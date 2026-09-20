@@ -1,7 +1,9 @@
 plugins { id "com.android.application" }
+
 android {
     namespace "com.sazgan.app"
     compileSdk 34
+
     defaultConfig {
         applicationId "com.sazgan.app"
         minSdk 24
@@ -9,21 +11,34 @@ android {
         versionCode 2
         versionName "1.1"
     }
+
+    signingConfigs {
+        release {
+            storeFile file("../sazgan-release.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug {
             minifyEnabled false
         }
     }
 }
+
 dependencies {
     implementation "androidx.appcompat:appcompat:1.6.1"
 }

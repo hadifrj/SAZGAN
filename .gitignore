@@ -19,3 +19,6 @@ build/
 android-webview/.gradle/
 android-webview/build/
 android-webview/app/build/
+android-webview/sazgan-release.jks
+android-webview/keystore_base64.txt
+*.jks
