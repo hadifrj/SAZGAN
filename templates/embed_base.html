@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}سازگان{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.min.css?v={{ app_version|default("1") }}">
+    <link rel="stylesheet" href="/static/css/scrollbars.css?v={{ app_version|default("1") }}">
+    <link rel="stylesheet" href="/static/css/searchable-select.css?v={{ app_version|default("1") }}">
+    <meta name="csrf-token" content="{{ csrf_token or session.get('csrf_token', '') }}">
+    <script>
+    /* همگام‌سازی تم/رنگ با صفحهٔ اصلی (localStorage) — قبل از paint */
+    (function(){
+      try {
+        var KEY='sazgan-display';
+        var d=JSON.parse(localStorage.getItem(KEY)||'{}')||{};
+        var theme=(d.theme==='dark')?'dark':'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        function isHex(v){ return typeof v==='string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v.trim()); }
+        function norm(v, fb){
+          v=(v||'').trim();
+          if(!isHex(v)) return fb;
+          if(v.length===4) v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3];
+          return v.toLowerCase();
+        }
+        function hexToRgb(hex){
+          hex=norm(hex,'#2563eb');
+          return {r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};
+        }
+        function darken(hex,f){
+          var c=hexToRgb(hex); f=Math.max(0,Math.min(1,f));
+          function ch(n){ return ('0'+Math.round(n*(1-f)).toString(16)).slice(-2); }
+          return '#'+ch(c.r)+ch(c.g)+ch(c.b);
+        }
+        function soft(hex,a){
+          var c=hexToRgb(hex);
+          return 'rgba('+c.r+','+c.g+','+c.b+','+(a==null?0.14:a)+')';
+        }
+        var accent=norm(d.accent,'#2563eb');
+        var bg=norm(d.bg,'#e8f1fb');
+        var pageBg, cardBg, textCol, mutedCol, borderCol, inputBg;
+        if(theme==='dark'){
+          pageBg='#0f172a'; cardBg='#1a2436'; textCol='#e5e9f0'; mutedCol='#94a3b8';
+          borderCol='#2b3a52'; inputBg='#131c2c';
+        } else {
+          pageBg=bg; cardBg='#ffffff'; textCol='#0f172a'; mutedCol='#64748b';
+          borderCol='#e2e8f0'; inputBg='#ffffff';
+        }
+        var css=':root{'+
+          '--accent:'+accent+';--accent-hover:'+darken(accent,0.18)+';--accent-soft:'+soft(accent,0.14)+';'+
+          '--bg:'+pageBg+';--card:'+cardBg+';--text:'+textCol+';--text-muted:'+mutedCol+';--border:'+borderCol+';'+
+        '}'+
+        'html,body{background:'+pageBg+' !important;color:'+textCol+' !important;}'+
+        '.card,.form-section-date{background:'+cardBg+' !important;color:'+textCol+' !important;border-color:'+borderCol+' !important;}'+
+        'input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=color]):not([type=range]),textarea,select,select.field-select{'+
+          'background:'+inputBg+' !important;color:'+textCol+' !important;border-color:'+(theme==='dark'?'#475569':'#94a3b8')+' !important;}'+
+        '.btn{background:'+accent+' !important;}';
+        var el=document.createElement('style');
+        el.id='sazgan-embed-theme';
+        el.textContent=css;
+        document.documentElement.appendChild(el);
+      } catch(e) {}
+    })();
+    </script>
+    <style>
+        /* Critical above-the-fold form paint: render a stable surface immediately. */
+        html,body{background:var(--bg,#f8fafc);color:var(--text,#0f172a);font-family:var(--app-font,'Vazirmatn',Tahoma,sans-serif);}
+        .embed-wrap{contain:layout paint;}
+        /* اسکرول دسکتاپ داخل خود سند embed؛ والد مودال فقط قاب را نگه می‌دارد. */
+        html, body {
+            width: 100%;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
+        html.in-iframe {
+            height: 100% !important;
+            min-height: 100% !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        html.in-iframe body.embed-body {
+            display: block !important;
+            height: auto !important;
+            min-height: 100% !important;
+            max-height: none !important;
+            overflow: visible !important;
+            align-items: initial !important;
+            justify-content: initial !important;
+        }
+        body.embed-body {
+            background: var(--bg, #f1f5f9);
+            color: var(--text, #0f172a);
+            margin: 0;
+            padding: 12px 14px 28px;
+        }
+        .embed-wrap { max-width: 960px; margin: 0 auto; }
+        .embed-wrap > .card {
+            margin: 0;
+            box-shadow: none;
+            border: none;
+            background: transparent;
+        }
+        /* هدر کارت در مودال مخفی؛ اگر آیکن برگشت/خانه دارد نمایش بده */
+        .embed-wrap .card-header { display: none !important; }
+        .embed-wrap .card-header:has(.sg-nav-icons),
+        .embed-wrap .card-header:has(.sg-nav-btn) {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 0 12px !important;
+            margin: 0 0 8px !important;
+            border: none !important;
+            background: transparent !important;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .embed-wrap .rq-head {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .embed-wrap .sg-nav-icons { flex-shrink: 0; }
+        .embed-wrap .card-body { padding: 0 !important; }
+        .form-actions-sticky {
+            position: sticky !important;
+            bottom: 0 !important;
+            margin-top: 18px;
+            padding: 12px 0 4px;
+            border-top: 1px solid var(--border, #e2e8f0);
+            background: var(--card, #fff) !important;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-start;
+            box-shadow: 0 -6px 18px -14px rgba(15,23,42,.35);
+        }
+        .form-actions-sticky .btn {
+            min-width: 160px;
+            min-height: 44px;
+        }
+        .form-section-date {
+            background: var(--card, #fff);
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+        }
+        .form-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted, #64748b);
+            margin-bottom: 8px;
+        }
+        .jalali-row { display: flex; gap: 8px; max-width: 380px; flex-wrap: wrap; }
+        .form-extra {
+            border-top: 1px dashed var(--border, #e2e8f0);
+            margin-top: 12px;
+            padding-top: 14px;
+        }
+        .form-extra-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        .field-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .field-hint-ok { color: var(--success-text, #047857); }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px 14px;
+        }
+        .form-grid .field-full { grid-column: 1 / -1; }
+        label { font-size: 12.5px !important; margin-bottom: 4px !important; color: var(--text-muted); display:block; }
+        textarea { min-height: 64px !important; }
+        input, textarea, select {
+            border-radius: 8px;
+        }
+        [data-theme="dark"] body.embed-body {
+            background: var(--bg, #0f172a);
+            color: var(--text, #e5e9f0);
+        }
+        [data-theme="dark"] .form-section-date {
+            background: var(--card, #1a2436);
+            border-color: var(--border, #2b3a52);
+        }
+        @media (max-width: 760px) {
+            .form-grid { grid-template-columns: 1fr !important; }
+            body.embed-body { padding: 10px 10px 24px; }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="embed-body" data-embed="1">
+    <div class="embed-wrap">
+        {% block content %}{% endblock %}
+    </div>
+    <script>
+        (function injectCsrf() {
+            var meta = document.querySelector('meta[name="csrf-token"]');
+            var token = meta ? meta.getAttribute('content') : '';
+            if (!token) return;
+            document.querySelectorAll('form[method="post"], form[method="POST"]').forEach(function(f) {
+                if (!f.querySelector('input[name="csrf_token"]')) {
+                    var i = document.createElement('input');
+                    i.type = 'hidden';
+                    i.name = 'csrf_token';
+                    i.value = token;
+                    f.appendChild(i);
+                }
+                f.setAttribute('target', '_top');
+            });
+        })();
+
+        /* ارتفاع فرم کامل را به والد بفرست تا iframe کشیده شود */
+        (function reportHeight(){
+            function send(){
+                try {
+                    var h = Math.max(
+                        document.body.scrollHeight || 0,
+                        document.documentElement.scrollHeight || 0
+                    );
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'sazgan-embed-height', height: h }, '*');
+                    }
+                } catch (e) {}
+            }
+            send();
+            window.addEventListener('load', send);
+            setTimeout(send, 100);
+            setTimeout(send, 400);
+            setTimeout(send, 1000);
+            if (window.ResizeObserver) {
+                try {
+                    var ro = new ResizeObserver(function(){ send(); });
+                    ro.observe(document.body);
+                } catch (e) {}
+            }
+        })();
+    </script>
+    {% block extra_scripts %}{% endblock %}
+    <script src="/static/js/searchable-select.js?v=8"></script>
+    <script src="/static/js/customer-picker.js?v=5"></script>
+    <script src="/static/js/file-picker.js?v=1"></script>
+    <script src="/static/js/form-validation.js?v=3"></script>
+
+<script id="sg-embedded-form-modal-bridge">
+(function(){
+  var paths=['/customer-affairs/new-request','/service/internal-repair/new','/service/external-repair/new',
+    '/service/installation/request-new','/service/installation/register-new','/service/inspection/request-new',
+    '/service/inspection/report-new','/settings/customers/edit/','/settings/representatives/edit/',
+    '/settings/users/edit/','/settings/warranty/edit/','/settings/warranty/activate/',
+    '/service/internal-repair/view/','/service/external-repair/view/',
+    '/service/pending-request/','/service/cartable-preview/','/service/inspection/view/',
+    '/service/installation/request-view/'];
+  function isForm(p){p=(p||'').split('?')[0];return paths.some(function(x){return x[x.length-1]==='/'?p.indexOf(x)===0:p===x;});}
+  document.addEventListener('click',function(ev){
+    var a=ev.target&&ev.target.closest?ev.target.closest('a[href]'):null;if(!a)return;
+    var u;try{u=new URL(a.href,location.href);}catch(_){return;}
+    if(u.origin!==location.origin||!isForm(u.pathname))return;
+    if(window.parent&&window.parent!==window&&typeof window.parent.sgOpenFormModal==='function'){
+      ev.preventDefault();ev.stopPropagation();
+      window.parent.sgOpenFormModal(u.toString(),a.textContent.trim()||'فرم');
+    }
+  },true);
+})();
+</script>
+
+</body>
+</html>

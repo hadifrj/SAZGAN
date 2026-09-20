@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}سازگان | تعمیرات خارجی{% endblock %}
+{% block content %}
+
+{% include "_ca_section_tabs.html" %}
+
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>{{ list_title or "لیست تعمیرات خارجی" }} ({{ requests|length }})</span>
+            <div class="list-header-actions">
+                
+                <a href="/service/external-repair/export" class="btn-export">خروجی اکسل</a>
+                <a href="/service/external-repair/new" class="btn btn-quick-new">پذیرش جدید</a>
+            </div>
+        </div>
+    </div>
+
+    <form method="GET" class="filter-bar">
+        <div class="filter-field" style="min-width:200px;">
+            <label>جستجو</label>
+            <input type="text" name="q" value="{{ q or '' }}" placeholder="پذیرش، مشتری، سریال، فاکتور، تکنسین…">
+        </div>
+        <div class="filter-field">
+            <label>از تاریخ</label>
+            <input type="text" name="date_from" value="{{ date_from or '' }}" placeholder="۱۴۰۵/۰۱/۰۱">
+        </div>
+        <div class="filter-field">
+            <label>تا تاریخ</label>
+            <input type="text" name="date_to" value="{{ date_to or '' }}" placeholder="۱۴۰۵/۱۲/۲۹">
+        </div>
+        <div class="filter-field">
+            <label>استان</label>
+            <select name="province" class="field-select geo-province" onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                <option value="">همه</option>
+                {% for p in provinces or [] %}
+                <option value="{{ p }}" {% if province == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>شهرستان</label>
+            <select name="county" class="field-select geo-county" onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div>
+            <label>شهر</label>
+            <select name="city" class="field-select geo-city">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div class="filter-field">
+            <label>وضعیت</label>
+            <select name="status" class="field-select">
+                <option value="">همه</option>
+                {% for s in statuses %}
+                <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label>تأخیر</label>
+            <select name="only_delayed" class="field-select">
+                <option value="">همه</option>
+                <option value="1" {% if only_delayed %}selected{% endif %}>فقط تأخیری‌ها (≥{{ delay_threshold or 3 }} روز)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">اعمال فیلتر</button>
+        <a href="/service/external-repair/archive" class="btn-cancel">پاک کردن</a>
+    </form>
+
+    {% if requests|length == 0 %}
+        <div class="empty-state">موردی یافت نشد.</div>
+    {% else %}
+    <div class="table-wrap">
+    <table>
+        <tr>
+            <th>ردیف</th>
+            <th>شماره پذیرش</th>
+            <th>تاریخ پذیرش</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>استان</th><th>شهرستان</th><th>شهر</th>
+            <th>شهر</th>
+            <th>نماینده</th>
+            <th>وضعیت</th>
+            <th>روز</th>
+            <th>شماره فاکتور</th>
+            <th>عملیات</th>
+        </tr>
+        {% for r in requests %}
+        <tr class="{% if r.is_delayed %}row-delayed{% endif %}">
+            <td>{{ loop.index }}</td>
+            <td>{{ r.reception_no or r.id }}</td>
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td>{% if r.is_delayed %}<span class="delay-badge">تأخیر</span>{% endif %}<span class="badge">{{ r.status }}</span></td>
+            <td>{{ r.days_in_status if r.days_in_status is defined else '—' }}</td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            <td>
+                {% if can_access('customer_affairs') %}
+                <a class="repair-view-action" href="/service/external-repair/view/{{ r.id }}" title="مشاهده" aria-label="مشاهده">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3.5 7.5h6l2 2H20.5v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>
+                        <path d="M3.5 7.5v-1a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span class="sr-only">مشاهده</span>
+                </a>
+                {% endif %}
+                <div class="row-actions">
+                    <button type="button" class="row-actions-toggle">عملیات ▾</button>
+                    <div class="row-actions-menu" hidden>
+                        <a href="/service/external-repair/view/{{ r.id }}">مشاهده</a>
+                        <a href="/service/external-repair/view/{{ r.id }}">ویرایش</a>
+                        <a href="/service/external-repair/print/{{ r.id }}" target="_blank">چاپ</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+    {% endif %}
+</div>
+
+{% include '_pagination.html' %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}سازگان | ثبت شماره فاکتور{% endblock %}
+{% block content %}
+<div class="card">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>ثبت شماره فاکتور سرویس‌ها (<span id="visible-count">{{ requests|length }}</span> از {{ requests|length }})</span>
+                <input
+                    type="text"
+                    id="inv-search"
+                    class="search-box"
+                    placeholder="جستجو بر اساس نام مشتری یا شرح کار..."
+                    onkeyup="filterInvoices()"
+                >
+            </div>
+        </div>
+        {% if requests|length == 0 %}
+            <div class="empty-state">موردی برای نمایش وجود ندارد.</div>
+        {% else %}
+        <table id="invoices-table">
+            <tr>
+                <th>#</th><th>دسته</th><th>نام مشتری</th><th>شرح کار</th><th>وضعیت</th><th>شماره فاکتور</th>
+            </tr>
+            {% for r in requests %}
+            <tr class="inv-row">
+                <td>{{ r.id }}</td>
+                <td><span class="tag">{{ r.request_category }}</span></td>
+                <td>{{ r.customer_name }}</td>
+                <td>{{ r.problem_desc }}</td>
+                <td>{{ r.status }}</td>
+                <td>
+                    <form method="POST" style="display:flex; gap:6px;">
+                        <input type="hidden" name="request_id" value="{{ r.id }}">
+                        <input type="text" name="invoice_number" value="{{ r.invoice_number if r.invoice_number else '' }}" style="width:140px;" placeholder="شماره فاکتور">
+                        <button type="submit" class="btn-edit" style="border:none; cursor:pointer;">ذخیره</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div id="no-results" class="empty-state" style="display:none;">موردی مطابق جستجوی شما یافت نشد.</div>
+        {% endif %}
+    </div>
+
+    <script>
+        function filterInvoices() {
+            var query = document.getElementById('inv-search').value.trim();
+            var rows = document.querySelectorAll('#invoices-table .inv-row');
+            var visibleCount = 0;
+            rows.forEach(function(row) {
+                var matches = row.textContent.indexOf(query) !== -1;
+                row.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+            document.getElementById('visible-count').textContent = visibleCount;
+            document.getElementById('no-results').style.display = (visibleCount === 0 && query !== '') ? 'block' : 'none';
+        }
+    </script>
+
+{% endblock %}

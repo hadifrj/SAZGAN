@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}دستمزد ماهانه{% endblock %}
+{% block content %}
+<div class="card">
+<div class="card-header">گزارش دستمزد نمایندگان — ماهانه</div>
+<div class="card-body">
+<form method="GET" class="form-grid" style="margin-bottom:16px">
+  <div><label>سال</label><input name="year" value="{{ year }}"></div>
+  <div><label>ماه (1-12)</label><input name="month" value="{{ month }}"></div>
+  <div style="display:flex;align-items:flex-end;gap:8px;">
+    <button class="btn" type="submit">نمایش</button>
+    <a class="btn-export" href="/finance/wage-monthly/export?year={{ year }}&month={{ month }}">خروجی اکسل</a>
+    <a class="btn-cancel" href="/finance/wage-calculation">ثبت دستی</a>
+  </div>
+</form>
+<p>جمع مبلغ: <strong>{{ '{:,}'.format(total) if total is number else total }}</strong> ریال — تعداد ردیف: {{ rows|length }}</p>
+<table>
+<tr>
+  <th>#</th><th>نماینده</th><th>شرح</th><th>مبلغ</th><th>تاریخ</th><th>مشتری</th><th>منبع</th>
+</tr>
+{% for r in rows %}
+<tr>
+<td>{{ r.id }}</td>
+<td>{{ r.representative_name }}</td>
+<td>{{ r.work_description }}</td>
+<td>{{ '{:,}'.format(r.amount) }}</td>
+<td>{{ r.calc_date or '—' }}</td>
+<td>{{ r.customer_name if r.customer_name is defined and r.customer_name else '—' }}</td>
+<td>{% if r.source is defined and r.source == 'auto' %}خودکار{% elif r.source is defined and r.source == 'manual' %}دستی{% else %}—{% endif %}</td>
+</tr>
+{% else %}
+<tr><td colspan="7">موردی در این ماه نیست</td></tr>
+{% endfor %}
+</table>
+</div></div>
+{% endblock %}

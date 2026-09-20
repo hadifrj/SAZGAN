@@ -1,0 +1,5 @@
+/* scrollbars — lightweight */
+* { scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: rgba(100,116,139,.45); border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }

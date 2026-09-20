@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}دستمزد ماهانه{% endblock %}
+{% block content %}
+<div class="card"><div class="card-header">گزارش دستمزد نمایندگان</div>
+<div class="card-body">
+<form method="GET" class="form-grid">
+<label>سال</label><input name="year" value="{{ year }}">
+<label>ماه</label><input name="month" value="{{ month }}">
+<button class="btn" type="submit">نمایش</button>
+<a class="btn-export" href="/finance/wage-report/export?year={{ year }}&month={{ month }}">اکسل</a>
+</form>
+<p>جمع: <strong>{{ total }}</strong></p>
+<table>
+<tr><th>#</th><th>نماینده</th><th>شرح</th><th>مبلغ</th><th>تاریخ</th></tr>
+{% for r in rows %}
+<tr><td>{{ r.id }}</td><td>{{ r.representative_name }}</td><td>{{ r.work_description }}</td><td>{{ r.amount }}</td><td>{{ r.calc_date }}</td></tr>
+{% else %}<tr><td colspan="5">موردی نیست</td></tr>{% endfor %}
+</table>
+</div></div>
+{% endblock %}

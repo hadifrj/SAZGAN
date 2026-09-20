@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}سازگان | تنظیمات تقویم{% endblock %}
+{% block content %}
+{% set system_active = 'calendar' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card">
+  <div class="card-header">تنظیمات تقویم کاری</div>
+  <div class="card-body">
+    {% if msg %}<div class="login-error" style="background:#ecfdf5;color:#065f46;border-color:#a7f3d0;">{{ msg }}</div>{% endif %}
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+
+    <div style="margin-bottom:18px;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);font-size:13px;line-height:1.6;">
+      <strong>قواعد پیش‌فرض هفته کاری:</strong>
+      <ul style="margin:8px 0 0 18px;padding:0;">
+        <li>شروع هفته: <strong>شنبه</strong></li>
+        <li>تعطیل ثابت: <strong style="color:#dc2626;">جمعه</strong> (در تقویم با عدد قرمز نمایش داده می‌شود)</li>
+        <li>سایر تعطیلات رسمی / مناسبتی را از فرم زیر اضافه کنید</li>
+      </ul>
+    </div>
+
+    <div class="form-extra-title">افزودن تعطیلی (غیر از جمعه)</div>
+    <form method="POST" class="form-grid" style="margin-bottom:22px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="action" value="add">
+      <div>
+        <label>تاریخ تعطیل (شمسی)</label>
+        <input type="text" name="holiday_date" class="jalali-date" required placeholder="1405/01/01" dir="ltr" autocomplete="off">
+      </div>
+      <div class="field-full">
+        <label>مناسبت / عنوان تعطیلی</label>
+        <input type="text" name="title" required placeholder="مثلاً نوروز، تاسوعا، تعطیل اعلامی شرکت">
+      </div>
+      <div>
+        <button type="submit" class="btn">افزودن به تقویم</button>
+      </div>
+    </form>
+
+    <div class="form-extra-title">تعطیلات ثبت‌شده ({{ holidays|length }})</div>
+    {% if holidays|length == 0 %}
+    <div class="empty-state">هنوز تعطیلی دستی ثبت نشده. جمعه‌ها به‌صورت خودکار تعطیل هستند.</div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>تاریخ</th>
+            <th>مناسبت</th>
+            <th style="width:100px;">عملیات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in holidays %}
+          <tr>
+            <td dir="ltr">{{ h.holiday_date }}</td>
+            <td>{{ h.title }}</td>
+            <td>
+              <form method="POST" style="display:inline;" onsubmit="return confirm('حذف این تعطیلی؟');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="holiday_id" value="{{ h.id }}">
+                <button type="submit" class="btn-delete">حذف</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

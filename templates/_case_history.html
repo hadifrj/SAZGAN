@@ -1,0 +1,27 @@
+{% if case_history is defined and case_history %}
+<div class="card" style="margin-top:16px;" id="history">
+  <div class="card-header">تاریخچه پرونده</div>
+  <div class="card-body">
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>تاریخ و ساعت</th>
+          <th>کاربر</th>
+          <th>عملیات</th>
+          <th>شرح</th>
+        </tr>
+        {% for h in case_history %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td dir="ltr" style="text-align:left;">{{ h.created_at }}</td>
+          <td>{{ h.user_name }}</td>
+          <td>{{ h.action }}</td>
+          <td>{{ h.details or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}

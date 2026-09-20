@@ -1,0 +1,128 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | درخواست جدید{% endblock %}
+{% block content %}
+
+<div class="card ca-new-request-card">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>درخواست جدید — امور مشتریان</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p class="ca-new-hint">
+      نوع خدمت مورد نظر را از کارت‌های زیر انتخاب کنید؛ برای ثبت سریع، کارت «ثبت سریع» را بزنید.
+    </p>
+
+    <div class="sys-tile-grid ca-request-tiles ca-request-tiles-compact">
+      <a href="/customer-affairs/new-request/quick?embed=1&back=/customer-affairs/new-request" class="sys-tile ca-tile-c0">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg></span>
+        <span class="sys-tile-title">ثبت سریع</span>
+      </a>
+      <a href="/service/internal-repair/new?embed=1&back=/customer-affairs/new-request" class="sys-tile ca-tile-c1">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V11l5 3v-3l5 3V9l5 3v9z"/><line x1="3" y1="21" x2="21" y2="21"/></svg></span>
+        <span class="sys-tile-title">تعمیرات داخلی</span>
+      </a>
+      <a href="/service/external-repair/new?embed=1&back=/customer-affairs/new-request" class="sys-tile ca-tile-c2">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="12" height="9" rx="1"/><path d="M14 11h4l3 3v3h-7z"/><circle cx="7" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/></svg></span>
+        <span class="sys-tile-title">تعمیرات خارجی</span>
+      </a>
+      <a href="/service/installation/request-new?embed=1&back=/customer-affairs/new-request" class="sys-tile ca-tile-c3">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><line x1="12" y1="11" x2="12" y2="21"/></svg></span>
+        <span class="sys-tile-title">درخواست نصب</span>
+      </a>
+      <a href="/service/installation/register-new?embed=1&back=/customer-affairs/new-request" class="sys-tile ca-tile-c4">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16 9"/></svg></span>
+        <span class="sys-tile-title">ثبت نصب</span>
+      </a>
+      <a href="/service/inspection/request-new?embed=1&back=/customer-affairs/new-request" class="sys-tile ca-tile-c5">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.3" y1="16.3" x2="21" y2="21"/></svg></span>
+        <span class="sys-tile-title">بازدید</span>
+      </a>
+      <a href="/service/demo/new?embed=1&back=/customer-affairs/new-request" class="sys-tile ca-tile-c6">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3h4"/><path d="M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><line x1="8.3" y1="14" x2="15.7" y2="14"/></svg></span>
+        <span class="sys-tile-title">دمو و امانی</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.sys-tile-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+  margin-bottom: 22px !important;
+}
+.sys-tile-grid > a.sys-tile {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 16px 14px !important;
+  border: 1px solid var(--border, #e2e8f0) !important;
+  border-radius: 12px !important;
+  background: var(--card, #fff) !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: border-color .15s, box-shadow .15s, transform .12s !important;
+  min-height: 72px !important;
+  box-sizing: border-box !important;
+}
+.sys-tile-grid > a.sys-tile:hover {
+  border-color: var(--accent, #C00000) !important;
+  box-shadow: 0 4px 14px rgba(192,0,0,.12) !important;
+  transform: translateY(-2px) !important;
+}
+.sys-tile-grid .sys-tile-icon { font-size: 22px !important; line-height: 1 !important; }
+.sys-tile-grid .sys-tile-title { font-weight: 700 !important; font-size: 14px !important; color: var(--text, #0f172a) !important; }
+.sys-tile-grid .sys-tile-desc { font-size: 12px !important; color: var(--text-muted, #64748b) !important; line-height: 1.4 !important; }
+@media (max-width: 720px) {
+  .sys-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 420px) {
+  .sys-tile-grid { grid-template-columns: 1fr !important; }
+}
+
+/* رنگ‌بندی هفت کارت درخواست جدید */
+.ca-request-tiles-compact > a.ca-tile-c0 { border-right: 4px solid #C00000 !important; }
+.ca-request-tiles-compact > a.ca-tile-c1 { border-right: 4px solid #2563eb !important; }
+.ca-request-tiles-compact > a.ca-tile-c2 { border-right: 4px solid #0ea5e9 !important; }
+.ca-request-tiles-compact > a.ca-tile-c3 { border-right: 4px solid #10b981 !important; }
+.ca-request-tiles-compact > a.ca-tile-c4 { border-right: 4px solid #14b8a6 !important; }
+.ca-request-tiles-compact > a.ca-tile-c5 { border-right: 4px solid #f59e0b !important; }
+.ca-request-tiles-compact > a.ca-tile-c6 { border-right: 4px solid #8b5cf6 !important; }
+
+/* ۷ کارت بالای صفحه — چیدمان فشرده‌تر با آیکون/فاصله کمتر */
+.ca-request-tiles-compact {
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 16px !important;
+}
+.ca-request-tiles-compact > a.sys-tile {
+  padding: 10px 8px !important;
+  min-height: 0 !important;
+  gap: 3px !important;
+}
+.ca-request-tiles-compact .sys-tile-icon,
+.ca-request-tiles-compact .sys-tile-icon svg { font-size: 16px !important; width: 16px !important; height: 16px !important; }
+.ca-request-tiles-compact .sys-tile-title { font-size: 12px !important; }
+@media (max-width: 900px) {
+  .ca-request-tiles-compact { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 720px) {
+  .ca-request-tiles-compact { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 420px) {
+  .ca-request-tiles-compact { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+/* رفع عدم اسکرول صفحه: .card به‌صورت سراسری overflow:hidden دارد (برای گرد بودن
+   لبه‌ها)؛ روی این کارتِ بلند باید فقط لبه‌ها گرد بمانند و ارتفاع/اسکرول آزاد باشد. */
+.ca-new-request-card,
+.ca-new-request-card .card-body {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>گفتگو #{{ thread.id }}</title>
+<link rel="stylesheet" href="/static/css/style.css?v={{ app_version|default('1') }}">
+<meta name="csrf-token" content="{{ csrf_token or session.get('csrf_token', '') }}">
+<style>
+  html,body{height:100%;margin:0;background:#f1f5f9 !important;color:#0f172a;}
+  body{display:flex;flex-direction:column;}
+  body.tg-embed .tg-app-card{height:100vh;max-height:none;min-height:0;max-width:100%;border-radius:0;border:0;box-shadow:none;flex:1;}
+  body.tg-embed{padding:0;}
+</style>
+</head>
+<body class="tg-embed">
+{% include "_tg_chat_panel.html" %}
+</body>
+</html>

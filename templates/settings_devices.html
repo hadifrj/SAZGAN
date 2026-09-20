@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}سازگان | مدیریت دستگاه‌ها{% endblock %}
+{% block content %}
+
+{% set products_active = 'devices' %}
+{% include '_settings_products_tabs.html' %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>لیست دستگاه‌ها</span>
+                <button type="button" class="btn" onclick="openModal('add-device-modal')">+ افزودن دستگاه</button>
+            </div>
+        </div>
+        {% if devices|length == 0 %}
+            <div class="empty-state">هنوز دستگاهی ثبت نشده است.</div>
+        {% else %}
+        <div class="table-wrap">
+        <table>
+            <tr>
+                <th>#</th><th>تصویر</th><th>نوع دستگاه</th><th>مدل</th><th>عکس</th>
+            </tr>
+            {% for d in devices %}
+            <tr>
+                <td>{{ d.id }}</td>
+                <td>
+                  {% if d.photo_filename %}
+                  <img src="/static/uploads/devices/{{ d.photo_filename }}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                  {% else %}
+                  <span style="color:var(--text-muted);font-size:12px">—</span>
+                  {% endif %}
+                </td>
+                <td>{{ d.device_type }}</td>
+                <td>{{ d.model }}</td>
+                <td>
+                  <form method="POST" enctype="multipart/form-data" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                    <input type="hidden" name="action" value="photo">
+                    <input type="hidden" name="device_id" value="{{ d.id }}">
+                    <input type="file" name="photo" accept="image/png,image/jpeg,image/jpg,image/webp" style="max-width:180px">
+                    <button type="submit" class="btn-edit">ذخیره عکس</button>
+                  </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="modal-overlay" id="add-device-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>افزودن دستگاه جدید</span>
+                <button type="button" class="modal-close" onclick="closeModal('add-device-modal')"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="add">
+                    <div class="form-grid">
+                        <div>
+                            <label>نوع دستگاه</label>
+                            <input type="text" name="device_type" required>
+                        </div>
+                        <div>
+                            <label>مدل دستگاه</label>
+                            <input type="text" name="model" required>
+                        </div>
+                        <div class="field-full">
+                            <label>عکس محصول (اختیاری)</label>
+                            <input type="file" name="photo" accept="image/png,image/jpeg,image/jpg,image/webp">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">افزودن</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

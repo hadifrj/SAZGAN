@@ -1,0 +1,71 @@
+{# صدور حواله ورود / خروج + PDF / Word #}
+<div class="card" style="margin-top:12px;">
+  <div class="card-header">صدور حواله (ورود / خروج) و دانلود فایل</div>
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
+      <strong>حواله ورود:</strong> ثبت قطعات روی پرونده / انبار / حساب نماینده.
+      <br>
+      <strong>حواله خروج:</strong> خروج از انبار یا
+      <em>خروج قطعات استفاده‌نشده از حساب نماینده</em>
+      (قطعاتی که در حواله تعمیر خارجی به حسابش منظور شده ولی مصرف نشده).
+    </p>
+    {% if voucher_kind != 'internal-repair' or req.status in ['در انتظار ارسال حواله تعمیر اولیه است','در انتظار ارسال حواله تعمیر نهایی است'] %}
+    <form method="POST"
+          action="/service/{{ voucher_kind }}/view/{{ req.id }}/voucher/issue"
+          style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+      {% if voucher_kind == 'internal-repair' %}
+      <div>
+        <label>نوع گردش</label>
+        <input class="field-select" value="ورود" readonly>
+        <input type="hidden" name="direction" value="ورود">
+      </div>
+      {% else %}
+      <div>
+        <label>نوع گردش</label>
+        <select name="direction" class="field-select">
+          <option value="ورود" selected>حواله ورود</option>
+          <option value="خروج">حواله خروج</option>
+        </select>
+      </div>
+      {% endif %}
+      <div>
+        <label>نوع حواله</label>
+        <select name="voucher_type" class="field-select">
+          {% if voucher_kind == 'internal-repair' %}
+          {% if req.status == 'در انتظار ارسال حواله تعمیر نهایی است' %}<option value="ورود — تعمیر نهایی" selected>ورود — تعمیر نهایی</option>{% else %}<option value="ورود — تعمیر اولیه" selected>ورود — تعمیر اولیه</option>{% endif %}
+          {% else %}
+          <option value="ورود — انبار استانی">ورود — انبار استانی</option>
+          <option value="ورود — به حساب نماینده" selected>ورود — به حساب نماینده</option>
+          <option value="خروج — قطعه استفاده‌نشده از حساب نماینده">خروج — قطعه استفاده‌نشده از حساب نماینده</option>
+          <option value="خروج — برگشت به انبار استانی">خروج — برگشت به انبار استانی</option>
+          {% endif %}
+        </select>
+      </div>
+      {% if voucher_kind == 'external-repair' %}
+      <div>
+        <label>نام نماینده (ورود/خروج حساب)</label>
+        <input type="text" name="representative_name" placeholder="نام نماینده">
+      </div>
+      {% endif %}
+      <div>
+        <label>فرمت فایل</label>
+        <select name="format" class="field-select">
+          <option value="pdf" selected>PDF</option>
+          <option value="docx">Word</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">صدور حواله و دانلود</button>
+    </form>
+    {% elif voucher_kind == 'internal-repair' %}
+    <p style="font-size:12.5px;color:var(--text-muted);margin-top:10px;">
+      صدور حواله تعمیر داخلی فقط در مرحله مجاز همان حواله فعال است.
+    </p>
+    {% endif %}
+    <p style="font-size:12.5px;color:var(--text-muted);margin-top:10px;">
+      قطعات از لیست ثبت‌شده روی پرونده خوانده می‌شوند.
+    </p>
+    {% if req.warehouse_voucher_no is defined and req.warehouse_voucher_no %}
+    <p style="font-size:13px;margin-top:6px;">آخرین حواله: <strong>{{ req.warehouse_voucher_no }}</strong></p>
+    {% endif %}
+  </div>
+</div>

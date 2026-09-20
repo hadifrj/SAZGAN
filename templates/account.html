@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}حساب کاربری — سازگان{% endblock %}
+{% block content %}
+{% set is_rep = (current_user.role or '') == 'تکنسین استانی' %}
+<div class="card" style="max-width:720px;margin:24px auto;">
+  <div class="card-header list-header-row">
+    <span>حساب کاربری</span>
+    <div class="list-header-actions">
+      
+    </div>
+  </div>
+  <div class="card-body">
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+    {% if success %}<div class="import-success">{{ success }}</div>{% endif %}
+
+    {# --- نمای پروفایل (فقط نمایش) --- #}
+    <div id="profile-view-panel" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:20px;text-align:center;">
+      <div style="margin:0 auto;">
+        {% if current_user.photo_filename %}
+        <img id="avatar-preview-current" src="/static/uploads/users/{{ current_user.photo_filename }}?v={{ current_user.id }}" alt=""
+             style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:1px solid var(--border);">
+        {% else %}
+        <span id="avatar-preview-current" style="display:inline-flex;width:140px;height:140px;border-radius:50%;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;">بدون عکس</span>
+        {% endif %}
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <div style="font-size:18px;font-weight:700;">{{ current_user.full_name or '—' }}<span style="font-weight:400;color:var(--text-muted);font-size:14px;"> ({{ current_user.username }})</span></div>
+        <div style="margin:8px 0;"><span class="role-badge">{{ current_user.role or '—' }}</span></div>
+        {% if joined_jalali %}
+        <div style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">عضو از: {{ joined_jalali }}</div>
+        {% endif %}
+        <button type="button" class="btn-primary" id="profile-edit-toggle">ویرایش پروفایل</button>
+      </div>
+    </div>
+
+    <div id="profile-edit-panel" style="display:none;">
+    <hr style="border:none;border-top:1px solid var(--border);margin:0 0 16px;">
+    <div class="info-row"><span class="info-label">نام کامل:</span> {{ current_user.full_name or '—' }}</div>
+    <div class="info-row"><span class="info-label">نام کاربری:</span> {{ current_user.username }}</div>
+    <div class="info-row"><span class="info-label">نقش:</span> {{ current_user.role or '—' }}</div>
+    <div class="info-row"><span class="info-label">استان:</span> {{ current_user.province or '—' }}</div>
+
+    {# --- عکس --- #}
+    <hr style="border:none;border-top:1px solid var(--border);margin:12px 0 16px;">
+    <p class="list-header-row " style="font-size:14px;font-weight:700;margin:0 0 10px;">
+      <span>عکس پروفایل</span>
+</p>
+    <form method="POST" enctype="multipart/form-data" action="/account" data-no-validate="1">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="form_section" value="photo">
+      <input type="hidden" name="photo_cropped" id="photo_cropped" value="">
+      {% if from_settings %}<input type="hidden" name="from" value="settings">{% endif %}
+      <div class="profile-upload-box">
+        <label for="photo-input" class="btn-primary profile-upload-btn">تغییر عکس پروفایل</label>
+        <input type="file" name="photo" id="photo-input" data-fp="off" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none;">
+        <div class="profile-upload-hint">JPG / PNG / WEBP</div>
+      </div>
+      <div id="crop-panel" style="display:none;margin-bottom:14px;">
+        <div id="crop-stage" style="position:relative;max-width:100%;background:#0b1220;border-radius:10px;overflow:hidden;user-select:none;touch-action:none;">
+          <img id="crop-image" alt="" style="display:block;max-width:100%;height:auto;">
+          <div id="crop-box" style="position:absolute;border:2px solid #38bdf8;box-shadow:0 0 0 9999px rgba(0,0,0,.45);cursor:move;box-sizing:border-box;">
+            <span data-h="nw" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;top:-7px;left:-7px;cursor:nwse-resize;"></span>
+            <span data-h="ne" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;top:-7px;right:-7px;cursor:nesw-resize;"></span>
+            <span data-h="sw" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;bottom:-7px;left:-7px;cursor:nesw-resize;"></span>
+            <span data-h="se" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;bottom:-7px;right:-7px;cursor:nwse-resize;"></span>
+          </div>
+        </div>
+        <div class="crop-toolbar">
+          <button type="button" class="btn" id="crop-zoom-out" title="کوچک‌نمایی">➖ کوچک‌نمایی</button>
+          <button type="button" class="btn" id="crop-zoom-in" title="بزرگ‌نمایی">➕ بزرگ‌نمایی</button>
+          <button type="button" class="btn-cancel" id="crop-reset" title="بازنشانی">بازنشانی</button>
+        </div>
+        <div class="crop-toolbar">
+          <button type="button" class="btn" id="crop-confirm">تأیید برش</button>
+          <button type="button" class="btn-cancel" id="crop-cancel">انصراف</button>
+        </div>
+        <p id="crop-status" style="font-size:12px;color:var(--text-muted);margin-top:8px;"></p>
+      </div>
+      <button type="submit" class="btn">ذخیره عکس</button>
+    </form>
+
+    {# --- رمز --- #}
+    {% if can_change_password %}
+    <hr style="border:none;border-top:1px solid var(--border);margin:22px 0 16px;">
+    <p style="font-size:14px;font-weight:700;margin:0 0 10px;">تغییر رمز عبور</p>
+    <form method="POST" action="/account" data-no-validate="1">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="form_section" value="password">
+      {% if from_settings %}<input type="hidden" name="from" value="settings">{% endif %}
+      <label>رمز فعلی</label>
+      <input type="password" name="current_password" autocomplete="current-password">
+      <label style="margin-top:10px;">رمز جدید (حداقل ۸ کاراکتر)</label>
+      <input type="password" name="new_password" minlength="8" autocomplete="new-password">
+      <label style="margin-top:10px;">تکرار رمز جدید</label>
+      <input type="password" name="new_password2" minlength="8" autocomplete="new-password">
+      <button type="submit" class="btn" style="margin-top:14px;">ذخیره رمز</button>
+    </form>
+    {% endif %}
+
+    {# --- مالی فقط نماینده --- #}
+    {% if is_rep %}
+    <hr style="border:none;border-top:1px solid var(--border);margin:22px 0 16px;">
+    <p class="list-header-row " style="font-size:14px;font-weight:700;margin:0 0 6px;">
+      <span>اطلاعات مالی</span>
+</p>
+    <form method="POST" action="/account" data-no-validate="1">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="form_section" value="finance">
+      {% if from_settings %}<input type="hidden" name="from" value="settings">{% endif %}
+      <label>شماره کارت (۱۶ رقم)</label>
+      <input type="text" name="bank_card" value="{{ bank_card or '' }}" maxlength="19" inputmode="numeric" dir="ltr" style="text-align:left;" placeholder="6037****************">
+      <label style="margin-top:10px;">شماره شبا</label>
+      <input type="text" name="bank_sheba" value="{{ bank_sheba or '' }}" maxlength="26" dir="ltr" style="text-align:left;" placeholder="IRxxxxxxxxxxxxxxxxxxxxxxxx">
+      <label style="margin-top:10px;">نام صاحب حساب</label>
+      <input type="text" name="bank_owner" value="{{ bank_owner or '' }}" placeholder="نام مطابق کارت بانکی">
+      <button type="submit" class="btn" style="margin-top:14px;">ذخیره اطلاعات مالی</button>
+    </form>
+    {% endif %}
+
+    <div style="margin-top:20px;">
+      <button type="button" class="btn-cancel" id="profile-edit-cancel">بستن ویرایش</button>
+    </div>
+    </div>
+  </div>
+</div>
+<script src="/static/js/avatar-crop.js?v=4"></script>
+<script>
+(function(){
+  var toggleBtn = document.getElementById('profile-edit-toggle');
+  var cancelBtn = document.getElementById('profile-edit-cancel');
+  var editPanel = document.getElementById('profile-edit-panel');
+  var hasError = {{ 'true' if error else 'false' }};
+  var hasSuccess = {{ 'true' if success else 'false' }};
+  function openEdit(){ editPanel.style.display = ''; }
+  function closeEdit(){ editPanel.style.display = 'none'; }
+  if (toggleBtn) toggleBtn.addEventListener('click', openEdit);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeEdit);
+  // اگر خطا یا پیام موفقیت داشتیم (یعنی از یک ثبت فرم برگشتیم)، پنل ویرایش باز بماند
+  if (hasError || hasSuccess) openEdit();
+})();
+</script>
+{% endblock %}

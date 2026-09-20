@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}سازگان | حساب کاربری{% endblock %}
+{% block content %}
+{% set parties_active = 'accounts' %}
+{% include '_settings_parties_tabs.html' %}
+
+<div class="card" style="max-width:720px;">
+    <div class="card-header list-header-row">
+        <span>حساب کاربری #{{ user.id }}</span>
+        <div class="list-header-actions">
+            {% if is_self %}
+            <a href="/account?from=settings" class="btn">تنظیمات حساب من</a>
+            {% else %}
+            <a href="/settings/users/edit/{{ user.id }}" class="btn-edit">ویرایش</a>
+            {% endif %}
+            
+        </div>
+    </div>
+    <div class="card-body">
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+            <div>
+                {% if user.photo_filename %}
+                <img src="/static/uploads/users/{{ user.photo_filename }}?v={{ user.id }}" alt=""
+                     style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:1px solid var(--border);">
+                {% else %}
+                <div style="width:140px;height:140px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:13px;">بدون عکس</div>
+                {% endif %}
+            </div>
+            <div style="flex:1;min-width:220px;">
+                <div style="font-weight:800;font-size:18px;margin-bottom:8px;">{{ user.full_name or user.username }}</div>
+                <div class="info-row"><span class="info-label">نام کاربری:</span> {{ user.username }}</div>
+                <div class="info-row"><span class="info-label">نقش:</span> {{ user.role or '—' }}</div>
+                <div class="info-row"><span class="info-label">استان:</span> {{ user.province or '—' }}</div>
+                <div class="info-row"><span class="info-label">کد نماینده:</span> {{ user.representative_id or '—' }}</div>
+            </div>
+        </div>
+        {% if is_self %}
+        <p style="margin-top:18px;font-size:13px;color:var(--text-muted);">
+            برای تغییر عکس یا رمز، به <a href="/account?from=settings">صفحه حساب کاربری</a> بروید.
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

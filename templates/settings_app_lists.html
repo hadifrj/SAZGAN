@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}سازگان | تنظیمات نرم‌افزار{% endblock %}
+
+{% block content %}
+{% set system_active = 'app-lists' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card">
+  <div class="card-header">تنظیمات نرم‌افزار — لیست‌های کشویی</div>
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+      از اینجا می‌توانید گزینه‌های لیست‌های کشویی (وضعیت‌ها، نقش‌ها و ...) را <strong>اضافه، ویرایش، غیرفعال یا حذف</strong> کنید.
+      تغییر وضعیت‌های حیاتی ممکن است روی پرونده‌های موجود تأثیر بگذارد.
+    </p>
+
+    {% if msg %}
+    <div class="alert alert-success" style="margin-bottom:12px;">{{ msg }}</div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger" style="margin-bottom:12px;">{{ error }}</div>
+    {% endif %}
+
+    <div class="app-list-tabs">
+      {% for key, defn in definitions.items() %}
+      <a href="/settings/app-lists?key={{ key }}"
+         class="app-list-tab{% if key == active_key %} active{% endif %}">
+        {{ defn.label }}
+        {% if defn.critical %}<span class="crit-star">★</span>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    <style>
+      .app-list-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .app-list-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 7px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        border-radius: 999px;
+        border: 1px solid var(--border, #e2e8f0);
+        background: var(--card, #fff);
+        color: var(--text, #1e293b);
+        text-decoration: none;
+        transition: all .15s ease;
+        white-space: nowrap;
+      }
+      .app-list-tab:hover {
+        border-color: var(--accent, #E2231A);
+        background: var(--accent-soft, rgba(226,35,26,.08));
+      }
+      .app-list-tab.active {
+        background: var(--accent, #E2231A);
+        border-color: var(--accent, #E2231A);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(226,35,26,.25);
+      }
+      .app-list-tab .crit-star { opacity: .85; font-size: 11px; }
+      .app-list-tab.active .crit-star { opacity: 1; }
+      .ops-cell { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+      .btn-ops {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 5px 12px; font-size: 12px; font-weight: 600;
+        border-radius: 6px; border: 1px solid var(--border, #e2e8f0);
+        background: var(--card, #fff); color: var(--text, #1e293b);
+        cursor: pointer; font-family: inherit; white-space: nowrap; transition: all .12s;
+      }
+      .btn-ops:hover { border-color: #94a3b8; background: #f8fafc; }
+      .btn-ops-save { background: var(--accent, #E2231A); border-color: var(--accent, #E2231A); color: #fff; }
+      .btn-ops-save:hover { filter: brightness(.92); }
+      .btn-ops-danger { color: #b91c1c; border-color: #fecaca; background: #fef2f2; }
+      .btn-ops-danger:hover { background: #fee2e2; }
+      .btn-ops-toggle { color: #0369a1; border-color: #bae6fd; background: #f0f9ff; }
+      .btn-ops-toggle:hover { background: #e0f2fe; }
+    </style>
+
+    {% if active_key and defn %}
+    <div class="form-section" style="margin-bottom:16px;">
+      <div class="form-section-title">{{ defn.label }}</div>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 12px;">{{ defn.description }}</p>
+
+      <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;">
+        <input type="hidden" name="action" value="add">
+        <input type="hidden" name="list_key" value="{{ active_key }}">
+        <div style="flex:1;min-width:200px;">
+          <label>مقدار جدید</label>
+          <input type="text" name="value" required placeholder="متن گزینه جدید">
+        </div>
+        <button type="submit" class="btn">افزودن</button>
+      </form>
+
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">#</th>
+              <th>مقدار</th>
+              <th style="width:90px;">فعال</th>
+              <th style="width:90px;">سیستمی</th>
+              <th style="width:220px;">عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr style="{% if not item.is_active %}opacity:.55;{% endif %}">
+              <td>{{ loop.index }}</td>
+              <td>
+                <form method="post" style="display:flex;gap:6px;align-items:center;">
+                  <input type="hidden" name="action" value="edit">
+                  <input type="hidden" name="list_key" value="{{ active_key }}">
+                  <input type="hidden" name="item_id" value="{{ item.id }}">
+                  <input type="text" name="value" value="{{ item.value }}" style="flex:1;min-width:160px;">
+                  <button type="submit" class="btn-ops btn-ops-save">ذخیره</button>
+                </form>
+              </td>
+              <td style="text-align:center;">
+                {% if item.is_active %}✓{% else %}—{% endif %}
+              </td>
+              <td style="text-align:center;">
+                {% if item.is_system %}بله{% else %}خیر{% endif %}
+              </td>
+              <td>
+                <div class="ops-cell">
+                  <form method="post" style="display:inline;margin:0;">
+                    <input type="hidden" name="action" value="toggle">
+                    <input type="hidden" name="list_key" value="{{ active_key }}">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <button type="submit" class="btn-ops btn-ops-toggle">
+                      {% if item.is_active %}غیرفعال{% else %}فعال{% endif %}
+                    </button>
+                  </form>
+                  <form method="post" style="display:inline;margin:0;" onsubmit="return confirm('حذف این گزینه؟{% if item.is_system %} این مقدار پیش‌فرض سیستم است.{% endif %}');">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="list_key" value="{{ active_key }}">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <button type="submit" class="btn-ops btn-ops-danger">حذف</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">موردی نیست — از دکمه بازنشانی استفاده کنید</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <form method="post" style="margin-top:14px;" onsubmit="return confirm('همه مقادیر این لیست پاک و به پیش‌فرض کارخانه برمی‌گردد. ادامه؟');">
+        <input type="hidden" name="action" value="reset">
+        <input type="hidden" name="list_key" value="{{ active_key }}">
+        <button type="submit" class="btn-cancel">بازنشانی به پیش‌فرض کارخانه</button>
+      </form>
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted);">یک لیست را از بالا انتخاب کنید.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,247 @@
+/* ==========================================================================
+   SAZGAN A1 — Global Responsive Stabilization
+   Applies after all legacy/theme CSS so component-specific overrides cannot
+   collapse Hub cards back to one column on narrow phones.
+   ========================================================================== */
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.main-content,
+.container,
+.card,
+.card-body,
+.stg-layout,
+.stg-main,
+.stg-preview-col,
+.stg-card,
+.sys-tile-grid {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
+/* Global Hub cards: exactly two columns on phones, including 5-inch / narrow
+   Android screens. Never use a 220px minimum here. */
+.sys-tile-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.sys-tile-grid > *,
+.sys-tile-grid > a.sys-tile {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.sys-tile-grid .sys-tile-title,
+.sys-tile-grid .sys-tile-desc {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+@media (max-width: 1100px) {
+  .sys-tile-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .sys-tile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .sys-tile-grid > a.sys-tile,
+  .sys-tile-grid > .sys-tile {
+    min-height: 96px !important;
+    padding: 10px 9px !important;
+  }
+
+  .sys-tile-grid .sys-tile-title {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+
+  .sys-tile-grid .sys-tile-desc {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .sys-tile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .sys-tile-grid > a.sys-tile,
+  .sys-tile-grid > .sys-tile {
+    padding: 9px 8px !important;
+  }
+}
+
+/* Settings / Theme page: prevent the live preview and controls from forcing
+   the document wider than a 5-inch phone. */
+.stg-layout,
+.stg-main,
+.stg-preview-col,
+.stg-preview-sticky,
+.stg-card {
+  width: 100% !important;
+}
+
+.stg-preview-frame {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.pv-main {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.stg-row {
+  min-width: 0 !important;
+}
+
+.stg-row-label {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+.stg-row-control {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.stg-seg {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex-wrap: wrap !important;
+}
+
+@media (max-width: 640px) {
+  .stg-layout {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .stg-preview-col {
+    width: 100% !important;
+  }
+
+  .stg-preview-sticky {
+    position: static !important;
+  }
+
+  .stg-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .stg-row-control {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .stg-seg {
+    width: 100% !important;
+    overflow-x: visible !important;
+  }
+
+  .stg-seg button {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .ds-preview-frame {
+    min-height: 210px !important;
+  }
+
+  .pv-sidebar {
+    width: 58px !important;
+    flex: 0 0 58px !important;
+    padding-inline: 4px !important;
+  }
+
+  .pv-main {
+    padding: 8px !important;
+  }
+
+  .pv-actions {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* Forms/cards: no fixed child can create page-level horizontal scrolling. */
+.card,
+.panel,
+.form-card,
+.upload-card,
+.modal-box {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.card-body,
+.panel-body,
+.form-card,
+.upload-card {
+  min-width: 0 !important;
+}
+
+input, select, textarea, button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.table-wrap {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: 8px !important;
+  }
+
+  .card-body {
+    padding-inline: 10px !important;
+  }
+}
+
+/* Mobile form scrolling hardening: nested flex layouts must allow the scroll child to shrink. */
+@media (max-width: 768px){
+  html,body{height:100%; min-height:100%; overflow-x:hidden;}
+  body{min-height:100dvh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .main-content,.content,.page-content,.page-shell,.form-page{min-height:0!important; max-height:none!important; overflow:visible!important;}
+  /* Modal bodies must keep their own scroll container — do not force overflow:visible here,
+     it breaks scrolling for tall forms (e.g. "add representative") inside full-screen mobile modals. */
+  .modal-box{contain:none!important;}
+  .modal-box .modal-body{overflow-y:auto!important; -webkit-overflow-scrolling:touch!important; overscroll-behavior:contain!important;}
+  .main-content{padding-bottom:max(24px, env(safe-area-inset-bottom))!important;}
+  form{min-height:0;}
+  input,select,textarea{scroll-margin-bottom:120px;}
+}
+
+/* PWA install prompt */
+.sazgan-install-prompt{position:fixed;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:9999;display:none;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--border,#d9dde5);border-radius:16px;background:var(--surface,#fff);box-shadow:0 12px 36px rgba(0,0,0,.18);direction:rtl}.sazgan-install-prompt.is-visible{display:flex}.sazgan-install-prompt__text{flex:1;min-width:0}.sazgan-install-prompt__title{font-weight:800}.sazgan-install-prompt__desc{font-size:.86rem;opacity:.75;margin-top:3px}.sazgan-install-btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:var(--primary,#0c4a6e);color:#fff}.sazgan-install-close{border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer}@media(min-width:769px){.sazgan-install-prompt{max-width:440px;right:24px;left:auto}}

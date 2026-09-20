@@ -1,0 +1,8 @@
+{
+  "runtime": "CPython",
+  "version": "3.11.9",
+  "architecture": "x64",
+  "platform": "Windows",
+  "official_url": "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe",
+  "offline_filename": "python-3.11.9-amd64.exe"
+}

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>گفتگو | سازگان</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:Tahoma,Verdana,sans-serif;
+  background:#f1f5f9;
+  color:#0f172a;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+  display:flex;justify-content:center;align-items:stretch;
+}
+.tg-app{
+  width:100%;
+  max-width:420px;
+  height:100%;
+  height:100dvh;
+  max-height:100dvh;
+  margin:0 auto;
+  display:flex;flex-direction:column;
+  background:#f8fafc;
+  box-shadow:0 0 0 1px rgba(15,23,42,.08), 0 12px 40px rgba(15,23,42,.12);
+  overflow:hidden;
+}
+@media(min-width:480px){
+  body{padding:12px 0;align-items:center;background:#f1f5f9}
+  .tg-app{
+    height:min(100dvh - 24px, 820px);
+    max-height:min(100dvh - 24px, 820px);
+    border-radius:16px;
+  }
+}
+.tg-header{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));
+  background:#ffffff;
+  border-bottom:1px solid rgba(15,23,42,.08);
+}
+.tg-avatar{
+  position:relative;
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,#2aabee,#229ed9);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:16px;color:#fff;flex-shrink:0;
+}
+.tg-avatar .dot{
+  position:absolute;bottom:-1px;left:-1px;width:11px;height:11px;border-radius:50%;
+  background:#8b9aab;border:2px solid #ffffff;transition:background .2s ease;
+}
+.tg-avatar .dot.online{background:#4cd964}
+.tg-header-info{flex:1;min-width:0}
+.tg-header-title{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-header-sub{font-size:12px;color:#8b9aab;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-header-sub.live{color:#4cd964}
+.tg-header-link{
+  flex-shrink:0;color:#8ea6bd;text-decoration:none;font-size:11.5px;font-weight:700;
+  padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);white-space:nowrap;
+}
+.tg-header-link:hover{background:rgba(255,255,255,.09)}
+.tg-track-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;
+  padding:6px 14px;background:#f8fafc;border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:11.5px;color:#8ea6bd;
+}
+.tg-track-bar b{color:#0f172a;font-weight:800;direction:ltr;unicode-bidi:embed}
+.tg-track-copy{
+  flex-shrink:0;border:0;border-radius:999px;background:rgba(255,255,255,.08);color:#c5d4e3;
+  font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:inherit;
+  transition:background .15s ease;
+}
+.tg-track-copy:hover{background:rgba(255,255,255,.14)}
+.tg-track-copy.copied{background:#1f6f4f;color:#fff}
+.tg-messages{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 12px 10px;
+  background:#f8fafc;
+  background-image:radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:18px 18px;
+}
+.tg-day{
+  text-align:center;margin:10px 0 14px;
+}
+.tg-day span{
+  display:inline-block;background:rgba(30,40,50,.85);color:#9aa7b5;
+  font-size:11.5px;padding:4px 10px;border-radius:999px;
+}
+.tg-empty{
+  text-align:center;color:#5c6b7a;font-size:12.5px;padding:30px 20px;line-height:1.8;
+}
+.tg-row{
+  display:flex;
+  width:100%;
+  margin-bottom:8px;
+  flex:0 0 auto;
+  height:auto;
+  min-height:0;
+  align-items:flex-end;
+  align-content:flex-end;
+}
+
+.tg-row.mine{justify-content:flex-start}
+.tg-row.theirs{justify-content:flex-end}
+.tg-bubble{
+  display:inline-block;
+  width:max-content;
+  max-width:min(82%, 320px);
+  min-width:0;
+  height:auto;
+  max-height:none;
+  min-height:0;
+  flex:none;
+  padding:8px 12px 6px;
+  border-radius:14px;
+  font-size:14.5px;line-height:1.45;
+  position:relative;
+  word-break:break-word;
+  overflow-wrap:break-word;
+  box-sizing:border-box;
+  align-self:flex-end;
+}
+
+.tg-text{display:block;width:auto;max-width:100%;height:auto;white-space:pre-wrap;}
+.tg-edited-flag{font-size:10.5px;color:#8b9aab;font-style:normal}
+.tg-edit-btn{
+  width:18px;height:18px;border:0;border-radius:50%;
+  background:transparent;color:#8b9aab;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;flex-shrink:0;padding:0;margin:0;
+}
+.tg-edit-btn:hover{color:#0f172a}
+.tg-meta{
+  display:flex;align-items:center;justify-content:flex-end;gap:4px;
+  margin-top:4px;direction:ltr;flex-wrap:nowrap;height:auto;
+}
+.tg-edit-box textarea{
+  width:100%;resize:none;min-height:36px;border-radius:8px;border:1px solid rgba(255,255,255,.15);
+  background:rgba(0,0,0,.2);color:#0f172a;font-family:inherit;font-size:14px;padding:6px 8px;outline:none;
+}
+.tg-edit-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+.tg-edit-actions button{
+  border:0;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.tg-edit-save{background:#2aabee;color:#fff}
+.tg-edit-cancel{background:rgba(255,255,255,.1);color:#0f172a}
+
+@keyframes tg-pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.tg-row.mine .tg-bubble{
+  background:#f8fafc;
+  border-bottom-right-radius:4px;
+}
+.tg-row.theirs .tg-bubble{
+  background:#2b5278;
+  border-bottom-left-radius:4px;
+}
+.tg-bubble.pending{opacity:.6}
+.tg-bubble.failed{background:#fef2f2}
+.tg-retry{
+  display:inline-block;margin-top:4px;font-size:11px;color:#fca5a5;
+  cursor:pointer;text-decoration:underline;
+}
+.tg-meta{
+  display:flex;align-items:center;justify-content:flex-end;gap:4px;
+  margin-top:4px;direction:ltr;
+}
+.tg-time{font-size:11px;color:#7f8b99}
+.tg-row.theirs .tg-time{color:#9ab0c7}
+.tg-ticks{display:inline-flex;align-items:center;height:14px}
+.tg-ticks svg{width:16px;height:11px}
+.tg-ticks.sent{color:#7f8b99}
+.tg-ticks.delivered{color:#7f8b99}
+.tg-ticks.read{color:#4fc3f7}
+.tg-attach-img{max-width:220px;max-height:200px;border-radius:8px;display:block;margin:2px 0 4px}
+.tg-attach-file{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.2);
+  color:#c5d4e3;text-decoration:none;font-size:12.5px;font-weight:700;margin:2px 0
+}
+.tg-composer{
+  flex-shrink:0;display:flex;flex-direction:row-reverse;align-items:center;gap:6px;
+  width:100%;position:relative;
+  padding:6px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom));
+  background:#ffffff;
+  border-top:1px solid rgba(15,23,42,.08);
+}
+.tg-composer textarea{
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
+  resize:none;
+  min-height:38px;max-height:110px;overflow-y:auto;
+  border:0;border-radius:19px;
+  padding:8px 14px;
+  background:#e2e8f0;color:#0f172a;
+  font-family:inherit;font-size:14.5px;line-height:1.35;
+  outline:none;
+}
+.tg-composer textarea::placeholder{color:#6b7c8c}
+.tg-btn{
+  width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#2aabee;color:#fff;flex-shrink:0;
+  transition:transform .1s ease, opacity .15s ease;
+}
+.tg-btn:active{transform:scale(.92)}
+.tg-btn:disabled{opacity:.5;cursor:default}
+.tg-btn.attach,.tg-btn.emoji{background:#e2e8f0;color:#8b9aab}
+.tg-btn.emoji.active{color:#2aabee;background:rgba(42,171,238,.14)}
+.tg-btn input{display:none}
+.tg-attach-preview{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;background:#e2e8f0;
+  border-top:1px solid rgba(15,23,42,.08);
+  animation:tg-pop .12s ease;
+}
+.tg-attach-preview[hidden]{display:none}
+.tg-attach-preview-thumb{
+  width:46px;height:46px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#8b9aab;
+}
+.tg-attach-preview-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.tg-attach-preview-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tg-attach-preview-name{font-size:12.5px;color:#0f172a;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-attach-preview-size{font-size:11px;color:#8b9aab}
+.tg-attach-preview-remove{
+  width:30px;height:30px;border-radius:50%;border:0;flex-shrink:0;cursor:pointer;
+  background:rgba(239,68,68,.15);color:#fca5a5;display:inline-flex;align-items:center;justify-content:center;
+  transition:background .15s ease;
+}
+.tg-attach-preview-remove:hover{background:rgba(239,68,68,.25)}
+.tg-closed{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px;color:#8b9aab;font-size:13px;background:#ffffff;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom));
+}
+.tg-toast{
+  position:absolute;bottom:76px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:#fef2f2;color:#fca5a5;font-size:12.5px;padding:8px 14px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;
+  white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.3);
+}
+.tg-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.err{margin:16px;padding:14px;background:#fef2f2;color:#fca5a5;border-radius:12px}
+
+.tg-serial-banner{padding:7px 14px;background:#ffffff;color:#9fb0bb;font-size:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,.05)}.tg-serial-banner b{color:#e9edef}.tg-react-btn{border:0;background:transparent;color:#aebac1;cursor:pointer;font-size:17px;padding:0 3px}.tg-reactions{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.tg-reaction{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e9edef;border-radius:999px;padding:1px 6px;font-size:11px;cursor:pointer}
+.tg-input-wrap{flex:1 1 auto;min-width:0;display:flex;align-items:center;}
+.tg-emoji-panel{display:none;flex-shrink:0;width:100%;height:220px;overflow-y:auto;padding:8px;background:#ffffff;border-top:1px solid rgba(15,23,42,.08);grid-template-columns:repeat(8,1fr);gap:2px;align-content:flex-start;box-sizing:border-box;}
+.tg-emoji-panel.open{display:grid}
+.tg-emoji-item{border:0;background:transparent;color:#fff;font-size:22px;padding:6px;border-radius:8px;cursor:pointer}
+.tg-emoji-item:hover{background:rgba(255,255,255,.08)}
+
+.tg-messages,.tg-composer textarea{scrollbar-width:thin;scrollbar-color:rgba(148,163,184,.35) transparent}
+.tg-messages::-webkit-scrollbar,.tg-composer textarea::-webkit-scrollbar{width:4px;height:4px}
+.tg-messages::-webkit-scrollbar-thumb,.tg-composer textarea::-webkit-scrollbar-thumb{background:rgba(148,163,184,.35);border-radius:99px}
+.tg-messages::-webkit-scrollbar-track,.tg-composer textarea::-webkit-scrollbar-track{background:transparent}
+.tg-composer textarea{min-height:36px;max-height:calc(1.4em * 5 + 20px);line-height:1.4;padding:8px 14px;font-size:14px;overflow-y:hidden}.tg-composer textarea.is-scrollable{overflow-y:auto}
+.tg-reply-preview{display:none;align-items:center;gap:8px;justify-content:space-between;margin:0 10px;padding:6px 10px;border-radius:10px;background:rgba(42,171,238,.12);border-right:3px solid #2aabee;color:#c5d4e3;font-size:12px}
+.tg-reply-preview.is-on{display:flex}
+.tg-reply-preview b{color:#2aabee;font-size:11px}
+.tg-reply-preview .tg-reply-x{border:0;background:transparent;color:#8b9aab;cursor:pointer;font-size:16px}
+.tg-reply-quote{border-right:3px solid #2aabee;background:rgba(42,171,238,.10);padding:5px 8px;margin:0 0 6px;border-radius:6px;font-size:12px;color:#e8f5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:background .15s ease,transform .15s ease}.tg-reply-quote:hover{background:rgba(42,171,238,.18)}.tg-reply-quote.is-target{background:rgba(42,171,238,.28);transform:translateY(-1px)}.tg-row.reply-target-highlight .tg-bubble{box-shadow:0 0 0 2px rgba(42,171,238,.75),0 0 18px rgba(42,171,238,.22)}
+.tg-reply-btn{border:0;background:transparent;color:#8b9aab;cursor:pointer;font-size:0;padding:0;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%}
+.tg-reply-btn svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tg-reply-btn:hover{color:#2aabee}
+.tg-reply-quote{display:flex;align-items:center;gap:5px}
+.tg-reply-icon{font-size:15px;flex:0 0 auto;color:#2aabee}
+.tg-reply-snippet{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;color:#f3f9ff;font-weight:600}
+
+
+
+.tg-recent-wrap{position:relative;flex-shrink:0;background:#fff;border-bottom:1px solid #e2e8f0;z-index:20}
+.tg-recent-toggle{width:100%;border:0;background:#fff;color:#334155;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.tg-recent-toggle .tg-recent-count{color:#64748b;font-weight:700}
+.tg-recent-toggle .tg-recent-chevron{font-size:15px;transition:transform .15s ease}
+.tg-recent-wrap.open .tg-recent-chevron{transform:rotate(180deg)}
+.tg-recent-panel{display:none;padding:0 10px 10px;background:#fff}
+.tg-recent-wrap.open .tg-recent-panel{display:block}
+.tg-recent-list{max-height:250px;overflow-y:auto;padding:2px 0;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+.tg-recent-list::-webkit-scrollbar{width:4px}.tg-recent-list::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}.tg-recent-list::-webkit-scrollbar-track{background:transparent}
+.tg-recent-item{display:flex;align-items:center;gap:8px;width:100%;border:1px solid #e2e8f0;background:#f8fafc;border-radius:10px;padding:8px 9px;margin-top:6px;text-align:right;cursor:pointer;font-family:inherit;color:#334155}
+.tg-recent-item:hover{background:#f1f5f9}.tg-recent-item.active{border-color:#94a3b8;background:#eef2f7}
+.tg-recent-main{min-width:0;flex:1}.tg-recent-title{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tg-recent-last{font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.tg-recent-time{font-size:10px;color:#94a3b8;direction:ltr;white-space:nowrap}.tg-recent-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#ef4444;color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center}
+.tg-recent-empty{text-align:center;color:#94a3b8;font-size:11.5px;padding:10px}
+
+/* SAZGAN Customer Chat V3 — same neutral light theme as the application. */
+body, .tg-chat-page, .tg-chat-card { background: #f1f5f9; color: #0f172a; }
+.tg-chat-card { border-color: #e2e8f0; }
+.tg-header { background: #ffffff; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
+.tg-header-sub { color: #64748b; }
+.tg-header-sub.live { color: #047857; }
+.tg-header-link, .tg-track-copy { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+.tg-track-bar { background: #ffffff; color: #64748b; border-bottom-color: #e2e8f0; }
+.tg-track-bar b { color: #0f172a; }
+.tg-messages { background-color: #f1f5f9; background-image: radial-gradient(rgba(71,85,105,.08) 1px, transparent 1px); }
+.tg-bubble { color: #0f172a; }
+.tg-row.mine .tg-bubble { background: #e8eef6; color: #0f172a; }
+.tg-row.theirs .tg-bubble { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
+.tg-time, .tg-edited-flag { color: #94a3b8; }
+.tg-row.theirs .tg-time { color: #475569; }
+.tg-ticks.sent, .tg-ticks.delivered { color: #64748b; }
+.tg-ticks.read { color: #0ea5e9; }
+.tg-file { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+.tg-composer { background: #ffffff; border-top-color: #e2e8f0; }
+.tg-composer textarea { background: #ffffff; color: #0f172a; border-color: #e2e8f0; }
+.tg-composer textarea::placeholder { color: #94a3b8; }
+.tg-btn.attach, .tg-btn.emoji { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+.tg-btn.emoji.active { background: #f3f4f6; color: #374151; }
+.tg-emoji-panel { background: #ffffff; border-top-color: #e2e8f0; }
+.tg-emoji-item { color: #0f172a; }
+.tg-emoji-item:hover { background: #f3f4f6; }
+.tg-reply-preview { background: #f1f5f9; color: #334155; border-right-color: #374151; }
+.tg-reply-preview b { color: #374151; }
+.tg-reply-quote { background: #f8fafc; color: #1e293b; border-right-color: #374151; }
+.tg-reply-snippet { color: #1e293b; }
+.tg-reply-quote:hover { background: #f1f5f9; }
+.tg-row.reply-target-highlight .tg-bubble { box-shadow: 0 0 0 2px rgba(55,65,81,.35), 0 0 14px rgba(15,23,42,.08); }
+.tg-reply-btn { color: #64748b; }
+.tg-reply-btn:hover { color: #374151; background: #f3f4f6; }
+.tg-edit-btn { color: #64748b; }
+.tg-edit-btn:hover { color: #374151; }
+.tg-edit-input { background: #ffffff; color: #0f172a; border-color: #e2e8f0; }
+.tg-edit-save { background: #374151; color: #ffffff; }
+.tg-edit-cancel { background: #f8fafc; color: #475569; }
+.tg-serial-banner { background: #ffffff; color: #64748b; border-bottom-color: #e2e8f0; }
+.tg-serial-banner b { color: #0f172a; }
+.tg-reaction { background: #f8fafc; border-color: #e2e8f0; color: #334155; }
+.tg-reply-icon { color: #374151; }
+.tg-messages, .tg-composer textarea { scrollbar-color: #cbd5e1 transparent; }
+.tg-messages::-webkit-scrollbar-thumb, .tg-composer textarea::-webkit-scrollbar-thumb { background: #cbd5e1; }
+
+html,body{background:#eef2f7;color:#172033}.tg-app{max-width:none;width:min(1180px,100%);height:100dvh;background:#f8fafc;box-shadow:none;border-radius:0}.tg-header{background:#fff;color:#172033;border-bottom:1px solid #e2e8f0;padding:12px 20px}.tg-header-title{font-size:16px}.tg-header-sub{color:#64748b}.tg-header-sub.live{color:#16a34a}.tg-avatar{background:linear-gradient(135deg,#6d5dfc,#4338ca)}.tg-header-link{background:#f1f5f9;color:#475569}.tg-track-bar,.tg-serial-banner{background:#fff;color:#64748b;border-color:#e2e8f0}.tg-messages{background:#f8fafc;background-image:radial-gradient(rgba(99,102,241,.05) 1px,transparent 1px)}.tg-row.mine .tg-bubble{background:#fff;color:#172033;border:1px solid #e2e8f0;box-shadow:0 6px 18px rgba(15,23,42,.05)}.tg-row.theirs .tg-bubble{background:linear-gradient(135deg,#6d5dfc,#5146d8);color:#fff;box-shadow:0 8px 20px rgba(79,70,229,.18)}.tg-row.mine .tg-time{color:#64748b}.tg-row.theirs .tg-time{color:#e0e7ff}.tg-composer{background:#fff;border-top:1px solid #e2e8f0;padding:10px 16px 8px}.tg-composer textarea{background:#f1f5f9;color:#172033;border:1px solid #e2e8f0}.tg-btn{background:#5b4ee5}.tg-btn.attach,.tg-btn.emoji{background:#f1f5f9;color:#64748b}.tg-quick-replies{display:flex;gap:8px;overflow-x:auto;padding:8px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:0;scrollbar-width:none}.tg-quick-replies button{white-space:nowrap;border:1px solid #e2e8f0;background:#f8fafc;color:#475569;border-radius:999px;padding:7px 11px;font-family:inherit;font-size:12px;cursor:pointer}.tg-quick-replies button:hover{border-color:#a5b4fc;color:#4338ca;background:#eef2ff}.tg-emoji-panel{background:#fff;border-color:#e2e8f0}.tg-day span{background:#e2e8f0;color:#64748b}@media(max-width:700px){.tg-app{width:100%;height:100dvh}.tg-header{padding:10px 12px}.tg-quick-replies{padding-inline:12px}.tg-bubble{max-width:88%}}
+
+.tg-row.reply-target-highlight .tg-bubble,
+.tg-bubble.reply-target-highlight-bubble{
+  box-shadow:0 0 0 3px rgba(55,65,81,.55),0 0 24px rgba(55,65,81,.20);
+  outline:2px solid rgba(55,65,81,.22);
+  transition:box-shadow .15s ease,outline .15s ease,background-color .15s ease;
+}
+</style>
+
+
+
+
+
+
+</head>
+<body>
+{% if error %}
+<div class="err">{{ error }}</div>
+{% elif thread %}
+<div class="tg-app" style="position:relative">
+  <header class="tg-header">
+    <div class="tg-avatar">ش<span class="dot" id="hdr-dot"></span></div>
+    <div class="tg-header-info">
+      <div class="tg-header-title">{{ agent_name or 'پشتیبانی سازگان' }}</div>
+      <div class="tg-header-sub{% if thread.status != 'بسته' %} live{% endif %}" id="hdr-sub">
+        {% if thread.status == 'بسته' %}بسته{% else %}آفلاین{% endif %}
+      </div>
+    </div>
+    <a class="tg-header-link tg-back-home" href="{{ back_url or '/support' }}" title="بازگشت به صفحه اصلی" aria-label="بازگشت به صفحه اصلی">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <span>بازگشت</span>
+    </a>
+  </header>
+
+  <div class="tg-track-bar">
+    <span>کد پیگیری این گفتگو: <b id="track-code">{{ token }}</b></span>
+    <button type="button" id="track-copy" class="tg-track-copy">کپی لینک</button>
+  </div>
+  <div class="tg-messages" id="chat-box">
+    {% if not messages %}
+    <div class="tg-empty">هنوز پیامی ثبت نشده. سؤال یا موضوع خود را بنویسید — همکاران ما به‌زودی پاسخ می‌دهند.</div>
+    {% endif %}
+    {% set ns = namespace(last_day='') %}
+    {% for m in messages %}
+    {% set day = (m.created_at.split(' ')[0] if m.created_at else '') %}
+    {% if day and day != ns.last_day %}
+    <div class="tg-day"><span>{{ day }}</span></div>
+    {% set ns.last_day = day %}
+    {% endif %}
+    {% set mine = (m.sender_type != 'support') %}
+    <div class="tg-row {% if mine %}mine{% else %}theirs{% endif %}" data-id="{{ m.id }}">
+      <div class="tg-bubble" style="display:inline-block;width:max-content;max-width:min(82%,320px);height:auto;">
+        {% if m.attachment_filename %}
+          {% set ext = m.attachment_filename.rsplit('.',1)[-1]|lower %}
+          {% if ext in ['png','jpg','jpeg','gif','webp'] %}
+          <a href="/static/uploads/support/{{ m.attachment_filename }}" target="_blank" rel="noopener">
+            <img class="tg-attach-img" src="/static/uploads/support/{{ m.attachment_filename }}" alt="">
+          </a>
+          {% else %}
+          <a class="tg-attach-file" href="/static/uploads/support/{{ m.attachment_filename }}" target="_blank" rel="noopener">
+            📎 {{ m.attachment_original or m.attachment_filename }}
+          </a>
+          {% endif %}
+        {% endif %}
+        {% if m.reply_to_id %}<div class="tg-reply-quote" data-reply-id="{{ m.reply_to_id }}" title="پاسخ"><span class="tg-reply-icon">↶</span><span class="tg-reply-snippet">در حال بارگذاری...</span></div>{% endif %}
+        {% if m.body and m.body != '📎 فایل پیوست' %}<div class="tg-text" data-text-for="{{ m.id }}">{{ m.body }}</div>{% endif %}
+        <div class="tg-reactions" data-reactions-for="{{ m.id }}">{% for r in (reaction_map.get(m.id, []) if reaction_map else []) %}<button type="button" class="tg-reaction" data-reaction-emoji="{{ r.emoji }}">{{ r.emoji }} {{ r.count }}</button>{% endfor %}</div><div class="tg-meta">
+          {% if mine and m.is_edited is defined and m.is_edited %}<span class="tg-edited-flag" data-edited-for="{{ m.id }}">ویرایش شده</span>{% else %}<span class="tg-edited-flag" data-edited-for="{{ m.id }}" hidden>ویرایش شده</span>{% endif %}
+          <span class="tg-time">{{ m.created_at.split(' ')[-1] if m.created_at else '' }}</span>
+          {% if mine %}
+          {% set ds = m.delivery_status if m.delivery_status is defined and m.delivery_status else ('read' if m.is_read else 'sent') %}
+          <span class="tg-ticks {{ ds }}" data-ticks-for="{{ m.id }}">
+            {% if ds == 'sent' %}
+            <svg viewBox="0 0 16 11"><path fill="currentColor" d="M5.5 9.5L1 5l1.2-1.2L5.5 7.1 13.3.3 14.5 1.5z"/></svg>
+            {% else %}
+            <svg viewBox="0 0 18 11"><path fill="currentColor" d="M6.5 9.5L2 5l1.2-1.2L6.5 7.1 14.3.3 15.5 1.5z"/><path fill="currentColor" d="M10.5 9.5L9.3 8.3 12.6 5l1.2 1.2z" transform="translate(2,0)"/></svg>
+            {% endif %}
+          </span>
+          {% endif %}
+          <button type="button" class="tg-reply-btn" title="پاسخ" aria-label="پاسخ" onclick="setReplyTo({{ m.id }}, this)"><svg viewBox="0 0 24 24"><path d="M9 15 4 10l5-5"/><path d="M4 10h9a7 7 0 0 1 7 7v2"/></svg></button>
+          {% if mine %}
+          <button type="button" class="tg-edit-btn" data-edit-btn-for="{{ m.id }}" title="ویرایش پیام">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1-1 4Z"/></svg>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if thread.status == 'بسته' %}
+  <div class="tg-closed">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    این گفتگو بسته است — برای بازگشت به صفحه اصلی از «بازگشت» استفاده کنید.
+  </div>
+  {% else %}
+  <div class="tg-attach-preview" id="attach-preview" hidden>
+    <div class="tg-attach-preview-thumb" id="attach-preview-thumb">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+    </div>
+    <div class="tg-attach-preview-info">
+      <span class="tg-attach-preview-name" id="attach-preview-name"></span>
+      <span class="tg-attach-preview-size" id="attach-preview-size"></span>
+    </div>
+    <button type="button" class="tg-attach-preview-remove" id="attach-preview-remove" title="حذف پیوست و بازگشت به گفتگو">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="tg-reply-preview" id="reply-preview"><div><span class="tg-reply-preview-icon">↶</span> <span id="reply-preview-text"></span></div>
+  <button type="button" class="tg-reply-x" onclick="clearReply()" title="لغو">×</button></div>
+  <form class="tg-composer" id="chat-form" method="post" action="/support/chat/{{ token }}" enctype="multipart/form-data">
+    <label class="tg-btn attach" title="پیوست">
+      <input type="file" name="attachment" id="chat-file" accept="image/*,.pdf,.doc,.docx,.zip,.txt">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+    </label>
+    <button type="button" class="tg-btn emoji" id="emoji-toggle" title="ایموجی">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.5 2 3.5 2 3.5-2 3.5-2"/><line x1="9" y1="9.5" x2="9.01" y2="9.5"/><line x1="15" y1="9.5" x2="15.01" y2="9.5"/></svg>
+    </button>
+    <div class="tg-input-wrap">
+      <input type="hidden" name="reply_to_id" id="reply_to_id" value="">
+    <textarea name="body" id="chat-body" rows="1" placeholder="پیام..." maxlength="4000"></textarea>
+    </div>
+    <button type="submit" class="tg-btn" id="send-btn" title="ارسال">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </form>
+  <div class="tg-quick-replies" id="quick-replies" aria-label="پیام‌های آماده" hidden></div>
+  <div class="tg-emoji-panel" id="emoji-panel">{% for e in chat_emojis %}<button type="button" class="tg-emoji-item" data-emoji="{{ e }}">{{ e }}</button>{% endfor %}</div>
+  <div class="tg-toast" id="toast"></div>
+  {% endif %}
+</div>
+
+<script>
+(function(){
+  var token = {{ token|tojson }};
+  function loadQuickReplies(){
+    var wrap=document.getElementById('quick-replies'); if(!wrap) return;
+    var items={{ (quick_replies or [])|tojson }}; wrap.innerHTML='';
+    items.forEach(function(q){ if(!q || !q.body) return; var b=document.createElement('button'); b.type='button'; b.textContent=q.title||q.body; b.dataset.quick=q.body; b.addEventListener('click',function(){var input=document.getElementById('chat-body'); if(!input)return; input.value=b.dataset.quick||''; input.focus(); input.dispatchEvent(new Event('input'));}); wrap.appendChild(b); });
+    wrap.hidden=!items.length;
+  }
+  loadQuickReplies();
+  function csrfToken(){
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? (meta.getAttribute('content') || '') : '';
+  }
+  var box = document.getElementById('chat-box');
+  var form = document.getElementById('chat-form');
+  var bodyEl = document.getElementById('chat-body');
+  function resizeComposer(){ if(!bodyEl) return; bodyEl.style.height='auto'; var limit=parseFloat(getComputedStyle(bodyEl).lineHeight)*5+20; var target=Math.min(bodyEl.scrollHeight,limit); bodyEl.style.height=target+'px'; bodyEl.classList.toggle('is-scrollable',bodyEl.scrollHeight>limit); }
+  if(bodyEl){ bodyEl.addEventListener('input',resizeComposer); resizeComposer(); }
+  var fileEl = document.getElementById('chat-file');
+  var attachPreview = document.getElementById('attach-preview');
+  var attachPreviewThumb = document.getElementById('attach-preview-thumb');
+  var attachPreviewName = document.getElementById('attach-preview-name');
+  var attachPreviewSize = document.getElementById('attach-preview-size');
+  var attachPreviewRemove = document.getElementById('attach-preview-remove');
+  var sendBtn = document.getElementById('send-btn');
+  var toastEl = document.getElementById('toast');
+  var seen = {};
+  var lastId = 0;
+  var threadOpen = {{ 'true' if thread.status != 'بسته' else 'false' }};
+
+  document.querySelectorAll('#chat-box [data-id]').forEach(function(el){
+    var id = parseInt(el.getAttribute('data-id'), 10);
+    seen[id] = true;
+    if (id > lastId) lastId = id;
+  });
+  if (box) box.scrollTop = box.scrollHeight;
+
+  // ---- ذخیرهٔ خودکار در مرورگر تا مشتری بتواند از /support دوباره وارد همین گفتگو شود ----
+  (function saveChatLocally(){
+    try {
+      var LS_KEY = 'sazgan_saved_chats';
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { saved = {}; }
+      saved[token] = {
+        token: token,
+        subject: {{ (thread.subject or 'گفتگو')|tojson }},
+        status: {{ (thread.status or '')|tojson }},
+        updated_at: Date.now()
+      };
+      var entries = Object.keys(saved).map(function(k){ return saved[k]; });
+      entries.sort(function(a, b){ return (b.updated_at || 0) - (a.updated_at || 0); });
+      var trimmed = {};
+      entries.slice(0, 10).forEach(function(e){ trimmed[e.token] = e; });
+      localStorage.setItem(LS_KEY, JSON.stringify(trimmed));
+    } catch (e) {}
+  })();
+
+  // ---- کپی لینک گفتگو ----
+  var copyBtn = document.getElementById('track-copy');
+  function fallbackCopy(text){
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      return true;
+    } catch (e) { return false; }
+  }
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function(){
+      var link = window.location.href;
+      function done(){
+        copyBtn.textContent = 'کپی شد ✓';
+        copyBtn.classList.add('copied');
+        setTimeout(function(){ copyBtn.textContent = 'کپی لینک'; copyBtn.classList.remove('copied'); }, 1800);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(done).catch(function(){ fallbackCopy(link); done(); });
+      } else {
+        fallbackCopy(link); done();
+      }
+    });
+  }
+
+  function showToast(msg){
+    if (!toastEl) { alert(msg); return; }
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ toastEl.classList.remove('show'); }, 2600);
+  }
+
+  function esc(s){
+    return String(s||'').replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+  function ticksHtml(status){
+    status = status || 'sent';
+    if (status === 'sent') {
+      return '<span class="tg-ticks sent"><svg viewBox="0 0 16 11"><path fill="currentColor" d="M5.5 9.5L1 5l1.2-1.2L5.5 7.1 13.3.3 14.5 1.5z"/></svg></span>';
+    }
+    var cls = (status === 'read') ? 'read' : 'delivered';
+    return '<span class="tg-ticks '+cls+'"><svg viewBox="0 0 18 11"><path fill="currentColor" d="M6.5 9.5L2 5l1.2-1.2L6.5 7.1 14.3.3 15.5 1.5z"/><path fill="currentColor" d="M10.5 9.5L9.3 8.3 12.6 5l1.2 1.2z" transform="translate(2,0)"/></svg></span>';
+  }
+  function timePart(ts){
+    if (!ts) return '';
+    var p = String(ts).split(' ');
+    return p[p.length-1] || ts;
+  }
+  function dayPart(ts){
+    if (!ts) return '';
+    return String(ts).split(' ')[0] || '';
+  }
+  function isImage(name){ return /\.(png|jpe?g|gif|webp)$/i.test(name||''); }
+  var lastRenderedDay = (function(){
+    var days = document.querySelectorAll('.tg-day span');
+    return days.length ? days[days.length-1].textContent : '';
+  })();
+
+  function maybeInsertDay(ts){
+    var d = dayPart(ts);
+    if (!d || d === lastRenderedDay) return;
+    lastRenderedDay = d;
+    var div = document.createElement('div');
+    div.className = 'tg-day';
+    div.innerHTML = '<span>'+esc(d)+'</span>';
+    box.appendChild(div);
+  }
+
+  function bubbleHtml(m, extraCls, mine){
+    var attach = '';
+    if (m.attachment_filename) {
+      var url = '/static/uploads/support/' + encodeURIComponent(m.attachment_filename);
+      if (isImage(m.attachment_filename)) {
+        attach = '<a href="'+url+'" target="_blank" rel="noopener"><img class="tg-attach-img" src="'+url+'" alt=""></a>';
+      } else {
+        attach = '<a class="tg-attach-file" href="'+url+'" target="_blank" rel="noopener">📎 '+esc(m.attachment_original||m.attachment_filename)+'</a>';
+      }
+    }
+    var quote = m.reply_to_id ? '<div class="tg-reply-quote" data-reply-id="'+esc(m.reply_to_id)+'"><span class="tg-reply-icon">↶</span><span class="tg-reply-snippet">در حال بارگذاری...</span></div>' : '';
+    var text = (m.body && m.body !== '📎 فایل پیوست') ? '<div class="tg-text" data-text-for="'+m.id+'">'+esc(m.body)+'</div>' : '';
+    var ticks = mine ? ticksHtml(m.delivery_status || 'sent').replace('class="tg-ticks', 'data-ticks-for="'+m.id+'" class="tg-ticks') : '';
+    var editedFlag = '<span class="tg-edited-flag" data-edited-for="'+m.id+'"'+((mine && m.is_edited)?'':' hidden')+'>ویرایش شده</span>';
+    var editBtn = mine ? '<button type="button" class="tg-edit-btn" data-edit-btn-for="'+m.id+'" title="ویرایش پیام"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>' : '';
+    return '<div class="tg-bubble '+(extraCls||'')+'" style="display:inline-block;width:max-content;max-width:min(82%,320px);height:auto;">'+attach+quote+text+
+      '<div class="tg-meta">'+editedFlag+'<span class="tg-time">'+esc(timePart(m.created_at))+'</span>'+ticks+'<button type="button" class="tg-reply-btn" title="پاسخ" aria-label="پاسخ" onclick="setReplyTo('+m.id+', this)"><svg viewBox="0 0 24 24"><path d="M9 15 4 10l5-5"/><path d="M4 10h9a7 7 0 0 1 7 7v2"/></svg></button>'+editBtn+'</div></div>';
+  }
+
+  function appendMsg(m){
+    if (!m || !m.id || seen[m.id]) return;
+    seen[m.id] = true;
+    if (m.id > lastId) lastId = m.id;
+    maybeInsertDay(m.created_at);
+    var mine = m.sender_type !== 'support';
+    var div = document.createElement('div');
+    div.className = 'tg-row ' + (mine ? 'mine' : 'theirs');
+    div.setAttribute('data-id', m.id);
+    div.innerHTML = bubbleHtml(m, '', mine);
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    var emptyMsg = box.querySelector('.tg-empty');
+    if (emptyMsg) emptyMsg.remove();
+    if (mine) wireEditButton(m.id);
+    fillReplySnippets();
+    wireReplyQuotes();
+  }
+
+  // ---- ویرایش پیام ارسال‌شده ----
+  function wireEditButton(id){
+    var btn = document.querySelector('[data-edit-btn-for="'+id+'"]');
+    if (!btn || btn._wired) return;
+    btn._wired = true;
+    btn.addEventListener('click', function(){ startEditMessage(id); });
+  }
+  document.querySelectorAll('[data-edit-btn-for]').forEach(function(btn){
+    wireEditButton(btn.getAttribute('data-edit-btn-for'));
+  });
+
+  function startEditMessage(id){ var textEl=document.querySelector('[data-text-for="'+id+'"]'); if(!textEl||!bodyEl)return; bodyEl.value=textEl.textContent||''; bodyEl.dataset.editingId=id; bodyEl.focus(); }
+
+  function updateStatuses(statuses){
+    if (!statuses) return;
+    statuses.forEach(function(s){
+      var el = document.querySelector('[data-ticks-for="'+s.id+'"]');
+      if (!el) return;
+      var st = s.delivery_status || (s.is_read ? 'read' : 'sent');
+      var tmp = document.createElement('div');
+      tmp.innerHTML = ticksHtml(st);
+      var neu = tmp.firstChild;
+      neu.setAttribute('data-ticks-for', s.id);
+      el.replaceWith(neu);
+    });
+  }
+
+  function applyEdits(edits){
+    (edits || []).forEach(function(e){
+      var bubble = document.querySelector('[data-id="'+e.id+'"] .tg-bubble');
+      if (bubble && bubble.querySelector('.tg-edit-box')) return; // در حال ویرایش — دست نزن
+      var textEl = document.querySelector('[data-text-for="'+e.id+'"]');
+      if (textEl && textEl.textContent !== e.body) textEl.textContent = e.body;
+    });
+  }
+
+  function renderReactions(id,reactions){var b=document.querySelector('[data-reactions-for="'+id+'"]');if(!b)return;b.innerHTML='';(reactions||[]).forEach(function(r){var x=document.createElement('button');x.className='tg-reaction';x.textContent=r.emoji+' '+r.count;x.onclick=function(){reactMessage(id,r.emoji)};b.appendChild(x);});}
+  function reactMessage(id,emoji){var fd=new FormData();fd.append('emoji',emoji);fetch('/api/support/chat/'+encodeURIComponent(token)+'/message/'+id+'/reaction',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(d){if(d.ok)renderReactions(id,d.reactions);});}
+  document.querySelectorAll('[data-react-for]').forEach(function(b){b.addEventListener('click',function(){var em=prompt('ایموجی واکنش را وارد کنید');if(em)reactMessage(this.getAttribute('data-react-for'),em.trim());});});
+  document.querySelectorAll('[data-reaction-emoji]').forEach(function(b){b.addEventListener('click',function(){var row=this.closest('[data-id]');if(row)reactMessage(row.getAttribute('data-id'),this.getAttribute('data-reaction-emoji'));});});
+  (function(){
+    var t = document.getElementById('emoji-toggle'), p = document.getElementById('emoji-panel');
+    if (!t || !p) return;
+    t.onclick = function(){
+      var willOpen = !p.classList.contains('open');
+      if (willOpen) {
+        if (bodyEl) bodyEl.blur(); // بستن صفحه‌کلید سیستم قبل از باز شدن پنل ایموجی
+        p.classList.add('open');
+        t.classList.add('active');
+        if (box) box.scrollTop = box.scrollHeight;
+      } else {
+        p.classList.remove('open');
+        t.classList.remove('active');
+      }
+    };
+    p.querySelectorAll('[data-emoji]').forEach(function(b){
+      b.onclick = function(){
+        bodyEl.value += (b.dataset.emoji || '');
+        bodyEl.dispatchEvent(new Event('input'));
+      };
+    });
+    if (bodyEl) {
+      bodyEl.addEventListener('focus', function(){ p.classList.remove('open'); t.classList.remove('active'); });
+    }
+  })();
+
+  function poll(){
+    fetch('/api/support/chat/'+encodeURIComponent(token)+'/messages?after='+lastId, {credentials:'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (!d || !d.ok) return;
+        (d.messages || []).forEach(appendMsg);
+        if (d.statuses) updateStatuses(d.statuses);
+        if (d.edits) applyEdits(d.edits);
+      }).catch(function(){});
+  }
+  setInterval(poll, 2500);
+
+  // ---- وضعیت آنلاین/آفلاین پشتیبانی (مستقل از امکان ارسال پیام) ----
+  // نکته: حتی وقتی پشتیبانی «آفلاین» است، تا وقتی سرور در دسترس باشد
+  // مشتری همچنان می‌تواند پیام بدهد؛ پیام هنگام آنلاین‌شدن پشتیبانی دیده می‌شود.
+  if (threadOpen) {
+    var hdrSub = document.getElementById('hdr-sub');
+    var hdrDot = document.getElementById('hdr-dot');
+    function setPresence(online){
+      if (hdrSub){ hdrSub.textContent = online ? 'آنلاین' : 'آفلاین'; hdrSub.classList.toggle('live', !!online); }
+      if (hdrDot){ hdrDot.classList.toggle('online', !!online); }
+    }
+    function pollPresence(){
+      fetch('/api/support/presence/status', {credentials:'same-origin', cache:'no-store'})
+        .then(function(r){ return r.json(); })
+        .then(function(d){ setPresence(!!(d && d.ok && d.online)); })
+        .catch(function(){ setPresence(false); });
+    }
+    pollPresence();
+    setInterval(pollPresence, 15000);
+  }
+
+  function isImageFile(f){ return f && f.type && f.type.indexOf('image/') === 0; }
+  function formatSize(bytes){
+    if (!bytes && bytes !== 0) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return Math.round(bytes/1024) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  }
+  var fileIconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>';
+  var previewObjectUrl = null;
+  function clearFile(){
+    if (fileEl) fileEl.value = '';
+    if (attachPreview) attachPreview.hidden = true;
+    if (previewObjectUrl) { URL.revokeObjectURL(previewObjectUrl); previewObjectUrl = null; }
+    if (attachPreviewThumb) attachPreviewThumb.innerHTML = fileIconSvg;
+  }
+  if (fileEl && attachPreview) {
+    fileEl.addEventListener('change', function(){
+      var f = fileEl.files && fileEl.files[0];
+      if (!f) { clearFile(); return; }
+      if (attachPreviewName) attachPreviewName.textContent = f.name;
+      if (attachPreviewSize) attachPreviewSize.textContent = formatSize(f.size);
+      if (previewObjectUrl) { URL.revokeObjectURL(previewObjectUrl); previewObjectUrl = null; }
+      if (attachPreviewThumb) {
+        if (isImageFile(f)) {
+          previewObjectUrl = URL.createObjectURL(f);
+          attachPreviewThumb.innerHTML = '<img src="'+previewObjectUrl+'" alt="">';
+        } else {
+          attachPreviewThumb.innerHTML = fileIconSvg;
+        }
+      }
+      attachPreview.hidden = false;
+      if (box) box.scrollTop = box.scrollHeight;
+    });
+  }
+  // حذف پیوست انتخاب‌شده و بازگشت به حالت عادی گفتگو (بدون ارسال)
+  if (attachPreviewRemove) attachPreviewRemove.addEventListener('click', clearFile);
+
+  if (bodyEl) {
+    bodyEl.addEventListener('input', function(){
+      bodyEl.style.height = 'auto';
+      bodyEl.style.height = Math.min(130, bodyEl.scrollHeight) + 'px';
+    });
+    bodyEl.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (form) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', {cancelable:true}));
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var body = (bodyEl && bodyEl.value || '').trim();
+      var hasFile = fileEl && fileEl.files && fileEl.files[0];
+      if (!body && !hasFile) return;
+      if (sendBtn) sendBtn.disabled = true;
+      var fd = new FormData(form);
+
+      // حباب موقت (optimistic) تا زمان تأیید سرور
+      var tempId = 'tmp-' + Date.now();
+      var pendingRow = document.createElement('div');
+      pendingRow.className = 'tg-row mine';
+      pendingRow.setAttribute('data-tmp', tempId);
+      pendingRow.innerHTML = bubbleHtml({
+        id: 0,
+        body: body || '📎 فایل پیوست',
+        created_at: '',
+        delivery_status: 'sent',
+        reply_to_id: document.getElementById('reply_to_id') ? document.getElementById('reply_to_id').value : ''
+      }, 'pending');
+      box.appendChild(pendingRow);
+      box.scrollTop = box.scrollHeight;
+      var emptyMsg = box.querySelector('.tg-empty');
+      if (emptyMsg) emptyMsg.remove();
+
+      var tok = csrfToken();
+      if (tok) fd.append('csrf_token', tok);
+
+      fetch('/api/support/chat/'+encodeURIComponent(token)+'/send', {
+        method: 'POST',
+        body: fd,
+        credentials: 'same-origin',
+        headers: tok ? {'X-CSRF-Token': tok} : {}
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if (sendBtn) sendBtn.disabled = false;
+        pendingRow.remove();
+        if (!d || !d.ok || !d.message) {
+          showToast('ارسال ناموفق بود — دوباره تلاش کنید');
+          return;
+        }
+        if (bodyEl) { bodyEl.value = ''; bodyEl.style.height = 'auto'; }
+        clearFile();
+        clearReply();
+        appendMsg(d.message);
+      }).catch(function(){
+        if (sendBtn) sendBtn.disabled = false;
+        pendingRow.remove();
+        showToast('ارتباط برقرار نشد — دوباره تلاش کنید');
+      });
+    });
+  }
+})();
+</script>
+{% endif %}
+
+<script>
+function replySnippet(text){
+  text=String(text||'').replace(/\s+/g,' ').trim();
+  if(!text) return 'پیام پیوست‌شده';
+  var words=text.split(' '), out=words.slice(0,6).join(' ');
+  return out+(words.length>6?'…':'');
+}
+function fillReplySnippets(){
+  document.querySelectorAll('.tg-reply-quote[data-reply-id]').forEach(function(q){
+    var id=q.getAttribute('data-reply-id');
+    var source=document.querySelector('.tg-row[data-id="'+id+'"] .tg-text');
+    var target=q.querySelector('.tg-reply-snippet');
+    if(target) target.textContent=replySnippet(source ? source.textContent : 'پیام #'+id);
+  });
+}
+function scrollToReplyTarget(id){
+  var row=document.querySelector('.tg-row[data-id="'+String(id)+'"]');
+  if(!row) return;
+  var bubble=row.querySelector('.tg-bubble') || row;
+  var container=document.getElementById('chat-stream') || document.getElementById('chat-box') || document.querySelector('.tg-stream');
+  if(container && container.contains(row)){
+    var top=row.offsetTop - Math.max(20, (container.clientHeight-row.offsetHeight)/2);
+    container.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+  } else {
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  row.classList.remove('reply-target-highlight');
+  void row.offsetWidth;
+  row.classList.add('reply-target-highlight');
+  bubble.classList.add('reply-target-highlight-bubble');
+  setTimeout(function(){
+    row.classList.remove('reply-target-highlight');
+    bubble.classList.remove('reply-target-highlight-bubble');
+  },1600);
+}
+function wireReplyQuotes(){
+  document.querySelectorAll('.tg-reply-quote[data-reply-id]').forEach(function(q){
+    if(q._wired) return;
+    q._wired=true;
+    q.addEventListener('click',function(e){
+      e.preventDefault(); e.stopPropagation();
+      scrollToReplyTarget(q.getAttribute('data-reply-id'));
+    });
+  });
+}
+function setReplyTo(id, btn){
+  var hid=document.getElementById('reply_to_id'), prev=document.getElementById('reply-preview'), txt=document.getElementById('reply-preview-text');
+  if(!hid||!prev) return;
+  hid.value=id;
+  var row=btn&&btn.closest?btn.closest('.tg-row'):null;
+  var body=row?(row.querySelector('.tg-text')||row.querySelector('.tg-bubble')):null;
+  if(txt) txt.textContent=replySnippet(body?body.textContent:'پیام #'+id);
+  prev.classList.add('is-on');
+  scrollToReplyTarget(id);
+  var ta=document.getElementById('chat-body'); if(ta) ta.focus();
+}
+function clearReply(){
+  var hid=document.getElementById('reply_to_id'), prev=document.getElementById('reply-preview');
+  if(hid) hid.value='';
+  if(prev) prev.classList.remove('is-on');
+}
+(function(){
+  var ta=document.getElementById('chat-body'); if(!ta) return;
+  var maxH=(parseFloat(getComputedStyle(ta).lineHeight)||20)*5+20;
+  function fit(){ta.style.height='36px';ta.style.height=Math.min(maxH,Math.max(36,ta.scrollHeight))+'px';}
+  ta.addEventListener('input',fit);fit();fillReplySnippets();
+})();
+</script>
+
+</body>
+</html>
+
+

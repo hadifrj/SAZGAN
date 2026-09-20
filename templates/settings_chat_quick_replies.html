@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}پیام‌های آماده چت | سازگان{% endblock %}
+{% block content %}
+<div class="card"><div class="card-header">⚡ مدیریت پیام‌های آماده چت</div><div class="card-body">
+  <p style="margin-top:0;color:var(--text-muted);font-size:13px">پیام‌های چت داخلی و چت مشتری کاملاً جدا هستند و هر گفتگو فقط پیام‌های آماده مربوط به خودش را نمایش می‌دهد.</p>
+  {% if msg %}<div style="padding:10px;border-radius:10px;background:rgba(76,217,100,.1);color:#4cd964;margin-bottom:12px">{{ msg }}</div>{% endif %}
+  {% if err %}<div style="padding:10px;border-radius:10px;background:rgba(239,68,68,.1);color:#fca5a5;margin-bottom:12px">{{ err }}</div>{% endif %}
+  <div class="qr-tabs" style="display:flex;gap:8px;margin:14px 0;border-bottom:1px solid var(--border);padding-bottom:8px">
+    <button type="button" class="btn qr-tab active" data-scope="internal">💬 چت داخلی</button>
+    <button type="button" class="btn qr-tab" data-scope="customer">👤 چت مشتری</button>
+  </div>
+  {% for scope, title, desc in [('internal','چت داخلی','ویژه کاربران و کارکنان داخل نرم‌افزار'),('customer','چت مشتری','ویژه گفتگو با مشتری در اپ مشتری')] %}
+  <section class="qr-panel" data-scope="{{ scope }}" {% if scope!='internal' %}hidden{% endif %}>
+    <h3 style="margin:4px 0">{{ title }}</h3><p style="color:var(--text-muted);font-size:12px">{{ desc }}</p>
+    <form method="post" style="display:grid;gap:9px;margin:14px 0 20px"><input type="hidden" name="action" value="save"><input type="hidden" name="scope" value="{{ scope }}">
+      <label>عنوان<input name="title" required placeholder="مثلاً: در حال بررسی"></label>
+      <label>متن پیام<textarea name="body" rows="3" required placeholder="متن پاسخ سریع..."></textarea></label>
+      <label style="display:flex;gap:7px;align-items:center"><input type="checkbox" name="is_active" value="1" checked> فعال باشد</label>
+      <button class="btn" type="submit">افزودن پیام آماده</button>
+    </form>
+    <div style="display:grid;gap:8px">
+    {% for q in items if q.scope==scope %}
+      <form method="post" style="display:grid;grid-template-columns:1fr 2fr auto auto;gap:8px;align-items:center;padding:12px;border:1px solid var(--border);border-radius:12px"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="{{ q.id }}"><input type="hidden" name="scope" value="{{ scope }}"><input name="title" value="{{ q.title }}" required><textarea name="body" rows="2" required>{{ q.body }}</textarea><label style="font-size:12px;white-space:nowrap"><input type="checkbox" name="is_active" value="1" {% if q.is_active %}checked{% endif %}> فعال</label><button class="btn" type="submit">ذخیره</button></form>
+      <form method="post" onsubmit="return confirm('این پیام حذف شود؟')" style="text-align:left"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ q.id }}"><button class="btn" type="submit">حذف پیام «{{ q.title }}»</button></form>
+    {% else %}<div style="color:var(--text-muted)">هنوز پیام آماده‌ای در این بخش ثبت نشده است.</div>{% endfor %}
+    </div>
+  </section>{% endfor %}
+</div></div>
+<script>document.querySelectorAll('.qr-tab').forEach(function(b){b.addEventListener('click',function(){var s=b.dataset.scope;document.querySelectorAll('.qr-tab').forEach(function(x){x.classList.toggle('active',x===b)});document.querySelectorAll('.qr-panel').forEach(function(p){p.hidden=p.dataset.scope!==s})})})</script>
+{% endblock %}

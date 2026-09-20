@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>درخواست خدمات | سازگان</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="login-page">
+<div class="login-card" style="max-width:480px">
+  <h1>درخواست خدمات</h1>
+  <p style="color:var(--text-muted);font-size:13px">فرم عمومی — بدون ورود به سامانه</p>
+  {% if msg %}<div class="import-success">{{ msg }}</div>{% endif %}
+  {% if err %}<div class="login-error">{{ err }}</div>{% endif %}
+  <form method="POST">
+    <label>نام مرکز / مشتری *</label>
+    <input name="customer_name" required>
+    <label>تلفن</label>
+    <input name="customer_phone">
+    <label>استان</label>
+    <select name="province" id="province" class="field-select geo-province"
+      onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+      <option value="">—</option>
+      {% for p in provinces %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+    </select>
+    <label>شهرستان</label>
+    <select name="county" id="county" class="field-select geo-county"
+      onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+      <option value="">—</option>
+    </select>
+    <label>شهر</label>
+    <select name="city" id="city" class="field-select geo-city">
+      <option value="">—</option>
+    </select>
+    <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px" placeholder="یا نام شهر را بنویسید">
+    <label>نوع دستگاه</label>
+    <input name="device_type">
+    <label>سریال</label>
+    <input name="serial_number" id="serial">
+    <div id="wmsg" style="font-size:12px;margin:4px 0"></div>
+    <label>شرح خرابی *</label>
+    <textarea name="problem_desc" rows="4" required></textarea>
+    <button type="submit" class="btn" style="width:100%;margin-top:12px">ثبت درخواست</button>
+  </form>
+</div>
+<script>
+document.getElementById('serial').addEventListener('blur', function(){
+  var s=this.value.trim(); if(!s) return;
+  fetch('/api/warranty-check?serial='+encodeURIComponent(s)).then(r=>r.json()).then(d=>{
+    var el=document.getElementById('wmsg');
+    el.textContent=d.message||d.status||'';
+    el.style.color=d.status==='فعال'?'#16a34a':'#b45309';
+  }).catch(function(){});
+});
+</script>
+<script src="/static/js/geo-cascade.js?v=1"></script>
+</body></html>

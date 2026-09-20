@@ -1,0 +1,60 @@
+{# نیاز: req, attachments (list), current_user, redirect_path #}
+<div class="card">
+    <div class="card-header">پیوست‌ها و مدارک ({{ attachments|length if attachments is defined else 0 }})</div>
+    <div class="card-body">
+        {% if attachments is defined and attachments|length > 0 %}
+        <table>
+            <tr>
+                <th>عنوان</th>
+                <th>نام فایل</th>
+                <th>آپلودکننده</th>
+                <th>تاریخ</th>
+                <th>عملیات</th>
+            </tr>
+            {% for a in attachments %}
+            <tr>
+                <td>{{ a.label or 'پیوست' }}</td>
+                <td><a href="/static/uploads/attachments/{{ a.filename }}" target="_blank">{{ a.original_name or a.filename }}</a></td>
+                <td>{{ a.uploaded_by or '—' }}</td>
+                <td>{{ a.uploaded_at or '—' }}</td>
+                <td>
+                    <a href="/static/uploads/attachments/{{ a.filename }}" class="btn-export" target="_blank" download>دانلود</a>
+                    {% if current_user.role == 'مسئول پذیرش' or a.uploaded_by == current_user.full_name %}
+                    <form method="POST" action="/attachments/delete/{{ a.id }}" style="display:inline" onsubmit="return confirm('حذف این پیوست؟')">
+                        <input type="hidden" name="redirect_to" value="{{ redirect_path }}">
+                        <button type="submit" class="btn-delete">حذف</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding:16px;">هنوز پیوستی ثبت نشده است.</div>
+        {% endif %}
+
+        <form method="POST" action="/attachments/upload/{{ req.id }}" enctype="multipart/form-data" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+            <input type="hidden" name="redirect_to" value="{{ redirect_path }}">
+            <div class="form-grid">
+                <div>
+                    <label>عنوان پیوست</label>
+                    <select name="label" class="field-select">
+                        <option value="پیش‌فاکتور">پیش‌فاکتور</option>
+                        <option value="تاییدیه پیش‌فاکتور">تاییدیه پیش‌فاکتور</option>
+                        <option value="حواله انبار">حواله انبار</option>
+                        <option value="بارنامه / ارسال">بارنامه / ارسال</option>
+                        <option value="گزارش فنی">گزارش فنی</option>
+                        <option value="عکس دستگاه">عکس دستگاه</option>
+                        <option value="فاکتور">فاکتور</option>
+                        <option value="سایر">سایر</option>
+                    </select>
+                </div>
+                <div>
+                    <label>فایل (jpg, png, pdf, doc, xls…)</label>
+                    <input type="file" name="attachment" required accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx">
+                </div>
+            </div>
+            <button type="submit" class="btn">آپلود پیوست</button>
+        </form>
+    </div>
+</div>

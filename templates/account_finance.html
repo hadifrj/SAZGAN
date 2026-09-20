@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}اطلاعات مالی — سازگان{% endblock %}
+{% block content %}
+<div class="card" style="max-width:560px;margin:24px auto;">
+  <div class="card-header list-header-row">
+    <span>اطلاعات مالی</span>
+    <div class="list-header-actions">
+      
+    </div>
+  </div>
+  <div class="card-body">
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+    {% if success %}<div class="import-success">{{ success }}</div>{% endif %}
+
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:14px;">
+      ثبت شماره کارت و شبا برای دریافت دستمزد / تسویه (مخصوص نمایندگان و تکنسین‌های استانی).
+    </p>
+
+    <form method="POST" action="/account" data-no-validate="1">
+      <input type="hidden" name="form_section" value="finance">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>شماره کارت (۱۶ رقم)</label>
+      <input type="text" name="bank_card" value="{{ bank_card or '' }}" maxlength="19" inputmode="numeric" placeholder="6037-****-****-****" dir="ltr" style="text-align:left;">
+      <label style="margin-top:12px;">شماره شبا</label>
+      <input type="text" name="bank_sheba" value="{{ bank_sheba or '' }}" maxlength="26" placeholder="IRxxxxxxxxxxxxxxxxxxxxxxxx" dir="ltr" style="text-align:left;">
+      <label style="margin-top:12px;">نام صاحب حساب</label>
+      <input type="text" name="bank_owner" value="{{ bank_owner or '' }}" placeholder="نام مطابق کارت بانکی">
+      <button type="submit" class="btn" style="margin-top:18px;width:100%;">ذخیره اطلاعات مالی</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

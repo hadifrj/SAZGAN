@@ -1,0 +1,55 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | فعال‌سازی گارانتی{% endblock %}
+{% block content %}
+
+{% set products_active = 'warranty' %}
+{% include '_settings_products_tabs.html' %}
+
+    <div class="card" style="max-width:min(560px,100%);margin:0 auto;width:100%;">
+        <div class="card-header list-header-row ">
+            <span>فعال‌سازی گارانتی — سریال {{ card.serial_number }}</span>
+</div>
+        <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">
+                نوع: <strong>{{ card.device_type or '—' }}</strong>
+                {% if card.model %} / {{ card.model }}{% endif %}
+                · تولید: {{ card.production_date or '—' }}
+                · شهریار: {{ card.shahriar or '—' }}
+            </p>
+            {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+            <form method="POST">
+                <div class="form-grid" style="grid-template-columns:1fr;">
+                    <div>
+                        <label>مشتری / طرف حساب</label>
+                        <input type="text" name="customer_name" list="customer-datalist"
+                               value="{{ card.customer_name or '' }}" placeholder="اگر خالی بود اینجا پر کنید" autocomplete="off">
+                        <datalist id="customer-datalist">
+                            {% for c in customers %}
+                            <option value="{{ c.name }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div>
+                        <label>تاریخ نصب (شمسی)</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" name="inst_date" class="field-select jalali-date" value="{{ (card.installation_date if card is defined and card.installation_date else '') }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+                        </div>
+                    </div>
+                    <div>
+                        <label>مدت گارانتی</label>
+                        <select name="warranty_months" class="field-select" required>
+                            {% for m in warranty_month_options %}
+                            <option value="{{ m }}" {% if m == 12 %}selected{% endif %}>{{ m }} ماه</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:12px;">
+                    <button type="submit" class="btn">فعال‌سازی گارانتی</button>
+                    <a href="/settings/warranty" class="btn-cancel">انصراف</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

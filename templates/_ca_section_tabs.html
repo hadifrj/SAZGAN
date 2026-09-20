@@ -1,0 +1,10 @@
+{% if section_tabs %}
+<nav class="settings-tabs ca-tabs" aria-label="بخش‌ها">
+  {% for t in section_tabs %}
+  <a href="{{ t.href }}" class="settings-tab ca-tab {% if t.active %}active{% endif %}">
+    {% if t.icon %}<span class="ca-tab-icon">{{ t.icon }}</span>{% endif %}
+    <span>{{ t.label }}</span>
+  </a>
+  {% endfor %}
+</nav>
+{% endif %}

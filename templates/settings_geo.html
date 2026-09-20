@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}سازگان | استان / شهر و مسافت{% endblock %}
+{% block content %}
+{% set system_active = 'geo' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card">
+  <div class="card-header list-header-row ">
+    <span>استان / شهرستان / شهر و محاسبه مسافت</span>
+</div>
+  <div class="card-body">
+    {% if msg %}<div class="alert alert-success" style="margin-bottom:14px;">{{ msg }}</div>{% endif %}
+    {% if error %}<div class="alert alert-danger" style="margin-bottom:14px;">{{ error }}</div>{% endif %}
+
+    <div class="geo-layout">
+      <!-- ستون نقشه -->
+      <div class="geo-map-col">
+        <div class="geo-panel-title">نقشه ایران</div>
+        <p class="geo-hint">روی استان کلیک کنید تا شهر را انتخاب کنید؛ در ماشین‌حساب به‌عنوان مقصد پر می‌شود.</p>
+        <div id="iran-map-root" class="iran-map-root"></div>
+        <p class="geo-credit">نقشه SVG از IranMap v1.1.0 — متن‌باز</p>
+      </div>
+
+      <!-- ستون مسافت — کنار نقشه -->
+      <div class="geo-dist-col">
+        <div class="geo-panel-title">محاسبه مسافت</div>
+        <p class="geo-hint">مبدأ و مقصد را وارد کنید یا از روی نقشه استان/شهر را انتخاب کنید.</p>
+
+        <form method="post" action="/settings/distance" class="geo-method-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="action" value="set_method">
+          <div class="geo-method-title">روش محاسبه</div>
+          <label class="geo-method-opt">
+            <input type="radio" name="distance_method" value="haversine" {% if (distance_method or 'haversine') == 'haversine' %}checked{% endif %} onchange="this.form.submit()">
+            <span><strong>۱ — تقریبی</strong> (هوایی × ضریب) — رایگان، بدون اینترنت</span>
+          </label>
+          <label class="geo-method-opt">
+            <input type="radio" name="distance_method" value="osrm" {% if distance_method == 'osrm' %}checked{% endif %} onchange="this.form.submit()">
+            <span><strong>۲ — مسیر جاده‌ای OSRM</strong> (OpenStreetMap) — دقیق‌تر، رایگان</span>
+          </label>
+          <div class="geo-osrm-url" style="{% if distance_method != 'osrm' %}display:none{% endif %}">
+            <label>آدرس سرور OSRM (اختیاری)</label>
+            <input type="text" name="osrm_url" value="{{ osrm_url or 'https://router.project-osrm.org' }}" placeholder="https://router.project-osrm.org">
+            <button type="submit" class="btn-cancel" style="margin-top:6px;font-size:12px;">ذخیره آدرس OSRM</button>
+          </div>
+        </form>
+
+        <div class="geo-dist-card">
+          <div class="geo-field">
+            <label>استان مبدأ (نماینده)</label>
+            <select id="from_province" class="field-select geo-province">
+              <option value="">— استان —</option>
+              {% for p in provinces %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="geo-field">
+            <label>شهر مبدأ</label>
+            <input type="text" id="from_city" placeholder="مثلاً تبریز" list="city_suggestions" autocomplete="off">
+          </div>
+          <div class="geo-field">
+            <label>استان مقصد (مشتری)</label>
+            <select id="to_province" class="field-select geo-province">
+              <option value="">— استان —</option>
+              {% for p in provinces %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="geo-field">
+            <label>شهر مقصد</label>
+            <input type="text" id="to_city" placeholder="مثلاً قم" autocomplete="off">
+          </div>
+          <input type="hidden" id="_from_ctx" value="">
+          <button type="button" class="btn geo-calc-btn" onclick="calcDistance()">محاسبه مسافت</button>
+
+          <div id="distance_result" class="geo-result" style="display:none;">
+            <div class="geo-result-title">نتیجه</div>
+            <div id="distance_body"></div>
+          </div>
+        </div>
+
+        <div class="geo-dist-meta">
+          <div>مختصات: <strong>{{ dist_stats.with_coords if dist_stats else '—' }}</strong> / {{ dist_stats.total_cities if dist_stats else '—' }}</div>
+          <div>ضریب جاده: <strong>{{ road_factor if road_factor is defined else '1.30' }}</strong></div>
+          <form method="post" action="/settings/distance" class="geo-meta-forms">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="action" value="seed_coords">
+            <button type="submit" class="btn-cancel" style="font-size:12px;">به‌روزرسانی مختصات</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/iran-map.js"></script>
+<script>
+function calcDistance() {
+  var fromCity = document.getElementById('from_city').value.trim();
+  var toCity = document.getElementById('to_city').value.trim();
+  var fromProv = document.getElementById('from_province').value;
+  var toProv = document.getElementById('to_province').value;
+  var box = document.getElementById('distance_result');
+  var body = document.getElementById('distance_body');
+  if (!fromCity || !toCity) {
+    box.style.display = 'block';
+    body.innerHTML = '<span class="geo-err">شهر مبدأ و مقصد را وارد کنید</span>';
+    return;
+  }
+  var url = '/api/geo/distance?from_city=' + encodeURIComponent(fromCity)
+    + '&to_city=' + encodeURIComponent(toCity)
+    + '&from_province=' + encodeURIComponent(fromProv)
+    + '&to_province=' + encodeURIComponent(toProv);
+  body.innerHTML = '<span class="geo-muted">در حال محاسبه…</span>';
+  box.style.display = 'block';
+  fetch(url, {credentials:'same-origin'})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d.ok) {
+        body.innerHTML = '<span class="geo-err">' + (d.error || 'خطا') + '</span>';
+        return;
+      }
+      var methodLine = d.method_label || (d.method === 'osrm' ? 'مسیر جاده‌ای OSRM' : 'تقریبی');
+      if (d.fallback) methodLine += ' (پشتیبان)';
+      var dur = (d.duration_min != null) ? ('<div class="geo-res-row"><span>زمان تقریبی</span><strong>' + d.duration_min + ' دقیقه</strong></div>') : '';
+      var roadLabel = (d.method === 'osrm' && !d.fallback) ? 'جاده‌ای (OSRM)' : ('جاده‌ای (×' + d.road_factor + ')');
+      body.innerHTML =
+        '<div class="geo-res-row"><span>روش</span><strong>' + methodLine + '</strong></div>' +
+        '<div class="geo-res-row"><span>مبدأ</span><strong>' + (d.from_matched || fromCity) + '</strong></div>' +
+        '<div class="geo-res-row"><span>مقصد</span><strong>' + (d.to_matched || toCity) + '</strong></div>' +
+        '<div class="geo-res-row"><span>هوایی</span><strong>' + d.air_km + ' کیلومتر</strong></div>' +
+        '<div class="geo-res-row"><span>' + roadLabel + '</span><strong>' + d.road_km + ' کیلومتر</strong></div>' +
+        dur +
+        '<div class="geo-res-row geo-res-total"><span>رفت‌وبرگشت</span><strong>' + d.round_trip_km + ' کیلومتر</strong></div>';
+    })
+    .catch(function(){ body.innerHTML = '<span class="geo-err">خطای شبکه</span>'; });
+}
+document.addEventListener('iran-map-select', function(ev){
+  var d = ev.detail || {};
+  if (d.province) {
+    var tp = document.getElementById('to_province');
+    if (tp) {
+      for (var i=0;i<tp.options.length;i++) {
+        if (tp.options[i].value === d.province || (tp.options[i].text||'').indexOf(d.province)>=0) {
+          tp.selectedIndex = i; break;
+        }
+      }
+    }
+    if (d.cities && d.cities[0]) {
+      var tc = document.getElementById('to_city');
+      if (tc) tc.value = d.cities[0];
+    }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}سازگان | تاریخچه نسخه‌ها{% endblock %}
+{% block content %}
+{% set system_active = 'changelog' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card">
+  <div class="card-header">تاریخچه نسخه‌ها (نگارش نرم‌افزار)</div>
+  <div class="card-body">
+    <p class="muted-note" style="margin-bottom:16px;">
+      نسخه فعلی: <strong>{{ app_version_label }}</strong>
+      {% if app_release_jalali %} — تاریخ انتشار: <strong>{{ app_release_jalali }}</strong>{% endif %}
+    </p>
+    {% if entries %}
+      {% for e in entries %}
+      <div class="ds-section" style="margin-bottom:12px;">
+        <h3 class="ds-title" style="margin-bottom:8px;">{{ e.title }}</h3>
+        {% for sec in e.sections %}
+          <div style="margin:8px 0 4px;font-weight:700;font-size:13px;color:var(--text-muted);">{{ sec.name }}</div>
+          <ul style="margin:0 0 8px 18px;padding:0;font-size:13.5px;line-height:1.7;">
+            {% for item in sec['items'] %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">تاریخچه‌ای ثبت نشده است.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

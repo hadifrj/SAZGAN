@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}اعلان‌ها{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="list-header-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between">
+      <span>اعلان‌های من
+        {% if unread_notifications and unread_notifications > 0 %}
+          <span class="nav-badge" style="background:#ef4444;color:#fff;border-radius:999px;font-size:11px;padding:2px 8px;margin-right:6px">{{ unread_notifications }}</span>
+        {% endif %}
+      </span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn-export" id="btn-enable-push" style="display:none">فعال‌سازی اعلان سیستم</button>
+        <form method="POST" action="/notifications/read-all" style="display:inline" id="form-read-all">
+          <button class="btn-cancel" type="submit">خواندن همه</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="push-status-msg" style="display:none;padding:10px 16px;font-size:13px;border-bottom:1px solid var(--border, #e2e8f0)"></div>
+
+  {% if rows|length == 0 %}
+    <div class="empty-state">اعلانی نیست.</div>
+  {% else %}
+  <table>
+    <tr><th>زمان</th><th>عنوان</th><th>شرح</th><th></th></tr>
+    {% for n in rows %}
+    <tr class="notif-row {% if not n.is_read %}notif-unread{% endif %}" data-id="{{ n.id }}"
+        {% if not n.is_read %}style="font-weight:700;background:var(--accent-soft, rgba(2,132,199,.08))"{% endif %}>
+      <td>{{ n.created_at }}</td>
+      <td>{{ n.title }}</td>
+      <td>{{ n.body }}</td>
+      <td style="white-space:nowrap">
+        {% if not n.is_read %}
+        <form method="POST" action="/notifications/read/{{ n.id }}" style="display:inline" class="form-mark-read">
+          <button class="btn-edit" type="submit">تأیید و ورود به کارتابل</button>
+        </form>
+        {% endif %}
+        {% if n.url %}
+          <a class="btn-export" href="{{ n.url }}">مشاهده</a>
+        {% elif n.request_id %}
+          <a class="btn-export" href="/?highlight={{ n.request_id }}">پرونده #{{ n.request_id }}</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  
+{% include '_pagination.html' %}
+{% endif %}
+</div>
+
+<script>
+(function(){
+  function setStatus(msg, isError){
+    var el = document.getElementById('push-status-msg');
+    if(!el) return;
+    el.style.display = msg ? 'block' : 'none';
+    el.textContent = msg || '';
+    el.style.color = isError ? '#b91c1c' : '#0369a1';
+  }
+
+  function updatePushButton(){
+    var btn = document.getElementById('btn-enable-push');
+    if(!btn || !window.SazganPush) return;
+    if(!SazganPush.isSupported()){
+      btn.style.display = 'none';
+      return;
+    }
+    var perm = SazganPush.getPermission();
+    if(perm === 'granted'){
+      btn.textContent = 'اعلان سیستم فعال است';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      btn.style.display = 'inline-flex';
+    } else if(perm === 'denied'){
+      btn.textContent = 'اعلان مسدود شده — از تنظیمات مرورگر فعال کنید';
+      btn.disabled = true;
+      btn.style.display = 'inline-flex';
+    } else {
+      btn.textContent = 'فعال‌سازی اعلان سیستم';
+      btn.disabled = false;
+      btn.style.display = 'inline-flex';
+    }
+  }
+
+  var btn = document.getElementById('btn-enable-push');
+  if(btn){
+    btn.addEventListener('click', function(){
+      if(!window.SazganPush) return;
+      btn.disabled = true;
+      SazganPush.requestPermissionAndSubscribe().then(function(r){
+        if(r && r.ok){
+          setStatus('اعلان‌های سیستم با موفقیت فعال شد.');
+        } else if(r && r.reason === 'denied'){
+          setStatus('دسترسی اعلان رد شد. می‌توانید از تنظیمات مرورگر مجدداً فعال کنید.', true);
+        } else if(r && r.reason === 'unsupported'){
+          setStatus('این مرورگر از اعلان پس‌زمینه پشتیبانی نمی‌کند.', true);
+        } else {
+          setStatus('فعال‌سازی انجام نشد. دوباره تلاش کنید.', true);
+        }
+        updatePushButton();
+      });
+    });
+  }
+
+  // AJAX mark-read for smoother UX
+  document.querySelectorAll('.form-mark-read').forEach(function(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var action = form.getAttribute('action') || '';
+      var idMatch = action.match(/\/(\d+)$/);
+      var nid = idMatch ? idMatch[1] : null;
+      var row = form.closest('tr');
+      fetch(nid ? ('/api/push/mark-read/' + nid) : action, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'}
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if(row){
+          row.style.fontWeight = '400';
+          row.style.background = '';
+          row.classList.remove('notif-unread');
+        }
+        form.remove();
+        if(window.SazganPush && typeof d.count === 'number'){
+          SazganPush.setBadge(d.count);
+        } else if(window.SazganPush){
+          SazganPush.refreshUnreadCount();
+        }
+      }).catch(function(){
+        form.submit();
+      });
+    });
+  });
+
+  // mark all via API
+  var formAll = document.getElementById('form-read-all');
+  if(formAll){
+    formAll.addEventListener('submit', function(e){
+      e.preventDefault();
+      fetch('/api/push/mark-all-read', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'}
+      }).then(function(r){ return r.json(); }).then(function(){
+        document.querySelectorAll('.notif-unread').forEach(function(row){
+          row.style.fontWeight = '400';
+          row.style.background = '';
+          row.classList.remove('notif-unread');
+          var f = row.querySelector('.form-mark-read');
+          if(f) f.remove();
+        });
+        if(window.SazganPush) SazganPush.setBadge(0);
+      }).catch(function(){ formAll.submit(); });
+    });
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', updatePushButton);
+  } else {
+    setTimeout(updatePushButton, 300);
+  }
+})();
+</script>
+{% endblock %}

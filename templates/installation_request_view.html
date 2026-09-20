@@ -1,0 +1,160 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | درخواست نصب {{ req.reception_no or req.id }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>درخواست نصب <strong>{{ req.reception_no or ('#' ~ req.id) }}</strong> — <span class="badge">{{ req.status }}</span></span>
+            <div class="list-header-actions">
+                <a href="/support/open/{{ req.id }}" class="btn">گفتگوی مشتری</a>
+
+                <a href="/service/installation/register-new" class="btn">ثبت نصب سریال</a>
+                <a href="/service/installation/request-print/{{ req.id }}" class="btn-export" target="_blank">چاپ</a>
+                
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if can_edit %}
+        <form method="POST">
+            <input type="hidden" name="action" value="save_fields">
+            <div class="form-grid">
+                <div><label>نام مشتری</label><input type="text" value="{{ req.customer_name }}" disabled></div>
+                <div><label>شماره درخواست</label><input type="text" value="{{ req.reception_no or req.id }}" disabled></div>
+                <div><label>تاریخ درخواست</label><input type="text" value="{{ req.reception_date or '' }}" disabled></div>
+                <div><label>استان</label><input type="text" value="{{ req.province }}" disabled></div>
+                <div><label>شهر</label><input type="text" name="city" value="{{ req.city or '' }}"></div>
+                <div class="field-full"><label>آدرس</label><input type="text" name="customer_address" value="{{ req.customer_address or '' }}"></div>
+                <div><label>کارشناس تجهیزات</label><input type="text" name="equipment_manager_name" value="{{ req.equipment_manager_name or '' }}"></div>
+                <div><label>موبایل کارشناس</label><input type="text" name="equipment_manager_mobile" value="{{ req.equipment_manager_mobile or '' }}"></div>
+                <div><label>نام تماس</label><input type="text" name="contact_name" value="{{ req.contact_name or '' }}"></div>
+                <div><label>شماره تماس</label><input type="text" name="contact_phone" value="{{ req.contact_phone or '' }}"></div>
+                <div>
+                    <label>نماینده</label>
+                    <select name="assigned_technician" class="field-select">
+                        <option value="">—</option>
+                        {% for t in technicians %}
+                        <option value="{{ t.id }}" {% if req.assigned_technician == t.full_name or req.assigned_technician == (t.id|string) %}selected{% endif %}>{{ t.full_name }}{% if t.province %} — {{ t.province }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field-full"><label>توضیحات</label><textarea name="install_notes">{{ req.install_notes or '' }}</textarea></div>
+            </div>
+            <button type="submit" class="btn">ذخیره</button>
+        </form>
+        {% else %}
+        <div class="form-grid">
+            <div><label>نام مشتری</label><p>{{ req.customer_name }}</p></div>
+            <div><label>شماره درخواست</label><p>{{ req.reception_no or req.id }}</p></div>
+            <div><label>وضعیت</label><p>{{ req.status }}</p></div>
+            <div><label>تکنسین</label><p>{{ req.assigned_technician or '—' }}</p></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if can_edit or is_assigned_tech %}
+<div class="card">
+    <div class="card-header">گزارش نصب (نماینده)</div>
+    <div class="card-body">
+        {% if req.report_filename %}
+        <p style="margin-bottom:12px;">فایل فعلی:
+            <a href="/static/uploads/reports/{{ req.report_filename }}" target="_blank">{{ req.report_filename }}</a>
+        </p>
+        {% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="upload_report">
+            <div class="form-grid">
+                <div class="field-full">
+                    <label>آپلود عکس / فایل گزارش نصب (jpg, png, pdf)</label>
+                    <input type="file" name="report_file" accept=".jpg,.jpeg,.png,.pdf">
+                </div>
+                <div class="field-full">
+                    <label>توضیح گزارش</label>
+                    <textarea name="install_notes" rows="2">{{ req.install_notes or '' }}</textarea>
+                </div>
+                <div>
+                    <label><input type="checkbox" name="mark_done" value="1"> علامت «نصب انجام شد»</label>
+                </div>
+            </div>
+            <button type="submit" class="btn">ثبت گزارش</button>
+        </form>
+        <p style="margin-top:12px;font-size:12.5px;color:var(--text-muted);">
+            برای هر دستگاه جداگانه از «ثبت نصب سریال» استفاده کنید تا شماره پذیرش P جدا بگیرد.
+        </p>
+    </div>
+</div>
+{% elif req.report_filename %}
+<div class="card">
+    <div class="card-header">گزارش نصب</div>
+    <div class="card-body">
+        <a href="/static/uploads/reports/{{ req.report_filename }}" target="_blank">{{ req.report_filename }}</a>
+    </div>
+</div>
+{% endif %}
+
+{% if related_registers %}
+<div class="card">
+    <div class="card-header">ثبت‌های نصب مرتبط (همین مشتری)</div>
+    <div class="card-body">
+        <table>
+            <tr><th>پذیرش</th><th>سریال</th><th>تاریخ</th><th>گزارش</th><th></th></tr>
+            {% for r in related_registers %}
+            <tr>
+                <td>{{ r.reception_no or r.id }}</td>
+                <td>{{ r.serial_number or '—' }}</td>
+                <td>{{ r.reception_date or '—' }}</td>
+                <td>{% if r.report_filename %}<a href="/static/uploads/reports/{{ r.report_filename }}" target="_blank">فایل</a>{% else %}—{% endif %}</td>
+                <td><a class="btn-edit" href="/service/installation/register-view/{{ r.id }}">باز</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">مراحل وضعیت</div>
+    <div class="card-body">
+        <table>
+            <tr><th>#</th><th>مرحله</th><th>تاریخ</th><th></th></tr>
+            {% for s in statuses %}
+            <tr {% if req.status == s %}style="background:var(--info-bg);"{% endif %}>
+                <td>{{ loop.index }}</td>
+                <td>{{ s }}</td>
+                <td>{% if stage_map.get(s) %}{{ stage_map[s].stage_date }}{% else %}—{% endif %}</td>
+                <td>{% if req.status == s %}<span class="tag">فعلی</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% if can_edit %}
+        {% if req.status == 'نصب انجام شد' %}
+        <form method="POST" style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px;">
+            <input type="hidden" name="action" value="change_status">
+            <input type="hidden" name="new_status" value="بسته شد">
+            <button type="submit" class="btn" style="background:#16a34a">✔ گزارش نصب بررسی شد — بستن پرونده</button>
+        </form>
+        {% endif %}
+        <form method="POST" style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px;">
+            <input type="hidden" name="action" value="change_status">
+            <div class="form-grid">
+                <div>
+                    <label>تغییر وضعیت</label>
+                    <select name="new_status" class="field-select" required>
+                        {% for s in statuses %}
+                        <option value="{{ s }}" {% if req.status == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>تاریخ مرحله</label>
+                    <input type="text" name="stage_date" class="field-select jalali-date" value="{{ today_year }}/{{ '%02d'|format(today_month) }}/{{ '%02d'|format(today_day) }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+                </div>
+                <div class="field-full"><label>یادداشت</label><input type="text" name="stage_notes"></div>
+            </div>
+            <button type="submit" class="btn">ثبت وضعیت</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

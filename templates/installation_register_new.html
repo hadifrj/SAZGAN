@@ -1,0 +1,166 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | ثبت نصب دستگاه{% endblock %}
+{% block content %}
+{% if prefill is defined and prefill.get('saved') %}
+<div class="card" style="border-color:#86efac;background:var(--success-bg);">
+  <div class="card-body" style="padding:12px 18px;">
+    ثبت شد — پذیرش داخلی #{{ prefill.saved }}. سریال بعدی را وارد کنید.
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>ثبت نصب دستگاه</span>
+            {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+            {% set back_url = request.args.get('back') or '/service/installation/registers' %}
+            {% include '_page_nav_icons.html' %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:20px;">
+                <label style="margin-bottom:8px;">تاریخ ثبت نصب (شمسی)</label>
+                <div style="display:flex;gap:8px;max-width:360px;">
+                    <input type="text" name="recep_date" class="field-select jalali-date" value="{{ today_year }}/{{ '%02d'|format(today_month) }}/{{ '%02d'|format(today_day) }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="field-full customer-field-block ">
+<label>نام مشتری (طرف حساب)</label>
+                    <select name="customer_id" id="customer_id" class="cp-source" onchange="fillCustomer()" tabindex="-1" aria-hidden="true">
+                        <option value="">—</option>
+                        {% for c in customers %}
+                        <option value="{{ c.id }}" data-name="{{ c.name }}" data-province="{{ c.province or '' }}" data-county="{{ c.county or '' }}" data-city="{{ c.city or '' }}">{{ c.name }}{% if c.province %} — {{ c.province }}{% endif %}{% if c.city %} / {{ c.city }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="customer_name" value="{{ prefill.customer_name if prefill is defined else '' }}" id="customer_name" class="cp-name" required>
+                </div>
+                <div>
+                    <label>استان</label>
+                    <select name="province" id="province" class="field-select geo-province" required
+                        onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                        <option value="">— انتخاب استان —</option>
+                        {% for p in provinces %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>شهرستان</label>
+                    <select name="county" id="county" class="field-select geo-county"
+                        onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                        <option value="">— انتخاب شهرستان —</option>
+                    </select>
+                </div>
+                <div>
+                    <label>شهر</label>
+                    <select name="city" id="city" class="field-select geo-city">
+                        <option value="">— انتخاب شهر —</option>
+                    </select>
+                    <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px" placeholder="یا نام شهر را بنویسید">
+                </div>
+                <div class="field-full"><label>آدرس</label><input type="text" name="customer_address" id="customer_address"></div>
+                <div><label>کارشناس تجهیزات</label><input type="text" name="equipment_manager_name" id="equipment_manager_name"></div>
+                <div><label>شماره تماس کارشناس</label><input type="text" name="equipment_manager_mobile" id="equipment_manager_mobile"></div>
+                <div><label>نام تماس (اختیاری)</label><input type="text" name="contact_name"></div>
+                <div><label>شماره تماس (اختیاری)</label><input type="text" name="contact_phone"><input type="hidden" name="customer_phone" id="customer_phone_hidden"></div>
+                <div class="field-full">
+                    <label>درخواست نصب مبدأ (اختیاری)</label>
+                    <select name="source_request_id" id="source_request_id" class="field-select">
+                        <option value="">— تشخیص خودکار بر اساس سریال/مشتری —</option>
+                        {% for r in open_install_requests %}
+                        <option value="{{ r.id }}">#{{ r.id }} — {{ r.customer_name }} — سریال {{ r.serial_number or '—' }} — {{ r.status }}</option>
+                        {% endfor %}
+                    </select>
+                    <small style="color:var(--text-muted);font-size:12px;">پس از ثبت موفق نصب، درخواست انتخاب‌شده به «بسته شد» منتقل و در تایم‌لاین آن ثبت می‌شود.</small>
+                </div>
+                <div>
+                    <label>شماره سریال (باید در کارت گارانتی فعال باشد)</label>
+                    <input type="text" name="serial_number" id="serial_number" required onblur="lookupWarranty()" placeholder="سریال دستگاه">
+                    <small id="warranty-hint" style="color:var(--text-muted);font-size:12px;"></small>
+                </div>
+                <div><label>بخش / واحد نصب‌شده</label><input type="text" name="install_unit" placeholder="مثلاً ICU / اورژانس"></div>
+                <div>
+                    <label>نماینده انجام‌دهنده</label>
+                    <select name="assigned_technician" class="field-select">
+                        <option value="">— انتخاب کنید —</option>
+                        {% for t in technicians %}
+                        <option value="{{ t.id }}">{{ t.full_name }}{% if t.province %} — {{ t.province }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field-full"><label>توضیحات</label><textarea name="install_notes"></textarea></div>
+            </div>
+            <div class="field-full" style="margin-top:12px;">
+                    <label>عکس / فایل گزارش نصب (اجباری — jpg, png, pdf)</label>
+                    <input type="file" name="report_file" accept=".jpg,.jpeg,.png,.pdf" required>
+                </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+                <button type="submit" class="btn">ثبت این سریال</button>
+                <button type="submit" name="next_serial" value="1" class="btn-complete">ثبت و سریال بعدی</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function fillCustomer() {
+    var id = document.getElementById('customer_id').value;
+    if (!id) return;
+    fetch('/api/customer/' + id).then(r => r.json()).then(data => {
+        if (!data.found) return;
+        var set = function(id, val) {
+            var el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+        set('customer_name', data.name);
+        set('customer_address', data.address);
+        set('city', data.city);
+        set('county', data.county);
+        set('equipment_manager_name', data.equipment_manager_name);
+        set('equipment_manager_mobile', data.equipment_manager_mobile);
+        if (data.phone) set('customer_phone_hidden', data.phone);
+        if (data.province) {
+            var sel = document.getElementById('province');
+            if (sel) {
+                if (sel.tagName === 'SELECT') {
+                    for (var i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === data.province) { sel.selectedIndex = i; break; }
+                    }
+                } else {
+                    sel.value = data.province;
+                }
+                var countyEl = document.getElementById('county');
+                var cityEl = document.getElementById('city');
+                if (countyEl && data.county) countyEl.setAttribute('data-selected', data.county);
+                if (cityEl && data.city) cityEl.setAttribute('data-selected', data.city);
+                if (typeof window.onGeoProvinceChange === 'function') {
+                    try { window.onGeoProvinceChange(sel); } catch (e) {}
+                }
+            }
+        }
+    });
+}
+function lookupWarranty() {
+    var serial = document.getElementById('serial_number').value;
+    var hint = document.getElementById('warranty-hint');
+    if (!serial) { hint.textContent = ''; return; }
+    fetch('/api/lookup_warranty/' + encodeURIComponent(serial))
+        .then(r => r.json())
+        .then(data => {
+            if (data.found) {
+                hint.style.color = 'var(--success-text)';
+                hint.textContent = 'کارت گارانتی یافت شد — نوع: ' + (data.device_type || '—') +
+                    (data.installation_date ? ' | نصب: ' + data.installation_date : '');
+                if (data.customer_name && !document.getElementById('customer_name').value) {
+                    document.getElementById('customer_name').value = data.customer_name;
+                }
+            } else {
+                hint.style.color = 'var(--danger-text)';
+                hint.textContent = 'کارت گارانتی برای این سریال یافت نشد. ابتدا کارت را در تنظیمات فعال کنید.';
+            }
+        });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}داشبورد مدیر{% endblock %}
+{% block content %}
+<div class="card"><div class="card-header">داشبورد مدیریتی</div>
+<div class="card-body">
+{% if request.args.get('migrated') %}<div class="import-success">{{ request.args.get('migrated') }} وضعیت یکسان‌سازی شد</div>{% endif %}
+<div class="stats-row">
+<div class="stat-card"><div class="stat-num">{{ total }}</div><div>کل</div></div>
+<div class="stat-card"><div class="stat-num">{{ open_n }}</div><div>باز</div></div>
+<div class="stat-card"><div class="stat-num">{{ rejected }}</div><div>رد پیش‌فاکتور</div></div>
+</div>
+<form method="POST" action="/admin/migrate-statuses" style="margin:12px 0">
+<button class="btn-cancel" type="submit">یکسان‌سازی وضعیت‌های قدیمی</button>
+</form>
+<h3>استان</h3>
+<table><tr><th>استان</th><th>تعداد</th></tr>
+{% for r in by_prov %}<tr><td>{{ r.province }}</td><td>{{ r.c }}</td></tr>{% endfor %}
+</table>
+<h3 style="margin-top:16px">وضعیت</h3>
+<table><tr><th>وضعیت</th><th>تعداد</th></tr>
+{% for r in by_st %}<tr><td>{{ r.status }}</td><td>{{ r.c }}</td></tr>{% endfor %}
+</table>
+</div></div>
+{% endblock %}

@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+{% block title %}جستجوی سراسری | سازگان{% endblock %}
+{% block content %}
+{% set selected_types = selected_types if selected_types is defined and selected_types else ['requests','customers','devices','technicians','parts'] %}
+{% set all_types = all_types if all_types is defined and all_types else ['requests','customers','devices','technicians','parts'] %}
+
+<div class="card gs-hero" style="margin-bottom:16px;">
+  <div class="card-body gs-hero-body">
+    <h2 class="gs-title">جستجوی سراسری</h2>
+    <p class="gs-subtitle">هر چیزی که نیاز دارید را در کل سیستم پیدا کنید</p>
+
+    <form method="GET" id="global-search-form" class="gs-form">
+      <div class="global-search-pill v6-pill">
+        <div class="gs-chip-wrap">
+          <button type="button" class="gs-chip" id="gs-chip-btn" onclick="toggleGsTypes(event)" aria-expanded="false" aria-controls="gs-types">
+            <span id="gs-chip-label">{% if selected_types|length == all_types|length %}همه{% else %}{{ selected_types|length }} مورد{% endif %}</span>
+            <svg class="gs-chip-caret" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="gs-types" id="gs-types" role="menu" aria-label="نوع جستجو">
+            <span class="gs-types-label">جستجو در:</span>
+            {% for t, label in [('requests','درخواست‌ها'), ('customers','مشتریان'), ('devices','دستگاه‌ها'), ('technicians','تعمیرکاران'), ('parts','قطعات')] %}
+            <label class="gs-type-item">
+              <input type="checkbox" name="type" value="{{ t }}" {% if t in selected_types %}checked{% endif %}>
+              <span>{{ label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="شماره سریال، نام مشتری، کد درخواست، مدل دستگاه و ..." autofocus autocomplete="off">
+        <button type="submit" class="global-search-btn" aria-label="جستجو">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="gs-layout">
+  <div class="card gs-filters">
+    <div class="card-header">فیلترها</div>
+    <div class="card-body">
+      <form method="GET" id="filters-form">
+        <input type="hidden" name="q" value="{{ q or '' }}">
+        {% for t in selected_types %}<input type="hidden" name="type" value="{{ t }}">{% endfor %}
+
+        <div class="form-group">
+          <label>بازه زمانی (درخواست‌ها)</label>
+          <select name="time_range">
+            <option value="">همه</option>
+            <option value="1m" {% if time_range=='1m' %}selected{% endif %}>۱ ماه اخیر</option>
+            <option value="3m" {% if time_range=='3m' %}selected{% endif %}>۳ ماه اخیر</option>
+            <option value="6m" {% if time_range=='6m' %}selected{% endif %}>۶ ماه اخیر</option>
+            <option value="1y" {% if time_range=='1y' %}selected{% endif %}>۱ سال اخیر</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>وضعیت (درخواست‌ها)</label>
+          <select name="status">
+            <option value="">همه وضعیت‌ها</option>
+            {% for s in ['ثبت شده', 'در حال بررسی', 'در حال تعمیر', 'تعمیر و آماده تحویل', 'تکمیل شده'] %}
+            <option value="{{ s }}" {% if status_filter==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>نوع درخواست</label>
+          <select name="category">
+            <option value="">همه موارد</option>
+            {% for c in ['تعمیر داخلی', 'تعمیر خارجی', 'نصب و آموزش', 'بررسی و بازدید'] %}
+            <option value="{{ c }}" {% if category_filter==c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%;">اعمال فیلترها</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card gs-results">
+    <div class="card-header">
+      نتایج جستجو
+      {% if q %}<span style="color:var(--text-muted);font-weight:400;font-size:13px;"> — {{ total_results }} نتیجه برای «{{ q }}»</span>{% endif %}
+    </div>
+    <div class="card-body">
+      {% if not q %}
+      <div class="empty-state">عبارتی را برای جستجو وارد کنید.</div>
+      {% elif results|length == 0 %}
+      <div class="empty-state">موردی یافت نشد.</div>
+      {% else %}
+      {% for r in results %}
+      <div class="search-result-row">
+        <div class="search-result-type search-result-type-{{ r.type }}">{{ r.type_label }}</div>
+        <div class="search-result-body">
+          <div class="search-result-title">{{ r.title }}</div>
+          <div class="search-result-sub">{{ r.subtitle }}</div>
+          <div class="search-result-meta">
+            {% for k, v in r.meta %}<span>{{ k }}: {{ v }}</span>{% endfor %}
+          </div>
+        </div>
+        {% if r.status %}<span class="badge">{{ r.status }}</span>{% endif %}
+        {% if r.folder_path %}
+        <button type="button" class="btn-edit" style="flex:none;"
+          onclick="openDeviceFolder({{ r.folder_path|tojson }})">باز کردن پوشه</button>
+        {% elif r.url %}
+        <a href="{{ r.url }}" class="search-result-arrow" aria-label="مشاهده">‹</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% include '_pagination.html' %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+/* یک کپسول واحد — بدون کادر داخلی روی input */
+.global-search-pill{
+  display:flex;
+  align-items:center;
+  height:52px;
+  padding:6px 6px 6px 16px;
+  border:1.5px solid var(--border);
+  border-radius:999px;
+  background:var(--card);
+  gap:8px;
+  box-sizing:border-box;
+  box-shadow:0 1px 2px rgba(15,23,42,.04);
+}
+.global-search-pill:focus-within{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* طرح ۶ — چیپ دسته‌بندی + دراپ‌داون */
+.global-search-pill.v6-pill{
+  padding:6px 16px 6px 6px;
+  gap:0;
+  position:relative;
+  overflow:visible;
+}
+/* روی موبایل، style.css یک contain:layout روی هر .card می‌گذارد (برای اسکرول
+   سریع‌تر) که باعث می‌شود این کارت یک stacking context جدید بسازد و پنل
+   position:fixed داخل آن (با وجود z-index بالا) پشت کارت نتایج (که بعداً در
+   DOM می‌آید) پنهان شود. برای همین کارت جستجو را از این قانون مستثنی می‌کنیم. */
+@media (max-width:900px){
+  .card.gs-hero{ contain:none !important; }
+}
+.gs-chip-wrap{
+  position:relative;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  margin-left:10px;
+  z-index:5;
+}
+.gs-chip{
+  flex-shrink:0;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  height:40px;
+  padding:0 14px;
+  border:0;
+  border-left:1px solid var(--border);
+  background:transparent;
+  color:var(--text-muted);
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:700;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:color .12s ease, background .12s ease;
+  border-radius:999px;
+}
+.gs-chip:hover{color:var(--accent);background:var(--accent-soft, rgba(0,0,0,.04));}
+.gs-chip-caret{flex-shrink:0;transition:transform .15s ease;}
+.gs-chip[aria-expanded="true"] .gs-chip-caret{transform:rotate(180deg);}
+.gs-chip[aria-expanded="true"]{color:var(--accent);}
+
+/* پنل انواع — fixed تا overflow کارت آن را نبرد */
+#gs-types.gs-types{
+  position:fixed !important;
+  z-index:2147483000 !important;
+  display:none;
+  flex-direction:column;
+  gap:2px;
+  min-width:220px;
+  max-width:min(280px, calc(100vw - 24px));
+  background:#fff;
+  background:var(--card, #fff);
+  border:1px solid var(--border, #e2e8f0);
+  border-radius:12px;
+  box-shadow:0 16px 40px rgba(15,23,42,.22);
+  padding:8px;
+  color:var(--text, #0f172a);
+}
+#gs-types.gs-types.is-open{
+  display:flex !important;
+}
+.gs-types-label{
+  color:var(--text-muted, #64748b);
+  font-size:11.5px;
+  font-weight:700;
+  padding:6px 10px 4px;
+}
+.gs-types .gs-type-item{
+  display:flex !important;
+  align-items:center;
+  gap:8px;
+  padding:9px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  white-space:nowrap;
+  font-size:13px;
+  color:var(--text, #0f172a);
+  margin:0;
+}
+.gs-types .gs-type-item:hover{background:var(--bg, #f1f5f9);}
+.gs-types input[type=checkbox]{
+  width:16px;
+  height:16px;
+  accent-color:var(--accent, #374151);
+  cursor:pointer;
+  flex-shrink:0;
+}
+.gs-hero.card,
+.card.gs-hero,
+.gs-hero .card-body,
+.gs-hero-body,
+.gs-form,
+.global-search-pill{
+  overflow:visible !important;
+}
+
+.global-search-pill input[type="search"],
+.global-search-pill input{
+  flex:1;
+  min-width:0;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background:transparent !important;
+  outline:none !important;
+  height:40px !important;
+  min-height:0 !important;
+  padding:0 8px !important;
+  margin:0 !important;
+  font-size:14.5px !important;
+  font-weight:500;
+  color:var(--text);
+  -webkit-appearance:none;
+  appearance:none;
+}
+.global-search-pill input[type="search"]::-webkit-search-decoration,
+.global-search-pill input[type="search"]::-webkit-search-cancel-button,
+.global-search-pill input[type="search"]::-webkit-search-results-button,
+.global-search-pill input[type="search"]::-webkit-search-results-decoration{
+  -webkit-appearance:none;
+  appearance:none;
+  display:none;
+}
+.global-search-pill input:focus,
+.global-search-pill input:focus-visible{
+  border:0 !important;
+  outline:none !important;
+  box-shadow:none !important;
+}
+.global-search-btn{
+  flex-shrink:0;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:0;
+  background:var(--accent);
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  padding:0;
+  box-shadow:none;
+}
+.global-search-btn:hover{filter:brightness(1.06)}
+.global-search-btn svg{width:18px;height:18px;}
+
+
+.search-result-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border);}
+.search-result-row:last-child{border-bottom:none;}
+.search-result-type{flex:none;font-size:11px;font-weight:600;padding:4px 8px;border-radius:6px;background:var(--bg);color:var(--text-muted);white-space:nowrap;}
+.search-result-type-requests{background:#dbeafe;color:#1d4ed8;}
+.search-result-type-devices{background:#e0e7ff;color:#4338ca;}
+.search-result-type-customers{background:#dcfce7;color:#15803d;}
+.search-result-type-technicians{background:#fef3c7;color:#b45309;}
+.search-result-type-parts{background:#f3e8ff;color:#7e22ce;}
+[data-theme="dark"] .search-result-type-requests{background:#1e3a5f;color:#93c5fd;}
+[data-theme="dark"] .search-result-type-devices{background:#312e81;color:#c7d2fe;}
+[data-theme="dark"] .search-result-type-customers{background:#14532d;color:#86efac;}
+[data-theme="dark"] .search-result-type-technicians{background:#78350f;color:#fcd34d;}
+[data-theme="dark"] .search-result-type-parts{background:#581c87;color:#e9d5ff;}
+.search-result-body{flex:1;min-width:0;}
+.search-result-title{font-weight:600;font-size:14px;}
+.search-result-sub{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.search-result-meta{font-size:12px;color:var(--text-muted);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+.search-result-arrow{flex:none;font-size:20px;color:var(--text-muted);text-decoration:none;padding:0 4px;}
+
+
+/* ---- layout responsive ---- */
+.gs-hero-body{text-align:center;padding:28px 16px;}
+.gs-title{margin:0 0 4px;font-size:1.35rem;}
+.gs-subtitle{color:var(--text-muted);margin:0 0 18px;font-size:13.5px;}
+.gs-form{max-width:640px;margin:0 auto;width:100%;}
+
+.gs-layout{
+  display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;
+}
+.gs-filters{flex:0 0 240px;max-width:100%;}
+.gs-results{position:relative;z-index:1;flex:1;min-width:0;width:100%;}
+
+.gs-filters .form-group{margin-bottom:12px;}
+.gs-filters select,
+.gs-filters .field-select{width:100%;max-width:100%;box-sizing:border-box;}
+
+.search-result-row{display:flex;align-items:flex-start;gap:12px;padding:12px 4px;border-bottom:1px solid var(--border);}
+.search-result-body{flex:1;min-width:0;overflow-wrap:anywhere;word-break:break-word;}
+
+@media (max-width: 768px){
+  .gs-hero-body{padding:18px 12px;}
+  .gs-title{font-size:1.15rem;}
+  .gs-subtitle{font-size:12.5px;margin-bottom:14px;}
+  .gs-form{max-width:100%;}
+  .global-search-pill{
+    height:48px;
+    padding:4px 4px 4px 12px;
+    width:100%;
+    max-width:100%;
+  }
+  .global-search-pill input{
+    font-size:14px !important;
+  }
+  .global-search-pill.v6-pill{
+    padding:4px 12px 4px 4px;
+  }
+  .gs-chip{
+    padding:0 10px;
+    font-size:11.5px;
+  }
+  .gs-types{
+    min-width:180px;
+    max-width:calc(100vw - 32px);
+  }
+  .gs-layout{
+    flex-direction:column;
+    gap:12px;
+  }
+  .gs-filters{
+    flex:none;
+    width:100%;
+    min-width:0;
+    order:2; /* نتایج اول، فیلترها پایین‌تر روی موبایل اختیاری */
+  }
+  .gs-results{
+    order:1;
+    width:100%;
+    min-width:0;
+  }
+  /* روی موبایل فیلترها جمع‌وجور */
+  .gs-filters .card-body{padding:12px;}
+  .gs-filters .btn{width:100%;}
+  .search-result-row{
+    flex-wrap:wrap;
+    gap:8px;
+    padding:12px 2px;
+  }
+  .search-result-type{font-size:10.5px;padding:3px 7px;}
+  .search-result-title{font-size:13.5px;}
+  .search-result-meta{gap:6px 10px;}
+  .search-result-arrow{display:none;}
+  .card-header{font-size:13.5px;overflow-wrap:anywhere;}
+}
+
+@media (max-width: 420px){
+  .gs-types label{font-size:12px;}
+  .global-search-btn{width:36px;height:36px;}
+  .global-search-btn svg{width:16px;height:16px;}
+}
+
+</style>
+
+<script>
+(function(){
+  var panel = document.getElementById('gs-types');
+  var chipBtn = document.getElementById('gs-chip-btn');
+  var chipLabel = document.getElementById('gs-chip-label');
+  if (!panel || !chipBtn) return;
+
+  var allCheckboxes = panel.querySelectorAll('input[type=checkbox]');
+  var totalTypes = allCheckboxes.length;
+
+  function placePanel(){
+    var r = chipBtn.getBoundingClientRect();
+    var panelW = Math.max(220, panel.offsetWidth || 220);
+    // در RTL: گوشه راست پنل زیر چیپ
+    var right = window.innerWidth - r.right;
+    var top = r.bottom + 8;
+    // اگر از پایین صفحه بیرون زد، بالای چیپ باز کن
+    var estH = 220;
+    if (top + estH > window.innerHeight - 8) {
+      top = Math.max(8, r.top - estH - 8);
+    }
+    panel.style.top = top + 'px';
+    panel.style.right = Math.max(8, right) + 'px';
+    panel.style.left = 'auto';
+  }
+
+  // پنل داخل فرم می‌ماند تا type= در GET ارسال شود (نه append به body)
+  function openPanel(){
+    panel.classList.add('is-open');
+    chipBtn.setAttribute('aria-expanded', 'true');
+    placePanel();
+  }
+  function closePanel(){
+    panel.classList.remove('is-open');
+    chipBtn.setAttribute('aria-expanded', 'false');
+  }
+  function isOpen(){
+    return panel.classList.contains('is-open');
+  }
+  function updateChipLabel(){
+    var checkedCount = panel.querySelectorAll('input[type=checkbox]:checked').length;
+    if (checkedCount === 0) {
+      allCheckboxes.forEach(function(x){ x.checked = true; });
+      checkedCount = totalTypes;
+    }
+    if (chipLabel) {
+      chipLabel.textContent = (checkedCount === totalTypes) ? 'همه' : (checkedCount + ' مورد');
+    }
+  }
+
+  window.toggleGsTypes = function(ev){
+    if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+    if (isOpen()) closePanel();
+    else openPanel();
+  };
+
+  document.addEventListener('click', function(e){
+    if (!isOpen()) return;
+    if (panel.contains(e.target) || chipBtn.contains(e.target)) return;
+    closePanel();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') closePanel();
+  });
+  window.addEventListener('resize', function(){ if (isOpen()) placePanel(); });
+  window.addEventListener('scroll', function(){ if (isOpen()) placePanel(); }, true);
+
+  // فقط برچسب را به‌روز کن — رفرش خودکار نکن (انتخاب با دکمه جستجو اعمال می‌شود)
+  allCheckboxes.forEach(function(cb){
+    cb.addEventListener('change', function(ev){
+      if (ev) ev.stopPropagation();
+      updateChipLabel();
+    });
+  });
+  updateChipLabel();
+})();
+</script>
+{% endblock %}

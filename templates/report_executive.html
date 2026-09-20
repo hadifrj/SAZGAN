@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}گزارش اجرایی{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">گزارش اجرایی</div>
+  <div class="card-body">
+    <div class="stats-row" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+      <div class="stat-card"><div class="stat-num">{{ total }}</div><div>کل پرونده‌ها</div></div>
+      <div class="stat-card"><div class="stat-num">{{ open_c }}</div><div>باز</div></div>
+      <div class="stat-card"><div class="stat-num">{{ internal }}</div><div>تعمیر داخلی</div></div>
+      <div class="stat-card"><div class="stat-num">{{ external }}</div><div>تعمیر خارجی</div></div>
+      <div class="stat-card"><div class="stat-num">{{ rejected }}</div><div>رد پیش‌فاکتور</div></div>
+    </div>
+    {% if rows is defined and rows|length %}
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>شماره پذیرش</th>
+          <th>تاریخ پذیرش</th>
+          <th>نوع خدمت</th>
+          <th>نام مشتری</th>
+          <th>نوع دستگاه</th>
+          <th>مدل دستگاه</th>
+          <th>استان</th>
+          <th>شهر</th>
+          <th>مسئول اجرا</th>
+          <th>وضعیت اجرا</th>
+          <th>تاریخ انجام خدمت</th>
+          <th>تعداد روز انجام</th>
+          <th>شماره فاکتور</th>
+          <th>وضعیت پرونده</th>
+          <th>عملیات</th>
+        </tr>
+        {% for r in rows %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.reception_no or r.id }}</td>
+          <td>{{ r.reception_date or '—' }}</td>
+          <td>{{ r.request_category or r.service_type or '—' }}</td>
+          <td>{{ r.customer_name }}</td>
+          <td>{{ r.device_type or '—' }}</td>
+          <td>{{ r.device_model or r.model or '—' }}</td>
+          <td>{{ r.province or '—' }}</td>
+          <td>{{ r.city or '—' }}</td>
+          <td>{{ r.assigned_technician or '—' }}</td>
+          <td>{{ r.status or '—' }}</td>
+          <td>{{ r.installation_date or r.visit_date or r.completion_date or '—' }}</td>
+          <td>{{ r.days_in_status if r.days_in_status is defined else '—' }}</td>
+          <td>{{ r.invoice_number or '—' }}</td>
+          <td><span class="badge">{{ r.status }}</span></td>
+          <td><a class="btn-edit" href="{% if r.service_type=='کارخانه' %}/service/internal-repair/view/{{ r.id }}{% elif r.request_category=='نصب و آموزش' %}/service/installation/request-view/{{ r.id }}{% elif r.request_category=='بررسی و بازدید' %}/service/inspection/view/{{ r.id }}{% else %}/service/external-repair/view/{{ r.id }}{% endif %}">مشاهده</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

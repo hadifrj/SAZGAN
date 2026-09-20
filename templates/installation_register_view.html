@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}سازگان | ثبت نصب #{{ req.id }}
+{% if req.report_filename %}
+<div class="card">
+  <div class="card-header">گزارش نصب</div>
+  <div class="card-body">
+    <a href="/static/uploads/reports/{{ req.report_filename }}" target="_blank">{{ req.report_filename }}</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>ثبت نصب دستگاه #{{ req.id }}</span>
+            <div class="list-header-actions">
+                <a href="/support/open/{{ req.id }}" class="btn">گفتگوی مشتری</a>
+
+                <a href="/service/installation/register-print/{{ req.id }}" class="btn-export" target="_blank"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="7" rx="1"/><path d="M6 9V4h12v5"/><rect x="7" y="13" width="10" height="6"/></svg> چاپ</a>
+                
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-grid">
+            <div><label>نام مشتری</label><p>{{ req.customer_name }}</p></div>
+            <div><label>تاریخ ثبت نصب</label><p>{{ req.reception_date or '—' }}</p></div>
+            <div><label>استان / شهر</label><p>{{ req.province }}{% if req.city %} / {{ req.city }}{% endif %}</p></div>
+            <div><label>آدرس</label><p>{{ req.customer_address or '—' }}</p></div>
+            <div><label>کارشناس تجهیزات</label><p>{{ req.equipment_manager_name or '—' }} — {{ req.equipment_manager_mobile or '' }}</p></div>
+            <div><label>تماس</label><p>{{ req.contact_name or '—' }} — {{ req.contact_phone or '' }}</p></div>
+            <div><label>سریال</label><p>{{ req.serial_number or '—' }}</p></div>
+            <div><label>نوع دستگاه</label><p>{{ req.device_type }}</p></div>
+            <div><label>بخش / واحد نصب‌شده</label><p>{{ req.install_unit or '—' }}</p></div>
+            <div><label>نماینده</label><p>{{ req.assigned_technician or '—' }}</p></div>
+            <div class="field-full"><label>توضیحات</label><p>{{ req.install_notes or '—' }}</p></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

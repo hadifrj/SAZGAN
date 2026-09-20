@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}ارتباط با مشتری | سازگان{% endblock %}
+{% block content %}
+{% set system_active = 'customer-comms' %}
+{% include '_settings_system_tabs.html' %}
+<div class="sg-page-head" style="margin-bottom:16px;">
+  <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:800;">ارتباط با مشتری</h2>
+  <p style="margin:0;color:var(--text-muted);font-size:13px;line-height:1.6;">
+    یک نقطه برای اعلام خرابی، پیگیری، گفتگوی مشتری، ربات بله و تنظیمات اعلان.
+  </p>
+</div>
+
+<div class="sys-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+
+  <a href="/support/inbox" class="sys-tile" style="display:block;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-decoration:none;color:inherit;">
+    <span class="sys-tile-title" style="display:block;font-weight:800;margin-bottom:4px;">گفتگوی مشتری</span>
+    <span class="sys-tile-desc" style="font-size:12.5px;color:var(--text-muted);">صندوق پیام‌های مشتریان و پاسخ شرکت</span>
+  </a>
+
+  <a href="/announce/list" class="sys-tile" style="display:block;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-decoration:none;color:inherit;">
+    <span class="sys-tile-title" style="display:block;font-weight:800;margin-bottom:4px;">اعلام‌های عمومی</span>
+    <span class="sys-tile-desc" style="font-size:12.5px;color:var(--text-muted);">لیست اعلام خرابی‌های ثبت‌شده از فرم/QR</span>
+  </a>
+
+  <a href="/c/login" class="sys-tile" style="display:block;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-decoration:none;color:inherit;">
+    <span class="sys-tile-title" style="display:block;font-weight:800;margin-bottom:4px;">اپ مشتری</span>
+    <span class="sys-tile-desc" style="font-size:12.5px;color:var(--text-muted);">ورود و دسترسی به مرکز ارتباط مشتریان</span>
+  </a>
+
+
+  <a href="/settings/chat-quick-replies" class="sys-tile" style="display:block;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-decoration:none;color:inherit;">
+    <span class="sys-tile-title" style="display:block;font-weight:800;margin-bottom:4px;">⚡ پیام‌های آماده چت</span>
+    <span class="sys-tile-desc" style="font-size:12.5px;color:var(--text-muted);">افزودن، ویرایش و مدیریت پاسخ‌های سریع اپراتورها</span>
+  </a>
+
+  <a href="/settings/chat-emojis" class="sys-tile" style="display:block;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-decoration:none;color:inherit;">
+    <span class="sys-tile-title" style="display:block;font-weight:800;margin-bottom:4px;">😊 ایموجی‌های چت</span>
+    <span class="sys-tile-desc" style="font-size:12.5px;color:var(--text-muted);">انتخاب ایموجی‌های نوار واکنش و انتخاب سریع پیام‌ها</span>
+  </a>
+
+  <a href="/settings/messaging" class="sys-tile" style="display:block;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-decoration:none;color:inherit;">
+    <span class="sys-tile-title" style="display:block;font-weight:800;margin-bottom:4px;">اعلان پیامک / ایتا</span>
+    <span class="sys-tile-desc" style="font-size:12.5px;color:var(--text-muted);">تنظیم کانال اعلان به نماینده</span>
+  </a>
+
+  <a href="/settings/bale" class="sys-tile" style="display:block;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-decoration:none;color:inherit;">
+    <span class="sys-tile-title" style="display:block;font-weight:800;margin-bottom:4px;">ربات بله</span>
+    <span class="sys-tile-desc" style="font-size:12.5px;color:var(--text-muted);">توکن ربات، اتصال حساب و تست اعلان</span>
+  </a>
+
+</div>
+
+<div class="card" style="margin-top:18px;">
+  <div class="card-header">راهنمای سریع</div>
+  <div class="card-body" style="font-size:13px;line-height:1.7;color:var(--text-muted);">
+    <ul style="margin:0;padding-right:18px;">
+      <li>مشتری با یک لینک/QR واحد (<code>/support</code>) هم اعلام خرابی ثبت می‌کند، هم پیگیری می‌کند (سریال/تلفن/کد گفتگو)، هم مستقیم گفتگو می‌کند — سه تب در همان صفحه.</li>
+      <li>لینک قدیمی <code>/track</code> به‌صورت خودکار به همین صفحه (<code>/support</code>) هدایت می‌شود.</li>
+      <li>پاسخ کارکنان در «گفتگوی مشتری» ثبت می‌شود.</li>
+      <li>ربات بله فقط کانال اعلان به کارکنان است، نه چت جدا.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

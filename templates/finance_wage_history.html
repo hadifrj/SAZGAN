@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}سازگان | سابقه محاسبات نمایندگان{% endblock %}
+{% block content %}
+<div class="card">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>سابقه محاسبات دستمزد (<span id="visible-count">{{ calcs|length }}</span> از {{ calcs|length }})</span>
+                <input
+                    type="text"
+                    id="calc-search"
+                    class="search-box"
+                    placeholder="جستجو بر اساس نام نماینده یا شرح کار..."
+                    onkeyup="filterCalcs()"
+                >
+            </div>
+        </div>
+        {% if calcs|length == 0 %}
+            <div class="empty-state">هنوز محاسبه‌ای ثبت نشده است.</div>
+        {% else %}
+        <table id="calcs-table">
+            <tr>
+                <th>#</th><th>نماینده</th><th>شرح کار</th><th>مبلغ (تومان)</th><th>تاریخ</th><th>توضیحات</th>
+            </tr>
+            {% for c in calcs %}
+            <tr class="calc-row">
+                <td>{{ c.id }}</td>
+                <td>{{ c.representative_name }}</td>
+                <td>{{ c.work_description }}</td>
+                <td>{{ '{:,}'.format(c.amount) }}</td>
+                <td>{{ c.calc_date if c.calc_date else '—' }}</td>
+                <td>{{ c.notes if c.notes else '—' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div id="no-results" class="empty-state" style="display:none;">موردی مطابق جستجوی شما یافت نشد.</div>
+        {% endif %}
+    </div>
+
+    <script>
+        function filterCalcs() {
+            var query = document.getElementById('calc-search').value.trim();
+            var rows = document.querySelectorAll('#calcs-table .calc-row');
+            var visibleCount = 0;
+            rows.forEach(function(row) {
+                var matches = row.textContent.indexOf(query) !== -1;
+                row.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+            document.getElementById('visible-count').textContent = visibleCount;
+            document.getElementById('no-results').style.display = (visibleCount === 0 && query !== '') ? 'block' : 'none';
+        }
+    </script>
+
+{% endblock %}

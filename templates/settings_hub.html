@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% block title %}سازگان | تنظیمات{% endblock %}
+{% block content %}
+<div class="stg-page">
+
+  <div class="stg-head">
+    <h1>تنظیمات</h1>
+    <p>یکی از بخش‌های زیر را باز کنید و گزینه‌ی مورد نظر را انتخاب کنید.</p>
+  </div>
+
+  <div class="stg-acc">
+
+    {% if can_access('parties') %}
+    <section class="stg-acc-item open" data-color="blue">
+      <button type="button" class="stg-acc-head" onclick="stgAccToggle(this)">
+        <span class="stg-acc-ic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        </span>
+        <span class="stg-acc-t">
+          <span class="stg-acc-title">طرف‌حساب‌ها</span>
+          <span class="stg-acc-desc">کاربران سامانه، دسترسی‌ها، مشتریان و نمایندگی‌ها</span>
+        </span>
+        <span class="stg-chevron">‹</span>
+      </button>
+      <div class="stg-acc-body">
+        <div class="stg-grid">
+          <a href="/settings" class="stg-card" title="حساب‌های کاربری — کاربران سامانه و ایجاد کاربر جدید">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
+            <span class="stg-card-title">حساب‌های کاربری</span>
+            <span class="stg-card-tip"><b>حساب‌های کاربری</b><br>کاربران سامانه و ایجاد کاربر جدید</span>
+          </a>
+          <a href="/settings/access" class="stg-card" title="مدیریت دسترسی‌ها — نقش‌ها و دسترسی به بخش‌های سامانه">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+            <span class="stg-card-title">مدیریت دسترسی‌ها</span>
+            <span class="stg-card-tip"><b>مدیریت دسترسی‌ها</b><br>نقش‌ها و دسترسی به بخش‌های سامانه</span>
+          </a>
+          <a href="/settings/customers" class="stg-card" title="مشتریان — طرف‌حساب‌های خدماتی و مراکز">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="9" y1="21" x2="9" y2="14"/></svg></span>
+            <span class="stg-card-title">مشتریان</span>
+            <span class="stg-card-tip"><b>مشتریان</b><br>طرف‌حساب‌های خدماتی و مراکز</span>
+          </a>
+          <a href="/settings/representatives" class="stg-card" title="نمایندگی‌ها — نمایندگان حقیقی و حقوقی">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="9" y1="21" x2="9" y2="14"/></svg></span>
+            <span class="stg-card-title">نمایندگی‌ها</span>
+            <span class="stg-card-tip"><b>نمایندگی‌ها</b><br>نمایندگان حقیقی و حقوقی</span>
+          </a>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_access('system') %}
+    <section class="stg-acc-item" data-color="violet">
+      <button type="button" class="stg-acc-head" onclick="stgAccToggle(this)">
+        <span class="stg-acc-ic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 21.4 12.0 L 21.2 13.8 L 19.0 14.9 L 18.3 16.2 L 18.6 18.6 L 17.2 19.8 L 14.9 19.0 L 13.5 19.5 L 12.0 21.4 L 10.2 21.2 L 9.1 19.0 L 7.8 18.3 L 5.4 18.6 L 4.2 17.2 L 5.0 14.9 L 4.5 13.5 L 2.6 12.0 L 2.8 10.2 L 5.0 9.1 L 5.7 7.8 L 5.4 5.4 L 6.8 4.2 L 9.1 5.0 L 10.5 4.5 L 12.0 2.6 L 13.8 2.8 L 14.9 5.0 L 16.2 5.7 L 18.6 5.4 L 19.8 6.8 L 19.0 9.1 L 19.5 10.5 Z"/><circle cx="12" cy="12" r="3.2"/></svg>
+        </span>
+        <span class="stg-acc-t">
+          <span class="stg-acc-title">تنظیمات سیستم</span>
+          <span class="stg-acc-desc">شرکت، ظاهر، تقویم، پشتیبان‌گیری و داده‌های مرجع</span>
+        </span>
+        <span class="stg-chevron">‹</span>
+      </button>
+      <div class="stg-acc-body">
+        <div class="stg-grid">
+          <a href="/settings/company" class="stg-card" title="شرکت — نام، تلفن و مسیر استقرار">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="9" y1="21" x2="9" y2="14"/></svg></span>
+            <span class="stg-card-title">شرکت</span>
+            <span class="stg-card-tip"><b>شرکت</b><br>نام، تلفن و مسیر استقرار</span>
+          </a>
+          <a href="/settings/about" class="stg-card" title="درباره / نسخه / فعال‌سازی — مشخصات سیستم و تاریخچه نسخه‌ها">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.9" fill="currentColor" stroke="none"/></svg></span>
+            <span class="stg-card-title">درباره / نسخه / فعال‌سازی</span>
+            <span class="stg-card-tip"><b>درباره / نسخه / فعال‌سازی</b><br>مشخصات سیستم و تاریخچه نسخه‌ها</span>
+          </a>
+          <a href="/settings/app-lists" class="stg-card" title="تنظیمات نرم‌افزار — وضعیت‌ها، نقش‌ها و لیست‌های کشویی">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/><circle cx="18" cy="18" r="3"/></svg></span>
+            <span class="stg-card-title">تنظیمات نرم‌افزار</span>
+            <span class="stg-card-tip"><b>تنظیمات نرم‌افزار</b><br>وضعیت‌ها، نقش‌ها و لیست‌های کشویی</span>
+          </a>
+          <a href="/settings/geo" class="stg-card" title="استان / شهر و مسافت — نقشه ایران و محاسبه مسافت">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span>
+            <span class="stg-card-title">استان / شهر و مسافت</span>
+            <span class="stg-card-tip"><b>استان / شهر و مسافت</b><br>نقشه ایران و محاسبه مسافت</span>
+          </a>
+          <a href="/settings/calendar" class="stg-card" title="تقویم — هفته کاری، جمعه قرمز و تعطیلات دستی">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg></span>
+            <span class="stg-card-title">تقویم</span>
+            <span class="stg-card-tip"><b>تقویم</b><br>هفته کاری، جمعه قرمز و تعطیلات دستی</span>
+          </a>
+          <a href="/settings/help-tips" class="stg-card" title="راهنماهای فرم‌ها — متن آیکون‌های راهنمای (؟) در فرم‌ها">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-1"/><path d="M12 13a2.5 2.5 0 1 0-1-4.7"/></svg></span>
+            <span class="stg-card-title">راهنماهای فرم‌ها</span>
+            <span class="stg-card-tip"><b>راهنماهای فرم‌ها</b><br>متن آیکون‌های راهنمای (؟) در فرم‌ها</span>
+          </a>
+          <a href="/settings/display" class="stg-card" title="تم و نمایش — حالت روز/شب، رنگ، فونت و اندازه متن">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 8 0 1 0 0 16c1.1 0 2-.8 2-2 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.2 0-.9.8-1.5 1.7-1.5H17a4 4 0 0 0 4-4c0-3.9-4-6-9-6z"/><circle cx="7.6" cy="10.6" r="1" fill="currentColor" stroke="none"/><circle cx="10.6" cy="7.4" r="1" fill="currentColor" stroke="none"/><circle cx="14.6" cy="7.6" r="1" fill="currentColor" stroke="none"/><circle cx="16.8" cy="10.8" r="1" fill="currentColor" stroke="none"/></svg></span>
+            <span class="stg-card-title">تم و نمایش</span>
+            <span class="stg-card-tip"><b>تم و نمایش</b><br>حالت روز/شب، رنگ، فونت و اندازه متن</span>
+          </a>
+          <a href="/settings/data-hub" class="stg-card" title="Export / Import — ورود و خروج اکسل مشتریان، قطعات و آرشیو">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 19h16"/></svg></span>
+            <span class="stg-card-title">Export / Import</span>
+            <span class="stg-card-tip"><b>Export / Import</b><br>ورود و خروج اکسل مشتریان، قطعات و آرشیو</span>
+          </a>
+          <a href="/security/backups" class="stg-card" title="پشتیبان و لاگ ممیزی — بکاپ دستی، دانلود و بازیابی">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><rect x="8" y="3" width="8" height="5"/><rect x="7.5" y="13" width="9" height="7"/></svg></span>
+            <span class="stg-card-title">پشتیبان و لاگ ممیزی</span>
+            <span class="stg-card-tip"><b>پشتیبان و لاگ ممیزی</b><br>بکاپ دستی، دانلود و بازیابی</span>
+          </a>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_access('system') %}
+    <section class="stg-acc-item" data-color="teal">
+      <button type="button" class="stg-acc-head" onclick="stgAccToggle(this)">
+        <span class="stg-acc-ic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0z"/></svg>
+        </span>
+        <span class="stg-acc-t">
+          <span class="stg-acc-title">ارتباط با مشتری</span>
+          <span class="stg-acc-desc">گفتگو، اعلام خرابی، پیامک، ایتا و ربات بله</span>
+        </span>
+        <span class="stg-chevron">‹</span>
+      </button>
+      <div class="stg-acc-body">
+        <div class="stg-grid">
+          <a href="/support/inbox" class="stg-card" title="گفتگوی مشتری — صندوق پیام‌های مشتریان">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0z"/></svg></span>
+            <span class="stg-card-title">گفتگوی مشتری</span>
+            <span class="stg-card-tip"><b>گفتگوی مشتری</b><br>صندوق پیام‌های مشتریان</span>
+          </a>
+          <a href="/announce/list" class="stg-card" title="اعلام‌های عمومی — اعلام خرابی‌های ثبت‌شده از فرم/QR">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span>
+            <span class="stg-card-title">اعلام‌های عمومی</span>
+            <span class="stg-card-tip"><b>اعلام‌های عمومی</b><br>اعلام خرابی‌های ثبت‌شده از فرم/QR</span>
+          </a>
+          <a href="/c/login" class="stg-card" title="اپ مشتری — ورود و دسترسی به مرکز ارتباط مشتریان">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="21" y2="14"/><line x1="14" y1="21" x2="21" y2="21"/><line x1="17.5" y1="14" x2="17.5" y2="21"/></svg></span>
+            <span class="stg-card-title">اپ مشتری</span>
+            <span class="stg-card-tip"><b>اپ مشتری</b><br>ورود و دسترسی به مرکز ارتباط مشتریان</span>
+          </a>
+          <a href="/settings/chat-quick-replies" class="stg-card" title="پیام‌های آماده چت — پاسخ‌های سریع اپراتورها">
+            <span class="stg-card-ic">⚡</span>
+            <span class="stg-card-title">پیام‌های آماده چت</span>
+            <span class="stg-card-tip"><b>پیام‌های آماده چت</b><br>پاسخ‌های سریع اپراتورها</span>
+          </a>
+          <a href="/settings/chat-emojis" class="stg-card" title="ایموجی‌های چت — ایموجی‌های نوار واکنش سریع">
+            <span class="stg-card-ic">😊</span>
+            <span class="stg-card-title">ایموجی‌های چت</span>
+            <span class="stg-card-tip"><b>ایموجی‌های چت</b><br>ایموجی‌های نوار واکنش سریع</span>
+          </a>
+          <a href="/settings/messaging" class="stg-card" title="اعلان پیامک / ایتا — کانال اعلان به نماینده">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m3 6 9 6 9-6"/></svg></span>
+            <span class="stg-card-title">اعلان پیامک / ایتا</span>
+            <span class="stg-card-tip"><b>اعلان پیامک / ایتا</b><br>کانال اعلان به نماینده</span>
+          </a>
+          <a href="/settings/bale" class="stg-card" title="ربات بله — توکن ربات و تست اعلان">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12h8M8 16h5"/></svg></span>
+            <span class="stg-card-title">ربات بله</span>
+            <span class="stg-card-tip"><b>ربات بله</b><br>توکن ربات و تست اعلان</span>
+          </a>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if can_access('products') %}
+    <section class="stg-acc-item" data-color="amber">
+      <button type="button" class="stg-acc-head" onclick="stgAccToggle(this)">
+        <span class="stg-acc-ic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><line x1="12" y1="11" x2="12" y2="21"/></svg>
+        </span>
+        <span class="stg-acc-t">
+          <span class="stg-acc-title">مدیریت محصولات</span>
+          <span class="stg-acc-desc">شناسنامه کالا، دستگاه‌ها و کاتالوگ قطعات</span>
+        </span>
+        <span class="stg-chevron">‹</span>
+      </button>
+      <div class="stg-acc-body">
+        <div class="stg-grid">
+          <a href="/settings/devices" class="stg-card" title="مدیریت دستگاه‌ها — نوع و مدل دستگاه‌ها">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></span>
+            <span class="stg-card-title">مدیریت دستگاه‌ها</span>
+            <span class="stg-card-tip"><b>مدیریت دستگاه‌ها</b><br>نوع و مدل دستگاه‌ها</span>
+          </a>
+          <a href="/settings/warranty" class="stg-card" title="شناسنامه کالا — سریال تولید، گارانتی و فعال‌سازی">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><circle cx="8.5" cy="11" r="2"/><line x1="5.5" y1="15.5" x2="11.5" y2="15.5"/><line x1="14" y1="9.5" x2="18.5" y2="9.5"/><line x1="14" y1="12.5" x2="18.5" y2="12.5"/></svg></span>
+            <span class="stg-card-title">شناسنامه کالا</span>
+            <span class="stg-card-tip"><b>شناسنامه کالا</b><br>سریال تولید، گارانتی و فعال‌سازی</span>
+          </a>
+          <a href="/settings/parts" class="stg-card" title="لیست قطعات — کاتالوگ قطعات و کد انبار">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 20 7 20 17 12 22 4 17 4 7"/><circle cx="12" cy="12" r="3.2"/></svg></span>
+            <span class="stg-card-title">لیست قطعات</span>
+            <span class="stg-card-tip"><b>لیست قطعات</b><br>کاتالوگ قطعات و کد انبار</span>
+          </a>
+          <a href="/settings/device-folders" class="stg-card" title="پرونده دستگاه‌ها — ایندکس سریال و باز کردن پوشه روی دیسک">
+            <span class="stg-card-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+            <span class="stg-card-title">پرونده دستگاه‌ها</span>
+            <span class="stg-card-tip"><b>پرونده دستگاه‌ها</b><br>ایندکس سریال و باز کردن پوشه روی دیسک</span>
+          </a>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+  </div>
+
+  {% if active_host %}
+  <div class="stg-sysinfo">
+    <b>محل اجرای فعلی:</b> {{ active_host }}<br>
+    <b>فایل دیتابیس فعال:</b> {{ active_db_path }}<br>
+    اگر نرم‌افزار را هم‌زمان از چند مسیر/نسخه باز کرده‌اید، هرکدام دیتابیس جداگانه‌ی خودش را دارد؛
+    برای اطمینان از یکسان بودن داده، همیشه فقط یک نسخه‌ی در حال اجرا داشته باشید.
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function stgAccToggle(btn) {
+    var item = btn.closest('.stg-acc-item');
+    if (!item) return;
+    item.classList.toggle('open');
+}
+
+// Default state: only the first visible settings section is open.
+document.addEventListener('DOMContentLoaded', function () {
+    var items = Array.prototype.slice.call(document.querySelectorAll('.stg-acc-item'));
+    items.forEach(function (item, index) { item.classList.toggle('open', index === 0); });
+});
+</script>
+
+<style>
+.stg-page{max-width:980px;margin:0 auto;}
+.stg-head{margin-bottom:16px;}
+.stg-head h1{font-size:19px;font-weight:800;margin:0 0 6px;}
+.stg-head p{margin:0;font-size:13px;color:var(--text-muted,#64748b);}
+
+/* ---- آکاردئون بخش‌ها ---- */
+.stg-acc{display:flex;flex-direction:column;gap:10px;}
+.stg-acc-item{
+  border:1px solid var(--border,#e2e8f0);
+  border-radius:14px;
+  background:var(--card,#fff);
+  overflow:hidden;
+}
+.stg-acc-head{
+  width:100%;display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border:0;background:transparent;cursor:pointer;
+  text-align:right;font-family:inherit;
+}
+.stg-acc-ic{
+  flex-shrink:0;width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--stg-c-soft);color:var(--stg-c);
+}
+.stg-acc-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.stg-acc-title{font-weight:800;font-size:14.5px;color:var(--text,#0f172a);}
+.stg-acc-desc{font-size:12px;color:var(--text-muted,#64748b);}
+.stg-chevron{
+  flex-shrink:0;font-size:16px;color:var(--text-muted,#64748b);
+  transform:rotate(-90deg);transition:transform .18s;
+}
+.stg-acc-item.open .stg-chevron{transform:rotate(-180deg);color:var(--stg-c);}
+.stg-acc-item.open .stg-acc-head{border-bottom:1px solid var(--border,#e2e8f0);}
+
+.stg-acc-body{max-height:0;overflow:hidden;transition:max-height .22s ease;}
+.stg-acc-item.open .stg-acc-body{max-height:2000px;overflow:visible;}
+.stg-acc-body > .stg-grid{padding:14px;}
+
+/* رنگ هر بخش */
+.stg-acc-item[data-color="blue"]{--stg-c:#2563eb;--stg-c-soft:rgba(37,99,235,.12);}
+.stg-acc-item[data-color="violet"]{--stg-c:#7c3aed;--stg-c-soft:rgba(124,58,237,.12);}
+.stg-acc-item[data-color="teal"]{--stg-c:#0891b2;--stg-c-soft:rgba(8,145,178,.12);}
+.stg-acc-item[data-color="amber"]{--stg-c:#d97706;--stg-c-soft:rgba(217,119,6,.13);}
+.stg-acc-item[data-color="green"]{--stg-c:#059669;--stg-c-soft:rgba(5,150,105,.12);}
+
+/* ---- کارت‌های کوچک زیرمجموعه ---- */
+.stg-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
+  gap:8px;
+}
+.stg-card{
+  position:relative;
+  display:flex;flex-direction:row;align-items:center;gap:7px;
+  padding:8px 10px;border-radius:9px;
+  border:1px solid var(--border,#e2e8f0);
+  border-inline-start:3px solid var(--stg-c);
+  background:var(--card,#fff);
+  text-decoration:none !important;color:inherit !important;
+  transition:border-color .15s, transform .12s, background .15s;
+}
+.stg-card:hover,.stg-card:focus-visible{background:var(--stg-c-soft);transform:translateY(-1px);}
+.stg-card-ic{
+  flex-shrink:0;width:20px;height:20px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--stg-c);
+  font-size:12px;line-height:1;
+}
+.stg-card-title{
+  min-width:0;flex:1;
+  font-weight:700;font-size:11.5px;color:var(--text,#0f172a);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ---- تولتیپ: عنوان کامل + توضیح، فقط روی هاور ---- */
+.stg-card-tip{
+  position:absolute;bottom:calc(100% + 8px);left:50%;
+  transform:translateX(-50%) translateY(4px);
+  min-width:150px;max-width:220px;width:max-content;
+  background:var(--text,#0f172a);color:#fff;
+  font-size:11px;line-height:1.6;white-space:normal;
+  padding:8px 10px;border-radius:8px;
+  box-shadow:0 8px 20px rgba(0,0,0,.18);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .15s, transform .15s;
+  z-index:20;
+}
+.stg-card-tip b{display:block;font-size:11.5px;margin-bottom:2px;}
+.stg-card-tip::after{
+  content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:var(--text,#0f172a);
+}
+.stg-card:hover .stg-card-tip,.stg-card:focus-visible .stg-card-tip{
+  opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);
+}
+html[data-theme="dark"] .stg-card-tip{background:#f1f5f9;color:#0f172a;}
+html[data-theme="dark"] .stg-card-tip::after{border-top-color:#f1f5f9;}
+
+.stg-sysinfo{
+  margin-top:16px;padding:12px 14px;border-radius:10px;
+  background:var(--bg-soft,rgba(127,127,127,.08));
+  font-size:12px;color:var(--text-muted);line-height:2;
+}
+
+@media (max-width:560px){
+  .stg-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+  /* روی موبایل هاور معنی نداره؛ تولتیپ را با تپ-نگه‌داشتن (title) جایگزین می‌کنیم */
+  .stg-card-tip{display:none;}
+}
+</style>
+{% endblock %}

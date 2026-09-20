@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مرکز ارتباط مشتریان | سازگان</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Tahoma,Verdana,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#f8fafc 40%,#f1f5f9 100%);color:#0f172a;min-height:100vh}
+    .wrap{max-width:600px;margin:0 auto;padding:20px 14px 44px}
+    .hero{text-align:center;margin-bottom:16px}
+    .hero .logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;margin-bottom:10px;box-shadow:0 8px 20px rgba(37,99,235,.25)}
+    .hero h1{margin:0 0 6px;font-size:1.3rem}
+    .hero p{margin:0;color:#64748b;font-size:13px;line-height:1.6}
+    .box{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 16px rgba(15,23,42,.05)}
+    label{display:block;font-size:12.5px;font-weight:700;margin:10px 0 6px;color:#334155}
+    input,select,textarea{width:100%;padding:11px 13px;border:1.5px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:14px;background:#f8fafc}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    textarea{resize:vertical}
+    button,.btn{margin-top:12px;width:100%;padding:12px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;text-align:center;text-decoration:none;display:inline-block}
+    button:hover,.btn:hover{filter:brightness(1.05)}
+    button.secondary{background:#0f766e}
+    button.ghost,.btn.ghost{background:#fff;color:#0f172a;border:1.5px solid #e2e8f0}
+    .err{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;padding:11px;border-radius:10px;margin-bottom:12px;font-size:13px}
+    .ok{background:#ecfdf5;color:#047857;padding:12px;border-radius:10px;font-size:13.5px}
+    .tabs{display:flex;gap:6px;margin-bottom:14px;background:#e2e8f0;border-radius:999px;padding:4px}
+    .panel{display:none}
+    .panel.active{display:block}
+    .hub{display:grid;grid-template-columns:1fr;gap:10px}
+    .hub-card{
+      display:flex;align-items:center;gap:12px;text-align:right;width:100%;
+      padding:14px;border:1.5px solid #e2e8f0;border-radius:14px;background:#f8fafc;
+      cursor:pointer;font-family:inherit;color:inherit;
+    }
+    .hub-card:hover{border-color:#93c5fd;background:#eff6ff}
+    .hub-card .ic{
+      width:42px;height:42px;border-radius:12px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;
+    }
+    .hub-card.c-track .ic{background:linear-gradient(135deg,#2563eb,#0ea5e9)}
+    .hub-card.c-chat .ic{background:linear-gradient(135deg,#0f766e,#14b8a6)}
+    .hub-card.c-report .ic{background:linear-gradient(135deg,#dc2626,#f97316)}
+    .hub-card.c-recent .ic{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+    .hub-card.c-survey .ic{background:linear-gradient(135deg,#f59e0b,#eab308)}
+    .recent-menu-list{max-height:340px;overflow:auto;padding-left:2px}
+    .recent-menu-list .item{background:#fff}
+    .recent-menu-list::-webkit-scrollbar{width:5px}
+    .recent-menu-list::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+    .hub-card .tx{flex:1;min-width:0}
+    .hub-card .tx b{display:block;font-size:14px;margin-bottom:2px}
+    .hub-card .tx span{display:block;font-size:12px;color:#64748b}
+    .hub-card .arrow{color:#94a3b8;flex-shrink:0}
+    .panel-back{
+      display:inline-flex;align-items:center;gap:6px;background:none;border:0;
+      color:#2563eb;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+      padding:6px 2px;margin-bottom:8px;
+    }
+    .modes{display:flex;gap:6px;background:#f1f5f9;border-radius:999px;padding:4px;margin-bottom:12px}
+    .mode{flex:1;border:0;background:transparent;border-radius:999px;padding:8px 6px;font-family:inherit;font-size:12px;font-weight:700;color:#64748b;cursor:pointer}
+    .mode.active{background:#fff;color:#0f172a;box-shadow:0 1px 3px rgba(15,23,42,.1)}
+    .row-inline{display:flex;gap:8px}
+    .row-inline input{flex:1}
+    .row-inline button{width:auto;margin:0;padding:0 16px;white-space:nowrap;border-radius:10px}
+    .section-title{font-size:12.5px;font-weight:800;color:#64748b;margin:14px 0 8px;letter-spacing:.02em}
+    .kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed #e2e8f0;font-size:13px}
+    .kv:last-child{border-bottom:0}
+    .kv .k{color:#64748b}
+    .kv .v{font-weight:700;text-align:left}
+    .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:800}
+    .badge.ok{background:#d1fae5;color:#047857}
+    .badge.warn{background:#fef3c7;color:#b45309}
+    .badge.info{background:#dbeafe;color:#1d4ed8}
+    .badge.muted{background:#e2e8f0;color:#475569}
+    .item{border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-top:8px;background:#f8fafc}
+    .item h3{margin:0 0 6px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .item .meta{font-size:12px;color:#64748b;margin-bottom:6px}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .actions .btn{width:auto;margin:0;flex:1;padding:9px 12px;font-size:12.5px}
+    .empty-result{text-align:center;color:#94a3b8;padding:16px 10px;font-size:13px}
+    .hint{font-size:12px;color:#64748b;margin-top:8px}
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid #cbd5e1;border-top-color:#2563eb;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-left:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="logo">S</div>
+      <h1>مرکز ارتباط مشتریان</h1>
+      <p>درخواست خدمات، پیگیری، گفتگو، نظرسنجی و سوابق ارتباط با مشتری از اینجا در دسترس است.</p>
+    </div>
+
+    <div class="box">
+      {% if success %}
+      <div class="ok">
+        <strong>درخواست خدمات شما ثبت شد.</strong>
+        <p style="margin:8px 0 0">همکاران پیام شما را می‌بینند و پاسخ می‌دهند.</p>
+        {% if chat_token %}
+        <p style="margin:12px 0 0">
+          <a class="btn" style="background:#0f766e" href="/support/chat/{{ chat_token }}">ادامه گفتگو / پیگیری آنلاین</a>
+        </p>
+        <p class="hint">همین صفحه را به‌عنوان لینک پیگیری نگه دارید — بعداً هم از تب «پیگیری» با تلفن یا سریال دستگاه قابل پیدا کردن است.</p>
+        {% endif %}
+      </div>
+      {% else %}
+
+      <div class="hub" id="hub" role="list">
+        <button type="button" class="hub-card c-track" data-open="track">
+          <span class="ic">🔍</span>
+          <span class="tx"><b>پیگیری</b><span>وضعیت با سریال دستگاه یا کد پیگیری</span></span>
+          <span class="arrow">‹</span>
+        </button>
+        <button type="button" class="hub-card c-chat" data-open="chat">
+          <span class="ic">💬</span>
+          <span class="tx"><b>گفتگو با پشتیبانی</b><span>سؤال یا پیگیری مستقیم با شرکت</span></span>
+          <span class="arrow">‹</span>
+        </button>
+        <button type="button" class="hub-card c-recent" data-open="recent">
+          <span class="ic">🕘</span>
+          <span class="tx"><b>گفتگوهای اخیر</b><span>ادامه گفتگوهای قبلی شما</span></span>
+          <span class="arrow">‹</span>
+        </button>
+        <button type="button" class="hub-card c-report" data-open="report">
+          <span class="ic">🛠</span>
+          <span class="tx"><b>درخواست خدمات</b><span>ثبت درخواست تعمیر، نصب، بازدید یا سایر خدمات</span></span>
+          <span class="arrow">‹</span>
+        </button>
+        <button type="button" class="hub-card c-survey" data-open="survey">
+          <span class="ic">⭐</span>
+          <span class="tx"><b>نظرسنجی</b><span>ثبت نظر و میزان رضایت از خدمات سازگان</span></span>
+          <span class="arrow">‹</span>
+        </button>
+      </div>
+
+      {% if request.args.get('chat_err') %}
+      <div class="err">
+        {% if request.args.get('chat_err')=='phone' %}شماره تلفن الزامی است.
+        {% elif request.args.get('chat_err')=='message' %}متن پیام الزامی است.
+        {% else %}خطا در شروع گفتگو. دوباره تلاش کنید.{% endif %}
+      </div>
+      {% endif %}
+      {% if error %}<div class="err">{{ error }}</div>{% endif %}
+
+      <!-- پنل پیگیری (سریال / کد پیگیری) -->
+      <div class="panel" id="panel-track">
+        <button type="button" class="panel-back" data-back>‹ بازگشت</button>
+        <p class="note" style="color:#64748b;font-size:13px;line-height:1.6;margin:0 0 10px">
+          وضعیت گارانتی، آخرین درخواست‌ها و گفتگوهای قبلی خود را ببینید.
+        </p>
+        <div class="modes">
+          <button type="button" class="mode active" data-mode="serial">سریال دستگاه</button>
+          <button type="button" class="mode" data-mode="code">کد پیگیری</button>
+        </div>
+        <div class="row-inline">
+          <input type="search" id="track-q" placeholder="مثلاً SN-12345" autocomplete="off">
+          <button type="button" id="track-btn">پیگیری</button>
+        </div>
+        <div id="track-result"></div>
+      </div>
+
+      <!-- پنل گفتگوی مستقیم -->
+      <div class="panel" id="panel-chat">
+        <button type="button" class="panel-back" data-back>‹ بازگشت</button>
+        <h2 style="margin:0 0 10px;font-size:1rem">گفتگو با شرکت (بدون ثبت درخواست خدمات)</h2>
+        <p class="note" style="color:#64748b;font-size:13px;line-height:1.6;margin:0 0 4px">اگر فقط سؤال یا پیگیری دارید، همین‌جا پیام بگذارید.</p>
+        <form method="POST" action="/support/chat-start">
+          <label>نام / مرکز</label>
+          <input name="hospital_name" id="chat-name" placeholder="نام شما یا مرکز">
+          <label>تلفن تماس *</label>
+          <input name="contact_phone" id="chat-phone" required placeholder="09xxxxxxxxx">
+          <label>سریال دستگاه (اختیاری)</label>
+          <input name="serial_number" id="chat-serial" placeholder="برای اتصال به پرونده قبلی">
+          <label>پیام *</label>
+          <textarea name="message" id="chat-message" rows="3" required placeholder="سؤال یا موضوع پیگیری..."></textarea>
+          <button type="submit" class="secondary">شروع گفتگو</button>
+        </form>
+      </div>
+
+      <!-- پنل گفتگوهای اخیر -->
+      <div class="panel" id="panel-recent">
+        <button type="button" class="panel-back" data-back>‹ بازگشت</button>
+        <h2 style="margin:0 0 6px;font-size:1rem">گفتگوهای اخیر</h2>
+        <p class="note" style="color:#64748b;font-size:13px;line-height:1.6;margin:0 0 8px">
+          گفتگوهای قبلی خود را از اینجا ادامه دهید.
+        </p>
+        <div id="recent-chats-list" class="recent-menu-list"></div>
+      </div>
+
+      <!-- پنل درخواست خدمات -->
+      <div class="panel" id="panel-report">
+        <button type="button" class="panel-back" data-back>‹ بازگشت</button>
+        <h2 style="margin:0 0 10px;font-size:1rem">ثبت درخواست خدمات</h2>
+        <form method="POST" action="/support">
+          <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+          <label>نام بیمارستان / مرکز *</label>
+          <input name="hospital_name" id="rep-name" required>
+          <label>نام رابط</label>
+          <input name="contact_name">
+          <label>تلفن تماس *</label>
+          <input name="contact_phone" id="rep-phone" required placeholder="09xxxxxxxxx">
+          <label>استان</label>
+          <select name="province" id="province" class="field-select geo-province"
+            onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+            <option value="">—</option>
+            {% for p in provinces %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+          </select>
+          <label>شهرستان</label>
+          <select name="county" id="county" class="field-select geo-county"
+            onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+            <option value="">—</option>
+          </select>
+          <label>شهر</label>
+          <select name="city" id="city" class="field-select geo-city">
+            <option value="">—</option>
+          </select>
+          <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px" placeholder="یا نام شهر را بنویسید">
+          <label>نوع دستگاه</label>
+          <input name="device_type" id="rep-device">
+          <label>سریال (در صورت وجود)</label>
+          <input name="serial_number" id="rep-serial">
+          <label>شرح مختصر درخواست *</label>
+          <textarea name="problem_brief" rows="3" required placeholder="مثلاً: دستگاه روشن نمی‌شود"></textarea>
+          <button type="submit">ثبت درخواست و شروع پیگیری</button>
+        </form>
+      </div>
+
+      <!-- پنل نظرسنجی — توسعه فرم در مرحله بعد -->
+      <div class="panel" id="panel-survey">
+        <button type="button" class="panel-back" data-back>‹ بازگشت</button>
+        <h2 style="margin:0 0 10px;font-size:1rem">نظرسنجی مشتریان</h2>
+        <p class="note" style="color:#64748b;font-size:13px;line-height:1.8;margin:0">
+          بخش نظرسنجی مشتریان در حال آماده‌سازی است و در نسخه بعدی توسعه داده می‌شود.
+        </p>
+        <div class="item" style="text-align:center;color:#64748b;margin-top:12px">
+          به‌زودی امکان ثبت و پیگیری نظر و میزان رضایت شما از خدمات سازگان در همین بخش فعال می‌شود.
+        </div>
+      </div>
+
+      {% endif %}
+    </div>
+  </div>
+
+<script>
+(function(){
+  function escSafe(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // ---------- هاب کارت‌ها ↔ پنل‌ها ----------
+  var hub = document.getElementById('hub');
+  var openCards = document.querySelectorAll('.hub-card');
+  var backBtns = document.querySelectorAll('[data-back]');
+
+  function openPanel(name){
+    hub.style.display = 'none';
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    var panel = document.getElementById('panel-' + name);
+    if (panel) panel.classList.add('active');
+  }
+  function backToHub(){
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    hub.style.display = 'grid';
+  }
+  openCards.forEach(function(btn){
+    btn.addEventListener('click', function(){ openPanel(btn.getAttribute('data-open')); });
+  });
+  backBtns.forEach(function(btn){
+    btn.addEventListener('click', backToHub);
+  });
+  if (location.search.indexOf('chat_err=') >= 0) {
+    openPanel('chat');
+  }
+
+  function fillSerialToForms(serial){
+    var a = document.getElementById('chat-serial');
+    var b = document.getElementById('rep-serial');
+    if (a && !a.value) a.value = serial;
+    if (b && !b.value) b.value = serial;
+  }
+  function goTab(name){ openPanel(name); }
+
+  // ---------- پیگیری (سریال / کد پیگیری) ----------
+  var trackModes = document.querySelectorAll('#panel-track .mode');
+  var trackQ = document.getElementById('track-q');
+  var trackBtn = document.getElementById('track-btn');
+  var trackResult = document.getElementById('track-result');
+  var currentMode = 'serial';
+  var placeholders = { serial: 'مثلاً SN-12345', code: 'کد پیگیری' };
+
+  trackModes.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      trackModes.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentMode = btn.getAttribute('data-mode');
+      trackQ.placeholder = placeholders[currentMode] || '';
+      trackQ.type = (currentMode === 'phone') ? 'tel' : 'search';
+      trackQ.focus();
+    });
+  });
+
+  function badgeCls(status){
+    if (status === 'باز' || status === 'فعال') return 'ok';
+    if (status === 'بسته') return 'muted';
+    return 'info';
+  }
+
+  function renderTrack(data){
+    if (!data || !data.ok) {
+      trackResult.innerHTML = '<div class="err" style="margin-top:12px">'+escSafe((data && data.error) || 'خطا در پیگیری')+'</div>';
+      return;
+    }
+    var r = data.result;
+    if (!r) {
+      trackResult.innerHTML = '<div class="empty-result">نتیجه‌ای یافت نشد.</div>';
+      return;
+    }
+    var html = '';
+
+    if (r.type === 'chat') {
+      html += '<div class="section-title">گفتگوی شما</div>';
+      html += '<div class="item"><h3><span>'+escSafe(r.thread.subject || ('گفتگو #'+r.thread.id))+'</span>'+
+        '<span class="badge '+badgeCls(r.thread.status)+'">'+escSafe(r.thread.status)+'</span></h3>';
+      html += '<div class="meta">'+r.messages_count+' پیام</div>';
+      if (r.last_message) {
+        var body = (r.last_message.body || '').slice(0, 100);
+        html += '<div class="kv"><span class="k">آخرین پیام</span><span class="v">'+escSafe(body)+'</span></div>';
+        html += '<div class="kv"><span class="k">زمان</span><span class="v">'+escSafe(r.last_message.created_at)+'</span></div>';
+      }
+      html += '<div class="actions"><a class="btn" style="background:#0f766e;color:#fff" href="/support/chat/'+encodeURIComponent(r.token)+'">ادامه گفتگو</a></div></div>';
+    }
+
+    if (r.type === 'serial' || r.type === 'phone') {
+      if (r.warranty) {
+        html += '<div class="section-title">اطلاعات دستگاه / گارانتی</div><div class="item">';
+        if (r.serial) html += '<div class="kv"><span class="k">سریال</span><span class="v" dir="ltr">'+escSafe(r.serial)+'</span></div>';
+        html += '<div class="kv"><span class="k">وضعیت گارانتی</span><span class="v"><span class="badge '+((r.warranty.warranty_status==='فعال')?'ok':'warn')+'">'+escSafe(r.warranty.warranty_status||'—')+'</span></span></div>';
+        if (r.warranty.customer_name) html += '<div class="kv"><span class="k">مشتری</span><span class="v">'+escSafe(r.warranty.customer_name)+'</span></div>';
+        if (r.warranty.device_type || r.warranty.model) html += '<div class="kv"><span class="k">دستگاه</span><span class="v">'+escSafe((r.warranty.device_type||'')+' '+(r.warranty.model||''))+'</span></div>';
+        if (r.warranty.warranty_end_date) html += '<div class="kv"><span class="k">پایان گارانتی</span><span class="v">'+escSafe(r.warranty.warranty_end_date)+'</span></div>';
+        html += '</div>';
+        if (r.warranty.device_type) {
+          var dn = document.getElementById('rep-device');
+          if (dn && !dn.value) dn.value = r.warranty.device_type;
+        }
+        if (r.warranty.customer_name) {
+          var rn = document.getElementById('rep-name'); var cn = document.getElementById('chat-name');
+          if (rn && !rn.value) rn.value = r.warranty.customer_name;
+          if (cn && !cn.value) cn.value = r.warranty.customer_name;
+        }
+      }
+
+      if (r.requests && r.requests.length) {
+        html += '<div class="section-title">درخواست‌ها / آخرین وضعیت</div>';
+        r.requests.forEach(function(req){
+          html += '<div class="item"><h3><span>'+escSafe(req.reception_no || ('درخواست #'+req.id))+'</span>'+
+            '<span class="badge info">'+escSafe(req.status)+'</span></h3>';
+          var meta = [];
+          if (req.customer_name) meta.push(escSafe(req.customer_name));
+          if (req.device_type) meta.push(escSafe(req.device_type));
+          html += '<div class="meta">'+meta.join(' · ')+'</div>';
+          if (req.reception_date) html += '<div class="kv"><span class="k">تاریخ پذیرش</span><span class="v">'+escSafe(req.reception_date)+'</span></div>';
+          html += '</div>';
+        });
+      }
+
+      if (r.threads && r.threads.length) {
+        html += '<div class="section-title">گفتگوهای مرتبط</div>';
+        r.threads.forEach(function(t){
+          html += '<div class="item"><h3><span>'+escSafe(t.subject || ('گفتگو #'+t.id))+'</span>'+
+            '<span class="badge '+badgeCls(t.status)+'">'+escSafe(t.status)+'</span></h3>';
+          if (t.public_token) {
+            html += '<div class="actions"><a class="btn" style="background:#0f766e;color:#fff" href="/support/chat/'+encodeURIComponent(t.public_token)+'">ادامه گفتگو</a></div>';
+          } else {
+            html += '<div class="meta">گفتگوی داخلی — از طریق شرکت پیگیری شود</div>';
+          }
+          html += '</div>';
+        });
+      }
+
+      if (r.announcements && r.announcements.length) {
+        html += '<div class="section-title">درخواست‌های خدمات ثبت‌شده</div>';
+        r.announcements.forEach(function(a){
+          html += '<div class="item"><h3><span>'+escSafe(a.hospital_name || 'اعلام')+'</span>'+
+            '<span class="badge warn">'+escSafe(a.status)+'</span></h3>';
+          html += '<div class="meta">'+escSafe(a.created_at||'')+(a.contact_phone?(' · '+escSafe(a.contact_phone)):'')+'</div>';
+          html += '</div>';
+        });
+      }
+
+      html += '<div class="actions" style="margin-top:14px">' +
+        '<button type="button" class="ghost" style="width:auto;flex:1" id="tr-go-chat">گفتگو درباره این مورد</button>' +
+        '<button type="button" class="ghost" style="width:auto;flex:1" id="tr-go-report">درخواست خدمات جدید</button></div>';
+    }
+
+    if (!html) html = '<div class="empty-result">نتیجه‌ای یافت نشد.</div>';
+    trackResult.innerHTML = html;
+
+    if (r.serial) fillSerialToForms(r.serial);
+    var gc = document.getElementById('tr-go-chat');
+    var gr = document.getElementById('tr-go-report');
+    if (gc) gc.addEventListener('click', function(){ goTab('chat'); });
+    if (gr) gr.addEventListener('click', function(){ goTab('report'); });
+  }
+
+  function doTrack(){
+    var q = (trackQ.value || '').trim();
+    if (!q) { trackResult.innerHTML = '<div class="err" style="margin-top:12px">مقدار جستجو را وارد کنید.</div>'; return; }
+    trackResult.innerHTML = '<div class="hint" style="margin-top:12px">در حال جستجو<span class="spinner"></span></div>';
+    fetch('/api/public/track?mode='+encodeURIComponent(currentMode)+'&q='+encodeURIComponent(q))
+      .then(function(r){ return r.json(); })
+      .then(renderTrack)
+      .catch(function(){
+        trackResult.innerHTML = '<div class="err" style="margin-top:12px">ارتباط برقرار نشد. دوباره تلاش کنید.</div>';
+      });
+  }
+  if (trackBtn) trackBtn.addEventListener('click', doTrack);
+  if (trackQ) trackQ.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); doTrack(); }
+  });
+
+  // ---------- گفتگوهای اخیر ذخیره‌شده در همین مرورگر ----------
+  (function renderRecentChats(){
+    var list = document.getElementById('recent-chats-list');
+    if (!list) return;
+    try {
+      var LS_KEY = 'sazgan_saved_chats';
+      var saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+      var entries = Object.keys(saved).map(function(k){ return saved[k]; });
+      entries.sort(function(a, b){ return (b.updated_at || 0) - (a.updated_at || 0); });
+
+      if (!entries.length) {
+        list.innerHTML = '<div class="empty-result">گفتگوی اخیری در این مرورگر ذخیره نشده است.</div>';
+        return;
+      }
+
+      var html = '';
+      entries.slice(0, 10).forEach(function(e){
+        var status = e.status || '';
+        html += '<div class="item">' +
+          '<h3><span>'+escSafe(e.subject || 'گفتگو')+'</span>' +
+          (status ? '<span class="badge '+badgeCls(status)+'">'+escSafe(status)+'</span>' : '') +
+          '</h3>' +
+          '<div class="meta">آخرین دسترسی: '+escSafe(e.updated_at ? new Date(e.updated_at).toLocaleString('fa-IR') : '—')+'</div>' +
+          '<div class="actions"><a class="btn" style="background:#0f766e;color:#fff" href="/support/chat/'+encodeURIComponent(e.token)+'">ادامه گفتگو</a></div>' +
+          '</div>';
+      });
+      list.innerHTML = html;
+    } catch (e) {
+      list.innerHTML = '<div class="empty-result">امکان نمایش گفتگوهای اخیر وجود ندارد.</div>';
+    }
+  })();
+})();
+</script>
+<script src="/static/js/geo-cascade.js?v=1">
+(function bootPanelFromQuery(){
+  try {
+    var params = new URLSearchParams(window.location.search || '');
+    var panel = params.get('panel') || params.get('tab') || '';
+    var mode = params.get('mode') || 'serial';
+    var q = params.get('q') || params.get('serial') || params.get('code') || params.get('phone') || '';
+    function openPanel(name){
+      document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+      var el = document.getElementById('panel-' + name);
+      if (el) el.classList.add('active');
+      // hide hub if opening a panel
+      var hub = document.getElementById('hub') || document.querySelector('.hub');
+      if (hub && el) hub.style.display = 'none';
+    }
+    if (panel === 'track' || panel === 'chat' || panel === 'announce' || panel === 'form') {
+      openPanel(panel === 'form' ? 'announce' : panel);
+    }
+    if (panel === 'track' || q) {
+      openPanel('track');
+      var modeBtns = document.querySelectorAll('#panel-track .mode');
+      modeBtns.forEach(function(b){
+        b.classList.toggle('active', (b.getAttribute('data-mode')||'') === mode);
+      });
+      var tq = document.getElementById('track-q');
+      if (tq && q) {
+        tq.value = q;
+        var btn = document.getElementById('track-btn');
+        if (btn) setTimeout(function(){ btn.click(); }, 200);
+      }
+    }
+  } catch(e) {}
+})();
+
+</script>
+</body>
+</html>

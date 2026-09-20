@@ -1,0 +1,461 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | پرونده تعمیر داخلی #{{ req.id }}{% endblock %}
+{% block content %}
+{% set redirect_path = "/service/internal-repair/view/" ~ req.id %}
+{% set kind = 'internal' %}
+{% include '_request_detail_modern.html' %}
+
+<div data-rd-panel="overview">
+  <div class="rd-summary-note">پرونده #{{ req.reception_no or req.id }} — وضعیت فعلی: <strong>{{ req.status or '—' }}</strong></div>
+      <div class="card no-print">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>پرونده تعمیر داخلی — #{{ req.id }}</span>
+                <div class="list-header-actions">
+                <a href="/support/open/{{ req.id }}" class="btn">گفتگوی مشتری</a>
+
+                    <a href="/service/internal-repair/print/{{ req.id }}" class="btn-export" target="_blank"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="7" rx="1"/><path d="M6 9V4h12v5"/><rect x="7" y="13" width="10" height="6"/></svg> چاپ</a>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:8px;">
+                <span class="badge" style="font-size:13px;">{{ req.status }}</span>
+                <span style="color:var(--text-muted);font-size:13px;">تاریخ پذیرش: <strong>{{ req.reception_date or '—' }}</strong></span>
+                <span style="color:var(--text-muted);font-size:13px;">تکنسین: <strong>{{ req.assigned_technician or '—' }}</strong></span>
+            </div>
+            {% if can_edit and req.status in ['در انتظار پذیرش دستگاه است', 'در انتظار بررسی پذیرش', 'در انتظار پذیرش', 'پذیرش دستگاه انجام شد'] %}
+            <form method="POST" style="margin-top:8px;">
+              <input type="hidden" name="action" value="confirm_receipt">
+              <button class="btn" type="submit">تأیید پذیرش و رفتن به مرحله بعد</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+
+</div>
+{% if not visible_panels or 'reception' in visible_panels %}
+<div data-rd-panel="reception">
+    <!-- اطلاعات اصلی -->
+    <div class="card">
+        <div class="card-header">اطلاعات پذیرش و مشتری</div>
+        <div class="card-body">
+            {% if can_edit %}
+            <form method="POST">
+                <input type="hidden" name="action" value="save_fields">
+                <div class="form-grid">
+                    <div><label>نام مشتری</label><input type="text" value="{{ req.customer_name }}" disabled></div>
+                    <div><label>سریال</label><input type="text" value="{{ req.serial_number or '' }}" disabled></div>
+                    <div><label>نوع دستگاه</label><input type="text" value="{{ req.device_type }}" disabled></div>
+                    <div><label>استان</label><input type="text" value="{{ req.province }}" disabled></div>
+                    <div><label>شهر</label><input type="text" name="city" value="{{ req.city or '' }}"></div>
+                    <div class="field-full"><label>آدرس</label><input type="text" name="customer_address" value="{{ req.customer_address or '' }}"></div>
+                    <div><label>کارشناس تجهیزات</label><input type="text" name="equipment_manager_name" value="{{ req.equipment_manager_name or '' }}"></div>
+                    <div><label>موبایل کارشناس</label><input type="text" name="equipment_manager_mobile" value="{{ req.equipment_manager_mobile or '' }}"></div>
+                    <div><label>نام تماس</label><input type="text" name="contact_name" value="{{ req.contact_name or '' }}"></div>
+                    <div><label>شماره تماس</label><input type="text" name="contact_phone" value="{{ req.contact_phone or '' }}"></div>
+                    <div><label>تاریخ نصب</label><input type="text" name="installation_date" value="{{ req.installation_date or '' }}"></div>
+                    <div><label>اتمام گارانتی</label><input type="text" name="warranty_end_date" value="{{ req.warranty_end_date or '' }}"></div>
+                    <div>
+                        <label>تکنسین کارخانه</label>
+                        <select name="assigned_technician" class="field-select">
+                            <option value="">—</option>
+                            {% for t in technicians %}
+                            <option value="{{ t.id }}" {% if req.assigned_technician_id == t.id or (not req.assigned_technician_id and req.assigned_technician == t.full_name) %}selected{% endif %}>{{ t.full_name }}{% if t.province %} — {{ t.province }}{% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="field-full"><label>اقلام همراه</label><textarea name="accompanying_items">{{ req.accompanying_items or '' }}</textarea></div>
+                    <div class="field-full"><label>وضعیت ظاهری</label><textarea name="appearance_status">{{ req.appearance_status or '' }}</textarea></div>
+                    <div class="field-full"><label>شرح درخواست بیمارستان</label><textarea name="hospital_request_desc">{{ req.hospital_request_desc or '' }}</textarea></div>
+                    <div class="field-full"><label>شرح کنترل کیفیت اولیه</label><textarea name="initial_qc_desc">{{ req.initial_qc_desc or '' }}</textarea></div>
+                    <div class="field-full"><label>شرح تکنسین</label><textarea name="technician_desc">{{ req.technician_desc or '' }}</textarea></div>
+                    <div class="field-full"><label>شرح کنترل کیفیت نهایی</label><textarea name="final_qc_desc">{{ req.final_qc_desc or '' }}</textarea></div>
+                    <div class="field-full"><label>اقدامات انجام‌شده</label><textarea name="actions_taken">{{ req.actions_taken or '' }}</textarea></div>
+                    <div id="shipping">
+                        <label>نام باربری</label>
+                        <input type="text" name="carrier_name" value="{{ req.carrier_name or req.shipping_method or '' }}" placeholder="تیپاکس / پست / چاپار / ...">
+                    </div>
+                    <div>
+                        <label>تاریخ تحویل به باربری</label>
+                        <input type="text" name="carrier_delivery_date" value="{{ req.carrier_delivery_date or '' }}" placeholder="۱۴۰۵/۰۱/۰۱">
+                    </div>
+                    <div>
+                        <label>شماره پیگیری / بارنامه</label>
+                        <input type="text" name="tracking_number" value="{{ req.tracking_number or '' }}">
+                    </div>
+                    <div id="invoice">
+                        <label>شماره فاکتور</label>
+                        <input type="text" name="invoice_number" value="{{ req.invoice_number or '' }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn">ذخیره اطلاعات</button>
+            </form>
+            {% else %}
+            <div class="form-grid">
+                <div><label>نام مشتری</label><p>{{ req.customer_name }}</p></div>
+                <div><label>سریال</label><p>{{ req.serial_number or '—' }}</p></div>
+                <div><label>وضعیت</label><p>{{ req.status }}</p></div>
+                <div class=""><label>شرح درخواست</label><p>{{ req.hospital_request_desc or req.problem_desc }}</p></div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    
+    
+
+</div>
+{% endif %}
+{% if not visible_panels or 'reports' in visible_panels %}
+<div data-rd-panel="reports">
+    {% set stage_locked = is_closed_for_ops is defined and is_closed_for_ops and not can_edit %}
+    {% if request.args.get('err') == 'stage_locked' %}
+    <div class="login-error" style="margin-bottom:12px;">این پرونده به مرحله پایانی رسیده و قفل شده است. برای ثبت تغییر با مسئول پذیرش هماهنگ کنید.</div>
+    {% endif %}
+    {% if is_qc or can_edit %}
+    <div class="card">
+        <div class="card-header">گزارش کنترل کیفیت{% if stage_locked %} <span class="tag" style="margin-right:8px;">قفل — پرونده بسته شده</span>{% endif %}</div>
+        <div class="card-body">
+            {% if stage_locked %}
+            <p style="color:var(--text-muted);font-size:12.5px;margin-bottom:10px;">این پرونده به مرحله پایانی رسیده و ویرایش گزارش QC برای این نقش بسته شده است. تغییر فقط توسط مسئول پذیرش/مدیر امکان‌پذیر است.</p>
+            {% endif %}
+            <form method="POST">
+                <input type="hidden" name="action" value="qc_report">
+                <fieldset {% if stage_locked %}disabled{% endif %} style="border:0;padding:0;margin:0;">
+                <div class="form-grid">
+                    <div class="field-full"><label>شرح کنترل کیفیت اولیه</label><textarea name="initial_qc_desc">{{ req.initial_qc_desc or '' }}</textarea></div>
+                    <div class="field-full"><label>شرح کنترل کیفیت نهایی</label><textarea name="final_qc_desc">{{ req.final_qc_desc or '' }}</textarea></div>
+                    {% if is_qc %}
+                    <div class="field-full">
+                        <label>نتیجه تست اولیه</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+                            {% if req.status == 'در انتظار تست اولیه است' %}
+                                <button type="submit" class="btn" name="initial_test_result" value="passed">✔ تست اولیه انجام شد — ارسال به تکنسین</button>
+                                <button type="submit" class="btn btn-secondary" name="initial_test_result" value="untestable">↪ دستگاه قابل تست نیست — ارجاع برای تعمیر اولیه</button>
+                            {% elif req.status == 'در انتظار تست نهایی و تحویل است' %}
+                                <span style="color:var(--text-muted);font-size:12.5px;">نتیجه تست نهایی را ثبت کنید.</span>
+                            {% else %}
+                                <span style="color:var(--text-muted);font-size:12.5px;">در حال حاضر Action تست اولیه برای این مرحله فعال نیست.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn">ذخیره گزارش QC</button>
+                {% if is_qc and req.status == 'در انتظار تست نهایی و تحویل است' %}
+                <div class="field-full" style="margin-top:12px;">
+                    <label>نتیجه تست نهایی</label>
+                    <button type="submit" name="final_test_result" value="passed" class="btn">✔ تست نهایی موفق — ارجاع به پذیرش برای خروج</button>
+                    <button type="submit" name="final_test_result" value="failed" class="btn btn-secondary">↩ تست نهایی ناموفق — بازگشت به تکنسین</button>
+                </div>
+                {% endif %}
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+{% if is_assigned_tech or can_edit %}
+    <div class="card">
+        <div class="card-header">گزارش تکنسین کارخانه{% if stage_locked %} <span class="tag" style="margin-right:8px;">قفل — پرونده بسته شده</span>{% endif %}</div>
+        <div class="card-body">
+            {% if stage_locked %}
+            <p style="color:var(--text-muted);font-size:12.5px;margin-bottom:10px;">این پرونده به مرحله پایانی رسیده و ویرایش گزارش تکنسین برای این نقش بسته شده است. تغییر فقط توسط مسئول پذیرش/مدیر امکان‌پذیر است.</p>
+            {% endif %}
+            <form method="POST">
+                <input type="hidden" name="action" value="tech_report">
+                <fieldset {% if stage_locked %}disabled{% endif %} style="border:0;padding:0;margin:0;">
+                <div class="form-grid">
+                    <div class="field-full"><label>شرح تکنسین</label><textarea name="technician_desc">{{ req.technician_desc or '' }}</textarea></div>
+                    <div class="field-full"><label>اقدامات انجام‌شده</label><textarea name="actions_taken">{{ req.actions_taken or '' }}</textarea></div>
+                </div>
+                {% if req.status == 'در انتظار ارسال گزارش فنی است' %}
+                <p style="color:var(--text-muted);font-size:12.5px;margin:8px 0;">برای انتقال به پیش‌فاکتور، گزارش فنی و حداقل یک قطعه نهایی باید ثبت شده باشد.</p>
+                {% endif %}
+                <button type="submit" class="btn">ثبت اقدام تکنسین</button>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+
+</div>
+{% endif %}
+{% if not visible_panels or 'status' in visible_panels %}
+<div data-rd-panel="status">
+  <div class="card"><div class="card-header">وضعیت و گردش پرونده</div><div class="card-body">
+    <table><tr><th>#</th><th>مرحله</th><th>تاریخ</th><th>وضعیت</th></tr>
+    {% for s in statuses or [] %}<tr {% if req.status == s %}style="background:var(--info-bg);"{% endif %}><td>{{ loop.index }}</td><td>{{ s }}</td><td>{% if stage_map.get(s) and stage_map[s].stage_date %}{{ stage_map[s].stage_date }}{% if stage_map[s].notes %}<br><small style="color:var(--text-muted)">{{ stage_map[s].notes }}</small>{% endif %}{% else %}—{% endif %}</td><td>{% if req.status == s %}<span class="tag">فعلی</span>{% endif %}</td></tr>{% endfor %}</table>
+  </div></div>
+</div>
+{% endif %}
+{% if request.args.get('err') == 'serial_required' %}
+<div class="login-error" style="margin:12px 0;">ثبت قطعه بدون سریال ورودی و سریال داغی مجاز نیست.</div>
+{% endif %}
+{% if request.args.get('err') == 'serial_duplicate' %}
+<div class="login-error" style="margin:12px 0;">این سریال قبلاً ثبت شده و قابل تکرار نیست.</div>
+{% endif %}
+{% if request.args.get('err') == 'initial_test_not_allowed' %}
+<div class="login-error" style="margin:12px 0;">این دستگاه در پذیرش «قابل تست اولیه» تعیین نشده و امکان انتقال به مرحله تست اولیه وجود ندارد.</div>
+{% endif %}
+
+
+{% if not visible_panels or 'parts' in visible_panels %}
+<div data-rd-panel="parts">
+<!-- مراحل وضعیت / قطعات -->
+    <div class="card">
+        <div class="card-header">مراحل وضعیت و تاریخ‌ها</div>
+        <div class="card-body">
+            <table>
+                <tr>
+                    <th>کد انبار</th>
+                    <th>نام قطعه</th>
+                    <th>تعداد</th>
+                    <th>سریال قطعه سالم</th>
+                    <th>سریال قطعه داغی</th>
+                    <th>مرحله</th>
+                    <th>حواله</th>
+                    <th>خروج انبار</th>
+                    <th></th>
+                </tr>
+                {% for p in req_parts %}
+                <tr>
+                    <td>{{ p.warehouse_code or '—' }}</td>
+                    <td>{{ p.part_name }}</td>
+                    <td>{{ p.quantity }}</td>
+                    <td>{{ p.serial_good or p.serial_healthy or '—' }}</td>
+                    <td>{{ p.serial_defective or p.serial_faulty or '—' }}</td>
+                    <td>{{ p.stage or '—' }}</td>
+                    <td>{% if p.voucher_recorded %}ثبت{% else %}—{% endif %}</td>
+                    <td>{% if p.stock_applied %}خارج شد{% else %}—{% endif %}</td>
+                    <td>
+                        {% if can_edit %}
+                        <details style="display:inline-block">
+                          <summary class="btn-edit" style="cursor:pointer;list-style:none">ویرایش</summary>
+                          <form method="POST" style="margin-top:8px;min-width:220px">
+                            <input type="hidden" name="action" value="edit_part">
+                            <input type="hidden" name="part_row_id" value="{{ p.id }}">
+                            <label>تعداد</label>
+                            <input type="number" name="quantity" value="{{ p.quantity }}" min="1">
+                            <label>سریال قطعه سالم</label>
+                            <input name="serial_good" value="{{ p.serial_good or p.serial_healthy or '' }}">
+                            <label>سریال قطعه داغی</label>
+                            <input name="serial_defective" value="{{ p.serial_defective or p.serial_faulty or '' }}">
+                            <label>مرحله</label>
+                            <input class="field-select" value="{{ p.stage or '—' }}" readonly>
+                            <label>توضیحات</label>
+                            <input name="part_notes" value="{{ p.notes or '' }}">
+                            <button type="submit" class="btn" style="margin-top:6px">ذخیره</button>
+                          </form>
+                        </details>
+                        <form method="POST" style="display:inline" onsubmit="return confirm('حذف این قطعه؟')">
+                            <input type="hidden" name="action" value="delete_part">
+                            <input type="hidden" name="part_row_id" value="{{ p.id }}">
+                            <button type="submit" class="btn-delete">حذف</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            {% if is_assigned_tech and req.status in ['در انتظار ارسال حواله تعمیر اولیه است', 'در انتظار دریافت قطعه تعمیر اولیه است', 'در انتظار ارسال گزارش فنی است'] %}
+            <form method="POST" style="margin-top:18px;border-top:1px solid var(--border);padding-top:18px;">
+                <input type="hidden" name="action" value="add_part">
+                <div class="form-grid">
+                    <div class="">
+                        <label>جستجوی قطعه از لیست</label>
+                        <select name="part_id" class="field-select ss-enable" data-ss-search-required="1" aria-label="جستجوی قطعه">
+                            <option value="">— نام یا کد انبار را جستجو کنید —</option>
+                            {% for p in parts_catalog %}
+                            <option value="{{ p.id }}">{{ p.warehouse_code or '—' }} | {{ p.part_name }}{% if p.device_type %} ({{ p.device_type }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>نام قطعه (دستی)</label>
+                        <input type="text" name="part_name">
+                    </div>
+                    <div>
+                        <label>کد انبار</label>
+                        <input type="text" name="warehouse_code">
+                    </div>
+                    <div>
+                        <label>تعداد</label>
+                        <input type="number" name="quantity" value="1" min="1">
+                    </div>
+                    <div>
+                        <label>سریال قطعه سالم</label>
+                        <input type="text" name="serial_good" placeholder="سریال قطعه ورودی (الزامی)" required>
+                    </div>
+                    <div>
+                        <label>سریال قطعه داغی</label>
+                        <input type="text" name="serial_defective" placeholder="سریال قطعه داغی (الزامی)" required>
+                    </div>
+                    <div>
+                        <label>مرحله استفاده</label>
+                        <input class="field-select" value="{% if req.status in ['در انتظار ارسال حواله تعمیر اولیه است', 'در انتظار دریافت قطعه تعمیر اولیه است', 'در انتظار تعمیر اولیه است'] %}تعمیر اولیه{% elif req.status == 'در انتظار ارسال گزارش فنی است' %}تعمیر نهایی{% else %}—{% endif %}" readonly>
+                    </div>
+                    <div class="">
+                        <label>توضیحات</label>
+                        <input type="text" name="part_notes" placeholder="تاریخ ارسال حواله / دریافت و ...">
+                    </div>
+                </div>
+                <button type="submit" class="btn">افزودن قطعه به پرونده</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endif %}<!--/parts-->
+
+{% if is_assigned_tech and req.status == 'در انتظار دریافت قطعه تعمیر اولیه است' %}
+<div class="card" style="margin-top:12px;">
+  <div class="card-header">دریافت قطعات تعمیر اولیه</div>
+  <div class="card-body">
+    <p style="color:var(--text-muted);font-size:13px">پس از تحویل قطعات ثبت‌شده، دریافت آن‌ها را تأیید کنید تا تعمیر اولیه شروع شود.</p>
+    <form method="POST">
+      <input type="hidden" name="action" value="receive_initial_parts">
+      <button class="btn" type="submit">ثبت دریافت قطعات و شروع تعمیر اولیه</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if can_edit and req.status == 'در انتظار ارسال حواله تعمیر نهایی است' %}
+<div class="card" style="margin-top:12px;">
+  <div class="card-header">صدور حواله قطعات تعمیر نهایی</div>
+  <div class="card-body">
+    <p style="color:var(--text-muted);font-size:13px">قطعات تعمیر نهایی قبلاً توسط تکنسین ثبت شده‌اند. با صدور حواله، پرونده برای دریافت قطعات به تکنسین ارجاع می‌شود.</p>
+    <form method="POST">
+      <input type="hidden" name="action" value="send_final_voucher">
+      <button class="btn" type="submit">ثبت صدور حواله و ارجاع به تکنسین</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% if is_assigned_tech and req.status == 'در انتظار دریافت قطعه تعمیر نهایی است' %}
+<div class="card" style="margin-top:12px;">
+  <div class="card-header">دریافت قطعات تعمیر نهایی</div>
+  <div class="card-body">
+    <p style="color:var(--text-muted);font-size:13px">پس از تحویل قطعات درج‌شده در حواله، دریافت آن‌ها را ثبت کنید.</p>
+    <form method="POST">
+      <input type="hidden" name="action" value="receive_final_parts">
+      <button class="btn" type="submit">ثبت دریافت قطعات و شروع تعمیر نهایی</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% if can_edit and req.status == 'در انتظار خروج از کارخانه است' %}
+<div class="card" style="margin-top:12px;">
+  <div class="card-header">خروج دستگاه از کارخانه</div>
+  <div class="card-body">
+    <p style="color:var(--text-muted);font-size:13px">تست نهایی QC موفق شده است. با ثبت خروج، پرونده به امور مالی برای صدور فاکتور نهایی می‌رود.</p>
+    <form method="POST">
+      <input type="hidden" name="action" value="final_exit">
+      <button class="btn" type="submit">ثبت خروج از کارخانه</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if can_edit and req.status == 'در انتظار دریافت تاییدیه پیش‌فاکتور است' %}
+<div class="card" style="margin-top:12px;border:2px solid var(--accent,#3b82f6)">
+  <div class="card-header">تصمیم مشتری درباره پیش‌فاکتور</div>
+  <div class="card-body">
+    {% if req.proforma_confirmed == 1 %}
+    <div class="import-success" style="margin-bottom:10px">پیش‌فاکتور تأیید شده است — مسیر تعمیر نهایی باز است.</div>
+    {% elif req.proforma_confirmed == 2 %}
+    <div class="login-error" style="margin-bottom:10px">پیش‌فاکتور رد شده — دستگاه باید توسط پذیرش برای مشتری ارسال شود (بدون تعمیر نهایی).</div>
+    {% endif %}
+    <p style="font-size:13px;color:var(--text-muted)">این بخش صرفاً برای ثبت تصمیم مشتری (تایید/رد) توسط پذیرش است؛ سایر امور مالی (شماره پیش‌فاکتور/فاکتور) در اختیار نقش امور مالی است.</p>
+    <p style="font-size:13px;color:var(--text-muted)">در صورت رد پیش‌فاکتور، پرونده به وضعیت «ارسال به مشتری» می‌رود و مسیر حواله/تعمیر نهایی طی نمی‌شود.</p>
+    <form method="POST" style="margin-bottom:0">
+      <input type="hidden" name="action" value="proforma_decision">
+      <label>یادداشت (اختیاری)</label>
+      <textarea name="finance_note" rows="2" placeholder="دلیل رد یا توضیحات تأیید"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button type="submit" name="decision" value="approve" class="btn" style="background:#16a34a">تأیید پیش‌فاکتور</button>
+        <button type="submit" name="decision" value="reject" class="btn-delete" onclick="return confirm('پیش‌فاکتور رد شود و دستگاه برای ارسال به مشتری برود؟')">رد پیش‌فاکتور</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% if not visible_panels or 'finance' in visible_panels %}
+<div data-rd-panel="finance">
+  <div class="rd-panel-intro">پیش‌فاکتور، امور مالی، شماره فاکتور و خطاهای مالی/انبار این پرونده در یک بخش قرار دارد.</div>
+<div class="card" style="border:1px solid var(--border);margin-bottom:14px"><div class="card-header">پیش‌فاکتور خدمات</div><div class="card-body"><p style="color:var(--text-muted);font-size:13px">این بخش به همین پرونده تعمیر متصل است و برای تعمیر داخلی و خارجی استفاده می‌شود.</p>{% set original = quote_files|selectattr('file_role','equalto','original')|list %}{% set signed = quote_files|selectattr('file_role','equalto','signed')|list %}{% if original %}<p>فایل پیش‌فاکتور: <a class="btn-export" href="/service/repair-quote/{{ req.id }}/file/{{ original[0].id }}">دانلود {{ original[0].original_name }}</a></p>{% elif is_finance and req.status == 'در انتظار ارسال پیش‌فاکتور است' %}<form method="POST" enctype="multipart/form-data" action="/service/repair-quote/{{ req.id }}/upload"><label>آپلود پیش‌فاکتور صادرشده</label><input type="file" name="quote_file" accept=".pdf,.jpg,.jpeg,.png"><button class="btn" type="submit">پیوست فایل پیش‌فاکتور</button></form>{% endif %}{% if signed %}<p style="margin-top:10px">نسخه امضاشده مشتری ثبت شده: {{ signed[0].original_name }}</p>{% else %}<p style="margin-top:10px;color:var(--text-muted)">پس از تأیید مشتری، نسخه امضاشده در همین پرونده نمایش داده می‌شود.</p>{% endif %}</div></div>
+{% if is_finance %}
+<div class="card" style="border:2px solid var(--accent,#3b82f6)">
+  <div class="card-header">پیش‌فاکتور و امور مالی</div>
+  <div class="card-body">
+    {% if req.proforma_confirmed == 1 %}
+    <div class="import-success" style="margin-bottom:10px">پیش‌فاکتور تأیید شده است — مسیر تعمیر نهایی باز است.</div>
+    {% elif req.proforma_confirmed == 2 %}
+    <div class="login-error" style="margin-bottom:10px">پیش‌فاکتور رد شده — دستگاه باید توسط پذیرش برای مشتری ارسال شود (بدون تعمیر نهایی).</div>
+    {% endif %}
+    <form method="POST" class="form-grid">
+      <input type="hidden" name="action" value="finance_save">
+      <label>شماره پیش‌فاکتور</label>
+      <input name="proforma_number" value="{{ req.proforma_number or '' }}" {% if req.proforma_number %}readonly{% endif %}>
+      <label>تاریخ ارسال پیش‌فاکتور</label>
+      <input name="proforma_sent_date" class="jalali-date" value="{{ req.proforma_sent_date or '' }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+      <button type="submit" class="btn-export">ذخیره پیش‌فاکتور</button>
+    </form>
+    <form method="POST" class="form-grid" style="margin-top:12px">
+      <input type="hidden" name="action" value="finance_save">
+      <label>شماره فاکتور</label>
+      <input name="invoice_number" value="{{ req.invoice_number or '' }}">
+      <button type="submit" class="btn-export">ذخیره شماره فاکتور</button>
+    </form>
+    {% if req.status == 'در انتظار صدور فاکتور است' %}
+    <form method="POST" style="margin-top:12px" class="form-grid">
+      <input type="hidden" name="action" value="issue_final_invoice">
+      <label>شماره فاکتور نهایی *</label>
+      <input type="text" name="invoice_number" value="{{ req.invoice_number or '' }}" required>
+      <label>تاریخ فاکتور نهایی *</label>
+      <input name="invoice_date" class="jalali-date" value="{{ req.invoice_date or '' }}" placeholder="1405/01/01" autocomplete="off" dir="ltr" required>
+      <button type="submit" class="btn" style="background:#16a34a">✔ ثبت فاکتور نهایی و پایان پرونده</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+    {% if request.args.get('stock_error') %}
+    <div class="delay-summary" style="margin-bottom:12px;"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 L22 20 L2 20 Z"/><line x1="12" y1="9.5" x2="12" y2="14"/><circle cx="12" cy="16.8" r="0.9" fill="currentColor" stroke="none"/></svg> خطا در موجودی انبار: {{ request.args.get('stock_error') }}</div>
+    {% endif %}
+</div>
+{% endif %}
+{% if not visible_panels or 'voucher' in visible_panels %}
+<div data-rd-panel="voucher">
+  {% set voucher_kind = 'internal-repair' %}
+  {% include '_voucher_issue_panel.html' %}
+</div>
+{% endif %}
+{% if not visible_panels or 'files' in visible_panels %}
+<div data-rd-panel="files">
+  {% set redirect_path = "/service/internal-repair/view/" ~ req.id %}
+  {% include "_attachments.html" %}
+  {% include '_attachments_panel.html' %}
+</div>
+{% endif %}
+
+
+{% if not visible_panels or 'history' in visible_panels %}
+<div data-rd-panel="history">
+  {% include "_case_history.html" %}
+  {% include '_extras_request.html' %}
+  {% include '_case_tools.html' %}
+</div>
+{% endif %}
+
+
+
+{% endblock %}

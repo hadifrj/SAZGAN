@@ -1,0 +1,14 @@
+{
+  "project": "Sazgan Service Management System",
+  "display_name": "مهندسی سازگان - سامانه مدیریت خدمات پس از فروش",
+  "version": "1.0.15",
+  "release_date": "1405/06/15",
+  "status": "stable",
+  "versioning": "semantic-versioning",
+  "last_changes": [
+    "Fixed finance inspection workflow authorization NameError",
+    "Aligned finance inspection action authorization with inspection-specific statuses",
+    "Added regression coverage for finance inspection access"
+  ],
+  "notes": "Update CHANGELOG.md after every release. Never change VERSION manually unless creating a new release."
+}

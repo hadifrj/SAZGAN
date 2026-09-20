@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}تنظیمات شرکت — MY SAZGAN{% endblock %}
+{% block content %}
+{% set system_active = 'company' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card" style="max-width:640px">
+  <div class="card-header">تنظیمات شرکت / استقرار</div>
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <label class="list-header-row " style="display:flex;">
+        <span>آرم / لوگوی شرکت</span>
+</label>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px;">
+        <div style="width:64px;height:64px;border-radius:12px;overflow:hidden;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;background:#f1f5f9;flex-shrink:0;">
+          {% if data.company_logo %}
+          <img src="/static/uploads/company/{{ data.company_logo }}" alt="لوگو" style="width:100%;height:100%;object-fit:cover;">
+          {% else %}
+          <img src="/static/icons/icon-192.png" alt="لوگوی پیش‌فرض" style="width:100%;height:100%;object-fit:cover;">
+          {% endif %}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <input type="file" name="company_logo_file" accept="image/png,image/jpeg,image/jpg">
+          {% if data.company_logo %}
+          <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:400;">
+            <input type="checkbox" name="remove_company_logo" value="1" style="width:auto;">
+            حذف لوگوی فعلی و بازگشت به آیکن پیش‌فرض
+          </label>
+          {% endif %}
+        </div>
+      </div>
+
+      <label class="list-header-row " style="display:flex;margin-top:12px;">
+        <span>نام شرکت</span>
+</label>
+      <input name="company_name" value="{{ data.company_name }}" placeholder="نام شرکت" required>
+
+      <label style="margin-top:12px">آدرس شرکت</label>
+      <textarea name="company_address" rows="3" placeholder="آدرس کامل شرکت">{{ data.company_address }}</textarea>
+
+      <label style="margin-top:12px">کد پستی شرکت</label>
+      <input name="company_postal_code" value="{{ data.company_postal_code }}" dir="ltr" style="text-align:left" placeholder="XXXXXXXXXX" inputmode="numeric" maxlength="10">
+
+      <label style="margin-top:12px">تلفن شرکت</label>
+      <input name="company_phone" value="{{ data.company_phone }}" dir="ltr" style="text-align:left" placeholder="021xxxxxxx">
+
+      <label style="margin-top:12px">شماره موبایل (پشتیبانی)</label>
+      <input name="company_mobile" value="{{ data.company_mobile }}" dir="ltr" style="text-align:left" placeholder="09xxxxxxxxx" inputmode="tel">
+
+      <button class="btn" type="submit" style="margin-top:16px">ذخیره</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

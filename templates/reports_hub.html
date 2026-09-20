@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}سازگان | گزارش‌ها{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">گزارش‌ها</div>
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px;">
+      داشبوردهای آماری و مدیریتی و گزارش‌های عملکرد خدمات از این بخش در دسترس است.
+    </p>
+    <div class="sys-tile-grid" data-module="reports">
+      {% if can_dashboard %}
+<a href="/dashboard" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="8" width="4" height="12"/><rect x="17" y="4" width="4" height="16"/></svg></span>
+        <span class="sys-tile-title">داشبورد آماری</span>
+        <span class="sys-tile-desc">آمار کلی خدمات پس از فروش</span>
+      </a>
+<a href="/reports/manager-dashboard" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="8" width="4" height="12"/><rect x="17" y="4" width="4" height="16"/></svg></span>
+        <span class="sys-tile-title">داشبورد مدیر</span>
+        <span class="sys-tile-desc">دید کلی مدیریتی از عملکرد سامانه</span>
+      </a>
+<a href="/reports/management" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>
+        <span class="sys-tile-title">گزارش مدیریتی</span>
+        <span class="sys-tile-desc">گزارش تحلیلی برای مدیریت</span>
+      </a>
+<a href="/reports/executive" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>
+        <span class="sys-tile-title">گزارش اجرایی</span>
+        <span class="sys-tile-desc">گزارش خلاصه اجرایی</span>
+      </a>
+<a href="/reports/service-performance" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>
+        <span class="sys-tile-title">گزارش عملکرد خدمات</span>
+        <span class="sys-tile-desc">دید کلی از عملکرد همه انواع خدمات</span>
+      </a>
+<a href="/reports/service-performance?service_kind=internal" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L3 17.5 6.5 21l6.3-6.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.1-2.1z"/></svg></span>
+        <span class="sys-tile-title">گزارش تعمیرات داخلی</span>
+        <span class="sys-tile-desc">عملکرد تعمیرات داخل کارخانه</span>
+      </a>
+<a href="/reports/service-performance?service_kind=external" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L3 17.5 6.5 21l6.3-6.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.1-2.1z"/></svg></span>
+        <span class="sys-tile-title">گزارش تعمیرات خارجی</span>
+        <span class="sys-tile-desc">عملکرد تعمیرات نزد نمایندگی‌ها</span>
+      </a>
+<a href="/reports/service-performance?service_kind=installation" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4"/></svg></span>
+        <span class="sys-tile-title">گزارش نصب</span>
+        <span class="sys-tile-desc">عملکرد نصب دستگاه‌ها</span>
+      </a>
+<a href="/reports/service-performance?service_kind=inspection" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.3" y1="16.3" x2="21" y2="21"/></svg></span>
+        <span class="sys-tile-title">گزارش بررسی و بازدید</span>
+        <span class="sys-tile-desc">عملکرد بازدیدهای میدانی</span>
+      </a>
+<a href="/reports/delay-matrix" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>
+        <span class="sys-tile-title">ماتریس تأخیر (سریال)</span>
+        <span class="sys-tile-desc">پیگیری تأخیرها بر اساس سریال دستگاه</span>
+      </a>
+
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

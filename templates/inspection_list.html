@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}سازگان | بررسی و بازدید{% endblock %}
+{% block content %}
+{% include "_ca_section_tabs.html" %}
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>{{ list_title or "بررسی و بازدید" }} ({{ requests|length }})</span>
+            <div class="list-header-actions">
+                
+                <a href="/service/inspection/export" class="btn-export">خروجی اکسل</a>
+                <a href="/service/inspection/report-new" class="btn-export">ثبت گزارش</a>
+                <a href="/service/inspection/request-new" class="btn btn-quick-new">بازدید جدید</a>
+            </div>
+        </div>
+    </div>
+    <form method="GET" class="filter-bar">
+        <input type="hidden" name="tab" value="{{ tab or 'requests' }}">
+        <div class="filter-field"><label>از تاریخ</label><input type="text" name="date_from" value="{{ date_from or '' }}"></div>
+        <div class="filter-field"><label>تا تاریخ</label><input type="text" name="date_to" value="{{ date_to or '' }}"></div>
+        <div class="filter-field"><label>استان</label>
+            <select name="province" class="field-select geo-province" onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                <option value="">همه</option>
+                {% for p in provinces or [] %}
+                <option value="{{ p }}" {% if province == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>شهرستان</label>
+            <select name="county" class="field-select geo-county" onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div>
+            <label>شهر</label>
+            <select name="city" class="field-select geo-city">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">اعمال فیلتر</button>
+    </form>
+    {% if requests|length == 0 %}
+    <div class="empty-state">موردی یافت نشد.</div>
+    {% else %}
+    <div class="table-wrap"><table>
+        {% if tab == 'reports' %}
+        <tr>
+            <th>ردیف</th>
+            <th>شماره پذیرش</th>
+            <th>تاریخ درخواست</th>
+            <th>تاریخ بازدید</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>استان</th><th>شهرستان</th><th>شهر</th>
+            <th>شهر</th>
+            <th>نماینده</th>
+            <th>وضعیت</th>
+            <th>شماره فاکتور</th>
+            <th>عملیات</th>
+        </tr>
+        {% for r in requests %}
+        <tr class="{% if r.is_delayed %}row-delayed{% endif %}">
+            <td>{{ loop.index }}</td>
+            <td>{{ r.reception_no or r.id }}</td>
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.visit_date or r.installation_date or r.reception_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or r.visit_device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span></td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            <td>
+                <div class="row-actions">
+                    <button type="button" class="row-actions-toggle">عملیات ▾</button>
+                    <div class="row-actions-menu" hidden>
+                        <a href="/service/inspection/view/{{ r.id }}">مشاهده / ویرایش</a>
+                        <a href="/service/inspection/print/{{ r.id }}" target="_blank">چاپ</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <th>ردیف</th>
+            <th>شماره پذیرش</th>
+            <th>تاریخ درخواست</th>
+            <th>نام مشتری</th>
+            <th>استان</th><th>شهرستان</th><th>شهر</th>
+            <th>شهر</th>
+            <th>شرح درخواست</th>
+            <th>نماینده</th>
+            <th>وضعیت</th>
+            <th>عملیات</th>
+        </tr>
+        {% for r in requests %}
+        <tr class="{% if r.is_delayed %}row-delayed{% endif %}">
+            <td>{{ loop.index }}</td>
+            <td>{{ r.reception_no or r.id }}</td>
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.hospital_request_desc or r.problem_desc or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span></td>
+            <td>
+                <div class="row-actions">
+                    <button type="button" class="row-actions-toggle">عملیات ▾</button>
+                    <div class="row-actions-menu" hidden>
+                        <a href="/service/inspection/view/{{ r.id }}">مشاهده / ویرایش</a>
+                        <a href="/service/inspection/print/{{ r.id }}" target="_blank">چاپ</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </table></div>
+{% include '_pagination.html' %}
+
+    {% endif %}
+</div>
+{% endblock %}

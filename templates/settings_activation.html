@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}سازگان | فعال‌سازی نرم‌افزار{% endblock %}
+{% block content %}
+{% set system_active = 'activation' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card" style="max-width:min(640px,100%);">
+  <div class="card-header list-header-row ">
+    <span>فعال‌سازی نرم‌افزار</span>
+</div>
+  <div class="card-body">
+    {% if msg %}<div class="login-error" style="background:#ecfdf5;color:#065f46;border-color:#a7f3d0;">{{ msg }}</div>{% endif %}
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+
+    <div style="margin-bottom:18px;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">وضعیت فعلی</div>
+      <div style="font-weight:700;font-size:15px;">
+        {% if license_status == 'active' %}
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16 9"/></svg> فعال
+        {% elif license_status == 'trial' %}
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10"/><path d="M7 21h10"/><path d="M7 3c0 5 5 6 5 9s-5 4-5 9"/><path d="M17 3c0 5-5 6-5 9s5 4 5 9"/></svg> آزمایشی
+        {% else %}
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 L22 20 L2 20 Z"/><line x1="12" y1="9.5" x2="12" y2="14"/><circle cx="12" cy="16.8" r="0.9" fill="currentColor" stroke="none"/></svg> غیرفعال / ثبت‌نشده
+        {% endif %}
+      </div>
+      {% if license_key_masked %}
+      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">کلید ثبت‌شده: <code>{{ license_key_masked }}</code></div>
+      {% endif %}
+      {% if license_activated_at %}
+      <div style="font-size:12px;color:var(--text-muted);">تاریخ فعال‌سازی: {{ license_activated_at }}</div>
+      {% endif %}
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">نسخه: {{ app_version_label or '—' }}{% if app_release_jalali %} · {{ app_release_jalali }}{% endif %}</div>
+    </div>
+
+    <form method="POST" class="form-grid" style="grid-template-columns:1fr;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field-full">
+        <label>کلید فعال‌سازی</label>
+        <input type="text" name="license_key" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" required style="font-family:monospace;letter-spacing:.04em;">
+      </div>
+      <div class="field-full">
+        <label>نام سازمان / دارنده لایسنس (اختیاری)</label>
+        <input type="text" name="license_owner" value="{{ license_owner or '' }}" placeholder="نام شرکت یا سازمان">
+      </div>
+      <div class="field-full" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="submit" class="btn">ثبت و فعال‌سازی</button>
+        
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

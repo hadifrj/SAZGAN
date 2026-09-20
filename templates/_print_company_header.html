@@ -1,0 +1,16 @@
+{# استفاده: {% include '_print_company_header.html' %} — نیازمند متغیر company (از get_company_info) و page_title #}
+<div class="print-company-header" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid #1a2433;">
+  {% if company and company.company_logo %}
+  <img src="/static/uploads/company/{{ company.company_logo }}" alt="" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+  {% endif %}
+  <div style="flex:1;min-width:0;">
+    <h1 style="margin:0 0 2px;">{{ (company.company_name if company and company.company_name else 'سازگان گستر') }} — {{ page_title }}</h1>
+    {% if company and (company.company_address or company.company_phone or company.company_postal_code) %}
+    <div style="font-size:11.5px;color:#64748b;">
+      {%- if company.company_address %}{{ company.company_address }}{% endif -%}
+      {%- if company.company_postal_code %} — کد پستی: {{ company.company_postal_code }}{% endif -%}
+      {%- if company.company_phone %} — تلفن: {{ company.company_phone }}{% endif -%}
+    </div>
+    {% endif %}
+  </div>
+</div>

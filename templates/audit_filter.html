@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}لاگ ممیزی{% endblock %}
+{% block content %}
+<div class="sg-subtabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+  <a href="/security/backups" class="btn-cancel sg-subtab">پشتیبان</a>
+  <a href="/security/audit-filter" class="btn-cancel sg-subtab is-active">لاگ ممیزی</a>
+</div>
+
+{% set system_active = 'audit' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card"><div class="card-header">لاگ ممیزی (فیلترپذیر)</div>
+<div class="card-body">
+<form method="GET" class="filter-bar">
+<input name="q" value="{{ q or '' }}" placeholder="کاربر / جزئیات / شناسه">
+<input name="action" value="{{ action or '' }}" placeholder="عمل (مثلاً رد پیش‌فاکتور)">
+<button class="btn" type="submit">فیلتر</button>
+</form>
+<table style="margin-top:12px">
+<tr><th>#</th><th>کاربر</th><th>عمل</th><th>موجودیت</th><th>جزئیات</th><th>زمان</th></tr>
+{% for r in rows %}
+<tr>
+<td>{{ r.id }}</td>
+<td>{{ r.user_name }}</td>
+<td>{{ r.action }}</td>
+<td>{{ r.entity_type }} {{ r.entity_id }}</td>
+<td>{{ r.details }}</td>
+<td>{{ r.created_at }}</td>
+</tr>
+{% else %}<tr><td colspan="6">موردی نیست</td></tr>{% endfor %}
+</table>
+</div></div>
+{% endblock %}

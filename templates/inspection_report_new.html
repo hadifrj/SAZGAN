@@ -1,0 +1,136 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | ثبت گزارش بازدید{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>ثبت گزارش بازدید</span>
+            {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+            {% set back_url = request.args.get('back') or '/service/inspection/list' %}
+            {% include '_page_nav_icons.html' %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:20px;">
+                <label style="margin-bottom:8px;">تاریخ بازدید (شمسی)</label>
+                <div style="display:flex;gap:8px;max-width:360px;">
+                    <input type="text" name="recep_date" class="field-select jalali-date" value="{{ today_year }}/{{ '%02d'|format(today_month) }}/{{ '%02d'|format(today_day) }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="field-full customer-field-block ">
+<label>نام مشتری</label>
+                    <select name="customer_id" id="customer_id" class="cp-source" onchange="fillCustomer()" tabindex="-1" aria-hidden="true">
+                        <option value="">—</option>
+                        {% for c in customers %}
+                        <option value="{{ c.id }}" data-name="{{ c.name }}" data-province="{{ c.province or '' }}" data-county="{{ c.county or '' }}" data-city="{{ c.city or '' }}">{{ c.name }}{% if c.province %} — {{ c.province }}{% endif %}{% if c.city %} / {{ c.city }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="customer_name" id="customer_name" class="cp-name" required>
+                </div>
+                <div>
+                    <label>استان</label>
+                    <select name="province" id="province" class="field-select geo-province" required
+                        onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                        <option value="">— انتخاب استان —</option>
+                        {% for p in provinces %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>شهرستان</label>
+                    <select name="county" id="county" class="field-select geo-county"
+                        onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                        <option value="">— انتخاب شهرستان —</option>
+                    </select>
+                </div>
+                <div>
+                    <label>شهر</label>
+                    <select name="city" id="city" class="field-select geo-city">
+                        <option value="">— انتخاب شهر —</option>
+                    </select>
+                    <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px" placeholder="یا نام شهر را بنویسید">
+                </div>
+                <div class="field-full"><label>آدرس</label><input type="text" name="customer_address" id="customer_address"></div>
+                <div><label>کارشناس تجهیزات</label><input type="text" name="equipment_manager_name" id="equipment_manager_name"></div>
+                <div><label>موبایل کارشناس</label><input type="text" name="equipment_manager_mobile" id="equipment_manager_mobile"></div>
+                <div><label>نام تماس</label><input type="text" name="contact_name"></div>
+                <div><label>شماره تماس</label><input type="text" name="contact_phone"><input type="hidden" name="customer_phone" id="customer_phone_hidden"></div>
+                <div class="field-full">
+                    <label>نماینده انجام‌دهنده</label>
+                    <select name="assigned_technician" class="field-select">
+                        <option value="">—</option>
+                        {% for t in technicians %}
+                        <option value="{{ t.id }}">{{ t.full_name }}{% if t.province %} — {{ t.province }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <h3 style="font-size:14px;margin:22px 0 12px;">سریال‌های بازدیدشده</h3>
+            <div id="serial-rows">
+                <div class="form-grid serial-row" style="margin-bottom:10px;">
+                    <div><label>سریال</label><input type="text" name="visit_serial"></div>
+                    <div class="field-full"><label>شرح بازدید</label><input type="text" name="visit_desc"></div>
+                </div>
+            </div>
+            <button type="button" class="btn-edit" onclick="addSerialRow()" style="margin-bottom:16px;">+ افزودن سریال</button>
+
+            <div class="form-grid">
+                <div class="field-full">
+                    <label>آپلود فایل گزارش (اختیاری)</label>
+                    <input type="file" name="report_file" accept=".jpg,.jpeg,.png,.pdf">
+                </div>
+            </div>
+            <button type="submit" class="btn">ثبت گزارش بازدید</button>
+        </form>
+    </div>
+</div>
+<script>
+function fillCustomer() {
+    var id = document.getElementById('customer_id').value;
+    if (!id) return;
+    fetch('/api/customer/' + id).then(r => r.json()).then(data => {
+        if (!data.found) return;
+        var set = function(id, val) {
+            var el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+        set('customer_name', data.name);
+        set('customer_address', data.address);
+        set('city', data.city);
+        set('county', data.county);
+        set('equipment_manager_name', data.equipment_manager_name);
+        set('equipment_manager_mobile', data.equipment_manager_mobile);
+        if (data.phone) set('customer_phone_hidden', data.phone);
+        if (data.province) {
+            var sel = document.getElementById('province');
+            if (sel) {
+                if (sel.tagName === 'SELECT') {
+                    for (var i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === data.province) { sel.selectedIndex = i; break; }
+                    }
+                } else {
+                    sel.value = data.province;
+                }
+                var countyEl = document.getElementById('county');
+                var cityEl = document.getElementById('city');
+                if (countyEl && data.county) countyEl.setAttribute('data-selected', data.county);
+                if (cityEl && data.city) cityEl.setAttribute('data-selected', data.city);
+                if (typeof window.onGeoProvinceChange === 'function') {
+                    try { window.onGeoProvinceChange(sel); } catch (e) {}
+                }
+            }
+        }
+    });
+}
+function addSerialRow() {
+    var div = document.createElement('div');
+    div.className = 'form-grid serial-row';
+    div.style.marginBottom = '10px';
+    div.innerHTML = '<div><label>سریال</label><input type="text" name="visit_serial"></div><div class="field-full"><label>شرح بازدید</label><input type="text" name="visit_desc"></div>';
+    document.getElementById('serial-rows').appendChild(div);
+}
+</script>
+{% endblock %}

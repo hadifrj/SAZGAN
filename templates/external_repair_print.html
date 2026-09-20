@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>چاپ پرونده تعمیر خارجی #{{ req.id }}</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; margin: 24px; color: #1a2433; font-size: 13px; }
+        h1 { font-size: 16px; margin: 0 0 4px; }
+        h2 { font-size: 14px; margin: 18px 0 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+        .meta { color: #64748b; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: right; }
+        th { background: #f5f7fa; }
+        .row { margin-bottom: 6px; }
+        .row strong { min-width: 130px; display: inline-block; color: #64748b; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; background: #dbeafe; color: #1e40af; font-weight: 600; }
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom:16px;">
+        <button onclick="window.print()">چاپ</button>
+        <button onclick="window.close()" style="margin-right:8px;">بستن</button>
+    </div>
+    {% set page_title = 'پرونده تعمیر خارجی' %}
+    {% include '_print_company_header.html' %}
+    <div class="meta">شماره: <strong>{{ req.id }}</strong> | وضعیت: <span class="badge">{{ req.status }}</span></div>
+
+    <h2>اطلاعات مشتری و دستگاه</h2>
+    <div class="row"><strong>نام مشتری:</strong> {{ req.customer_name }}</div>
+    <div class="row"><strong>استان / شهر:</strong> {{ req.province }}{% if req.city %} / {{ req.city }}{% endif %}</div>
+    <div class="row"><strong>آدرس:</strong> {{ req.customer_address or '—' }}</div>
+    <div class="row"><strong>کارشناس تجهیزات:</strong> {{ req.equipment_manager_name or '—' }} — {{ req.equipment_manager_mobile or '' }}</div>
+    <div class="row"><strong>سریال / نوع:</strong> {{ req.serial_number or '—' }} / {{ req.device_type }}</div>
+    <div class="row"><strong>نصب / اتمام گارانتی:</strong> {{ req.installation_date or '—' }} / {{ req.warranty_end_date or '—' }}</div>
+    <div class="row"><strong>تاریخ پذیرش:</strong> {{ req.reception_date or '—' }}</div>
+    <div class="row"><strong>نماینده:</strong> {{ req.assigned_technician or '—' }}</div>
+
+    <h2>شرح‌ها</h2>
+    <div class="row"><strong>درخواست بیمارستان:</strong> {{ req.hospital_request_desc or req.problem_desc or '—' }}</div>
+    <div class="row"><strong>شرح تکنسین:</strong> {{ req.technician_desc or '—' }}</div>
+    <div class="row"><strong>اقدامات:</strong> {{ req.actions_taken or '—' }}</div>
+
+    <h2>مراحل</h2>
+    <table>
+        <tr><th>#</th><th>مرحله</th><th>تاریخ</th><th>یادداشت</th></tr>
+        {% for s in statuses %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ s }}{% if req.status == s %} ★{% endif %}</td>
+            <td>{% for d in stage_dates %}{% if d.stage_name == s %}{{ d.stage_date }}{% endif %}{% endfor %}</td>
+            <td>{% for d in stage_dates %}{% if d.stage_name == s %}{{ d.notes or '' }}{% endif %}{% endfor %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>قطعات</h2>
+    {% if req_parts|length == 0 %}<p>—</p>{% else %}
+    <table>
+        <tr><th>#</th><th>کد</th><th>نام</th><th>تعداد</th><th>مرحله</th><th>توضیح</th></tr>
+        {% for p in req_parts %}
+        <tr>
+            <td>{{ loop.index }}</td><td>{{ p.warehouse_code or '—' }}</td><td>{{ p.part_name }}</td>
+            <td>{{ p.quantity }}</td><td>{{ p.stage or '—' }}</td><td>{{ p.notes or '—' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <h2>ارسال و فاکتور</h2>
+    <div class="row"><strong>روش ارسال:</strong> {{ req.shipping_method or '—' }}</div>
+    <div class="row"><strong>پیگیری:</strong> {{ req.tracking_number or '—' }}</div>
+    <div class="row"><strong>فاکتور:</strong> {{ req.invoice_number or '—' }}</div>
+    <div class="row"><strong>تایید پیش‌فاکتور:</strong> {% if req.proforma_confirmed %}بله{% else %}خیر{% endif %}</div>
+    {% if req.report_filename %}
+    <div class="row"><strong>فایل گزارش:</strong> {{ req.report_filename }}</div>
+    {% endif %}
+    <p style="margin-top:28px;color:#94a3b8;font-size:11px;">سامانه خدمات پس از فروش سازگان</p>
+</body>
+</html>

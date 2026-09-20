@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}سازگان | کنترل قطعات نمایندگان{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header list-header-row ">
+    <span>کنترل قطعات نمایندگان (رهگیری — نه انبار)</span>
+</div>
+  <div class="card-body">
+    <form method="GET" class="filter-bar" style="margin-bottom:12px;">
+      <div class="filter-field" style="min-width:220px;">
+        <label>جستجوی سریال / پذیرش / قطعه</label>
+        <input type="text" name="q" value="{{ q or '' }}" placeholder="سریال ورودی، داغی، شماره پذیرش…">
+      </div>
+      <button type="submit" class="btn">جستجو</button>
+    </form>
+    <form method="GET" class="filter-bar" style="margin-bottom:12px;">
+      <div class="filter-field">
+        <label>استان</label>
+            <select name="province" class="field-select geo-province" onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                <option value="">همه</option>
+                {% for p in provinces or [] %}
+                <option value="{{ p }}" {% if province == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>شهرستان</label>
+            <select name="county" class="field-select geo-county" onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div>
+            <label>شهر</label>
+            <select name="city" class="field-select geo-city">
+                <option value="">همه</option>
+            </select>
+        </div>
+      <button type="submit" class="btn">اعمال فیلتر</button>
+    </form>
+    {% if rows|length == 0 %}
+    <div class="empty-state">سابقه‌ای ثبت نشده است.</div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>استان</th><th>شهرستان</th><th>شهر</th>
+          <th>نماینده</th>
+          <th>شماره پذیرش</th>
+          <th>تاریخ</th>
+          <th>کد قطعه</th>
+          <th>نام قطعه</th>
+          <th>نوع دستگاه</th>
+          <th>مدل دستگاه</th>
+          <th>سریال قطعه ورودی</th>
+          <th>سریال قطعه داغی</th>
+          <th>وضعیت</th>
+          <th>عملیات</th>
+        </tr>
+        {% for r in rows %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+          <td>{{ r.representative_name or r.assigned_technician or '—' }}</td>
+          <td>{{ r.reception_no or r.request_id }}</td>
+          <td>{{ r.created_at or '—' }}</td>
+          <td>{{ r.warehouse_code or '—' }}</td>
+          <td>{{ r.part_name or '—' }}</td>
+          <td>{{ r.device_type or '—' }}</td>
+          <td>{{ r.device_model or '—' }}</td>
+          <td>{{ r.serial_good or r.serial_healthy or '—' }}</td>
+          <td>{{ r.serial_defective or r.serial_faulty or '—' }}</td>
+          <td><span class="badge">{{ r.status or '—' }}</span></td>
+          <td>
+            <a href="/service/external-repair/view/{{ r.request_id }}" class="btn-edit">مشاهده پرونده</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

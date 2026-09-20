@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}سازگان | رهگیری قطعات{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">رهگیری قطعات</div>
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px;">
+      کنترل قطعات مصرفی در تعمیرات داخلی و نزد نمایندگان از این بخش قابل پیگیری است.
+    </p>
+    <div class="sys-tile-grid" data-module="warehouse">
+      <a href="/warehouse/internal" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></span>
+        <span class="sys-tile-title">کنترل قطعات تعمیرات داخلی</span>
+        <span class="sys-tile-desc">قطعات مصرفی در تعمیرات داخل کارخانه</span>
+      </a>
+      <a href="/warehouse/external" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></span>
+        <span class="sys-tile-title">کنترل قطعات نمایندگان</span>
+        <span class="sys-tile-desc">قطعات مصرفی نزد نمایندگی‌ها</span>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}سازگان | آرشیو نمایندگان{% endblock %}
+{% block content %}
+
+{% set parties_active = 'representatives' %}
+{% include '_settings_parties_tabs.html' %}
+
+<div class="card">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>آرشیو نمایندگان ({{ representatives|length }})</span>
+      <div class="list-header-actions">
+        
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    {% if representatives|length == 0 %}
+    <div class="empty-state">نماینده آرشیو‌شده‌ای وجود ندارد.</div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>کد نماینده</th>
+          <th>نام نماینده</th>
+          <th>نوع نماینده</th>
+          <th>استان</th><th>شهرستان</th><th>شهر</th>
+          <th>شهر</th>
+          <th>شماره تماس</th>
+          <th>نوع ضمانت</th>
+          <th>مبلغ ضمانت</th>
+          <th>وضعیت</th>
+          <th>تاریخ آرشیو</th>
+          <th>علت آرشیو</th>
+          <th>عملیات</th>
+        </tr>
+        {% for r in representatives %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.id }}</td>
+          <td>
+            {% if r.rep_type == 'حقوقی' and r.company_name %}
+              {{ r.company_name }}
+            {% else %}
+              {{ r.first_name }} {{ r.last_name }}
+            {% endif %}
+          </td>
+          <td>{{ r.rep_type or '—' }}</td>
+          <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+          <td>{{ r.city or '—' }}</td>
+          <td>{{ r.phone or '—' }}</td>
+          <td>{{ r.guarantee_status or '—' }}</td>
+          <td>{{ r.guarantee_amount or '—' }}</td>
+          <td><span class="badge">{{ r.status or '—' }}</span></td>
+          <td>{{ r.archive_date or '—' }}</td>
+          <td>{{ r.archive_reason or '—' }}</td>
+          <td>
+            <a href="/settings/representatives/view/{{ r.id }}" class="btn-edit">مشاهده</a>
+            <a href="/settings/representatives/edit/{{ r.id }}" class="btn-edit">ویرایش</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

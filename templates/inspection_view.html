@@ -1,0 +1,215 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | پرونده بازدید #{{ req.id }}
+    {% set redirect_path = "/service/inspection/view/" ~ req.id %}
+    {% include "_attachments.html" %}
+
+{% endblock %}
+{% block content %}
+
+{% if is_finance and not can_edit %}
+<div class="card" style="border:2px solid var(--accent,#3b82f6)">
+  <div class="card-header">اقدام امور مالی</div>
+  <div class="card-body">
+    <form method="POST" class="form-grid">
+      <input type="hidden" name="action" value="finance_save">
+      <label>تأیید پیش‌فاکتور</label>
+      <select name="proforma_confirmed" class="field-select">
+        <option value="0" {% if not req.proforma_confirmed %}selected{% endif %}>در انتظار / رد</option>
+        <option value="1" {% if req.proforma_confirmed %}selected{% endif %}>تأیید شد</option>
+      </select>
+      <label>شماره فاکتور</label>
+      <input name="invoice_number" value="{{ req.invoice_number or '' }}">
+      <button type="submit" class="btn">ذخیره</button>
+    </form>
+    <form method="POST" style="margin-top:12px" class="form-grid">
+      <input type="hidden" name="action" value="change_status">
+      <label>وضعیت مالی</label>
+      <select name="status" class="field-select">
+        {% for s in finance_statuses %}<option value="{{ s }}" {% if req.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn-export">اعمال</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div class="card no-print">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>پرونده بازدید — #{{ req.id }} ({{ req.request_subtype or 'بازدید' }})</span>
+            <div class="list-header-actions">
+                <a href="/support/open/{{ req.id }}" class="btn">گفتگوی مشتری</a>
+
+                <a href="/service/inspection/print/{{ req.id }}" class="btn-export" target="_blank"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="7" rx="1"/><path d="M6 9V4h12v5"/><rect x="7" y="13" width="10" height="6"/></svg> چاپ</a>
+                
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <span class="badge">{{ req.status }}</span>
+        <span style="margin-right:12px;color:var(--text-muted);font-size:13px;">
+            {% if req.is_paid_visit %}غیررایگان{% else %}رایگان{% endif %}
+            | تاریخ: {{ req.reception_date or '—' }}
+            | تکنسین: {{ req.assigned_technician or '—' }}
+        </span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">اطلاعات</div>
+    <div class="card-body">
+        {% if can_edit %}
+        <form method="POST">
+            <input type="hidden" name="action" value="save_fields">
+            <div class="form-grid">
+                <div><label>مشتری</label><input type="text" value="{{ req.customer_name }}" disabled></div>
+                <div>
+                    <label>نوع بازدید</label>
+                    <select name="is_paid_visit" class="field-select">
+                        <option value="0" {% if not req.is_paid_visit %}selected{% endif %}>رایگان</option>
+                        <option value="1" {% if req.is_paid_visit %}selected{% endif %}>غیررایگان</option>
+                    </select>
+                </div>
+                <div><label>شهر</label><input type="text" name="city" value="{{ req.city or '' }}"></div>
+                <div class="field-full"><label>آدرس</label><input type="text" name="customer_address" value="{{ req.customer_address or '' }}"></div>
+                <div><label>کارشناس تجهیزات</label><input type="text" name="equipment_manager_name" value="{{ req.equipment_manager_name or '' }}"></div>
+                <div><label>موبایل کارشناس</label><input type="text" name="equipment_manager_mobile" value="{{ req.equipment_manager_mobile or '' }}"></div>
+                <div><label>نام تماس</label><input type="text" name="contact_name" value="{{ req.contact_name or '' }}"></div>
+                <div><label>شماره تماس</label><input type="text" name="contact_phone" value="{{ req.contact_phone or '' }}"></div>
+                <div><label>نوع دستگاه</label><input type="text" name="visit_device_type" value="{{ req.visit_device_type or '' }}"></div>
+                <div><label>تعداد</label><input type="number" name="visit_device_count" value="{{ req.visit_device_count or '' }}"></div>
+                <div>
+                    <label>نماینده</label>
+                    <select name="assigned_technician" class="field-select">
+                        <option value="">—</option>
+                        {% for t in technicians %}
+                        <option value="{{ t.id }}" {% if req.assigned_technician_id == t.id or (not req.assigned_technician_id and req.assigned_technician == t.full_name) %}selected{% endif %}>{{ t.full_name }}{% if t.province %} — {{ t.province }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>تایید پیش‌فاکتور</label>
+                    <select name="proforma_confirmed" class="field-select">
+                        <option value="0" {% if not req.proforma_confirmed %}selected{% endif %}>خیر</option>
+                        <option value="1" {% if req.proforma_confirmed %}selected{% endif %}>بله</option>
+                    </select>
+                </div>
+                <div class="field-full"><label>شرح درخواست</label><textarea name="hospital_request_desc">{{ req.hospital_request_desc or '' }}</textarea></div>
+                <div class="field-full"><label>شرح تکنسین</label><textarea name="technician_desc">{{ req.technician_desc or '' }}</textarea></div>
+                <div class="field-full"><label>اقدامات</label><textarea name="actions_taken">{{ req.actions_taken or '' }}</textarea></div>
+                <div><label>شماره فاکتور</label><input type="text" name="invoice_number" value="{{ req.invoice_number or '' }}"></div>
+            </div>
+            <button type="submit" class="btn">ذخیره</button>
+        </form>
+        {% else %}
+        <p><strong>{{ req.customer_name }}</strong> — {{ req.province }} / {{ req.city or '' }}</p>
+        <p>{{ req.hospital_request_desc or req.problem_desc }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">مراحل وضعیت</div>
+    <div class="card-body">
+        <table>
+            <tr><th>#</th><th>مرحله</th><th>تاریخ</th><th></th></tr>
+            {% for s in statuses %}
+            <tr {% if req.status == s %}style="background:var(--info-bg);"{% endif %}>
+                <td>{{ loop.index }}</td>
+                <td>{{ s }}</td>
+                <td>{% if stage_map.get(s) %}{{ stage_map[s].stage_date }}{% else %}—{% endif %}</td>
+                <td>{% if req.status == s %}<span class="tag">فعلی</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% if can_edit %}
+        <form method="POST" style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px;">
+            <input type="hidden" name="action" value="change_status">
+            <div class="form-grid">
+                <div>
+                    <label>تغییر وضعیت</label>
+                    <select name="new_status" class="field-select" required>
+                        {% for s in statuses %}
+                        <option value="{{ s }}" {% if req.status == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>تاریخ</label>
+                    <div style="display:flex;gap:6px;">
+                        <input type="text" name="stage_date" class="field-select jalali-date" value="{{ today_year }}/{{ '%02d'|format(today_month) }}/{{ '%02d'|format(today_day) }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+                    </div>
+                </div>
+                <div class="field-full"><label>یادداشت</label><input type="text" name="stage_notes"></div>
+            </div>
+            <button type="submit" class="btn">ثبت وضعیت</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">سریال‌های بازدیدشده</div>
+    <div class="card-body">
+        {% if visit_serials|length == 0 %}
+        <div class="empty-state" style="padding:16px;">سریالی ثبت نشده.</div>
+        {% else %}
+        <table>
+            <tr><th>#</th><th>سریال</th><th>شرح بازدید</th>{% if can_edit %}<th></th>{% endif %}</tr>
+            {% for vs in visit_serials %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ vs.serial_number }}</td>
+                <td>{{ vs.visit_desc or '—' }}</td>
+                {% if can_edit %}
+                <td>
+                    <form method="POST" style="display:inline" onsubmit="return confirm('حذف؟')">
+                        <input type="hidden" name="action" value="delete_serial">
+                        <input type="hidden" name="serial_row_id" value="{{ vs.id }}">
+                        <button type="submit" class="btn-delete">حذف</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        {% if can_edit or is_assigned_tech %}
+        <form method="POST" style="margin-top:16px;">
+            <input type="hidden" name="action" value="add_serial">
+            <div class="form-grid">
+                <div><label>سریال</label><input type="text" name="visit_serial" required></div>
+                <div class="field-full"><label>شرح</label><input type="text" name="visit_desc"></div>
+            </div>
+            <button type="submit" class="btn">افزودن سریال</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% if can_edit or is_assigned_tech %}
+<div class="card">
+    <div class="card-header">گزارش و فایل</div>
+    <div class="card-body">
+        {% if req.report_filename %}
+        <p style="margin-bottom:12px;">فایل فعلی:
+            <a href="/static/uploads/visits/{{ req.report_filename }}" target="_blank">{{ req.report_filename }}</a>
+        </p>
+        {% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="upload_report">
+            <div class="form-grid">
+                <div class="field-full"><label>شرح تکنسین</label><textarea name="technician_desc">{{ req.technician_desc or '' }}</textarea></div>
+                <div class="field-full"><label>آپلود گزارش</label><input type="file" name="report_file" accept=".jpg,.jpeg,.png,.pdf"></div>
+            </div>
+            {% if can_edit %}
+            <label style="display:flex;align-items:center;gap:8px;margin:12px 0;">
+                <input type="checkbox" name="mark_done" value="1"> علامت‌گذاری به‌عنوان «بازدید انجام شد»
+            </label>
+            {% endif %}
+            <button type="submit" class="btn">ذخیره گزارش</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

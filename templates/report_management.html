@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}گزارش مدیریتی{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>گزارش مدیریتی</span>
+      <div class="list-header-actions">
+        <a class="btn-export" href="/reports/management/export">خروجی اکسل</a>
+        <a class="btn-cancel" href="/dashboard">داشبورد</a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>بازه زمانی</th>
+          <th>تعداد پذیرش‌ها</th>
+          <th>تعداد تعمیرات داخلی</th>
+          <th>تعداد تعمیرات خارجی</th>
+          <th>تعداد نصب‌ها</th>
+          <th>تعداد بررسی و بازدیدها</th>
+          <th>تعداد پرونده‌های مختومه</th>
+          <th>تعداد پرونده‌های باز</th>
+          <th>تعداد پرونده‌های دارای تأخیر</th>
+          <th>تعداد خدمات رایگان</th>
+          <th>تعداد خدمات غیررایگان</th>
+          <th>مبلغ خدمات</th>
+          <th>مبلغ قطعات</th>
+          <th>مبلغ کل فاکتورها</th>
+          <th>عملیات</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>{{ period or '—' }}</td>
+          <td>{{ total_accept or 0 }}</td>
+          <td>{{ n_internal or 0 }}</td>
+          <td>{{ n_external or 0 }}</td>
+          <td>{{ n_install or 0 }}</td>
+          <td>{{ n_visit or 0 }}</td>
+          <td>{{ closed_total or 0 }}</td>
+          <td>{{ open_total or 0 }}</td>
+          <td><strong style="color:var(--danger-text)">{{ delayed_total or 0 }}</strong></td>
+          <td>{{ n_free or 0 }}</td>
+          <td>{{ n_paid or 0 }}</td>
+          <td>{{ amount_services or 0 }}</td>
+          <td>{{ amount_parts or 0 }}</td>
+          <td>{{ amount_invoices or 0 }}</td>
+          <td><a href="/reports/service-performance" class="btn-edit">جزئیات</a></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-top:16px;">
+  <div class="stat-card"><div class="stat-label">پرونده باز</div><div class="stat-value">{{ open_total }}</div></div>
+  <div class="stat-card"><div class="stat-label">تأخیری</div><div class="stat-value" style="color:var(--danger-text)">{{ delayed_total }}</div></div>
+  <div class="stat-card"><div class="stat-label">میانگین روز در وضعیت</div><div class="stat-value">{{ avg_days }}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+  <div class="card"><div class="card-header">تأخیر به تفکیک تکنسین / نماینده</div>
+  <table>{% for k,v in by_tech %}<tr><td>{{ k }}</td><td><strong>{{ v }}</strong></td></tr>{% else %}<tr><td colspan="2">—</td></tr>{% endfor %}</table>
+  </div>
+  <div class="card"><div class="card-header">تأخیر به تفکیک استان</div>
+  <table>{% for k,v in by_prov %}<tr><td>{{ k }}</td><td><strong>{{ v }}</strong></td></tr>{% else %}<tr><td colspan="2">—</td></tr>{% endfor %}</table>
+  </div>
+</div>
+{% endblock %}

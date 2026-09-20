@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}سازگان | لیست اعلانات{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">درخواست‌های خدمات ثبت‌شده</div>
+  <div class="card-body">
+    {% if items is defined %}{% set rows = items %}{% elif announces is defined %}{% set rows = announces %}{% elif rows is defined %}{% else %}{% set rows = [] %}{% endif %}
+    {% if rows|length == 0 %}
+    <div class="empty-state">اعلانی ثبت نشده است.</div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>شماره اعلام</th>
+          <th>تاریخ اعلام</th>
+          <th>نام مرکز / مشتری</th>
+          <th>نام رابط</th>
+          <th>شماره تماس</th>
+          <th>استان</th><th>شهرستان</th><th>شهر</th>
+          <th>شهر</th>
+          <th>شرح درخواست</th>
+          <th>وضعیت</th>
+          <th>عملیات</th>
+        </tr>
+        {% for r in rows %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.id or r.announce_no or loop.index }}</td>
+          <td>{{ r.created_at or r.announce_date or r.reception_date or '—' }}</td>
+          <td>{{ r.hospital_name or r.customer_name or r.center_name or r.name or '—' }}</td>
+          <td>{{ r.contact_name or r.liaison_name or '—' }}</td>
+          <td>{{ r.contact_phone or r.phone or '—' }}</td>
+          <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+          <td>{{ r.city or '—' }}</td>
+          <td>{{ r.problem_brief or r.description or r.problem_desc or '—' }}</td>
+          <td><span class="badge">{{ r.status or 'جدید' }}</span></td>
+          <td>
+            {% if r.linked_request_id or r.request_id %}<a href="/service/external-repair/view/{{ r.linked_request_id or r.request_id }}" class="btn-edit">پرونده</a>{% endif %}
+            {% if r.id and (r.status or '').startswith('جدید') %}
+            <form method="POST" action="/announce/{{ r.id }}/handled" style="display:inline;margin:0">
+              <button type="submit" class="btn-edit">تماس انجام شد</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+{% include '_pagination.html' %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

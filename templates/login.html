@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<script>
+(function(){
+  var KEY='sazgan-display';
+  var OCEAN={accent:'#0284c7',bg:'#f0f9ff',sidebar:'#0c4a6e',theme:'light'};
+  function hexToRgb(h){h=(h||'').replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    return{r:parseInt(h.slice(0,2),16)||0,g:parseInt(h.slice(2,4),16)||0,b:parseInt(h.slice(4,6),16)||0};}
+  function soft(h,a){var c=hexToRgb(h);return 'rgba('+c.r+','+c.g+','+c.b+','+(a||.15)+')';}
+  function darken(h,f){var c=hexToRgb(h);function ch(n){return('0'+Math.round(n*(1-f)).toString(16)).slice(-2);}return'#'+ch(c.r)+ch(c.g)+ch(c.b);}
+  var cfg=OCEAN;
+  try{var d=JSON.parse(localStorage.getItem(KEY)||'{}')||{};cfg=Object.assign({},OCEAN,d);}catch(e){}
+  var dark=cfg.theme==='dark';
+  var accent=cfg.accent||OCEAN.accent;
+  var bg=dark?'#0f172a':(cfg.bg||OCEAN.bg);
+  var sidebar=cfg.sidebar||OCEAN.sidebar;
+  var r=document.documentElement;
+  r.style.setProperty('--accent',accent);
+  r.style.setProperty('--accent2',darken(accent,.15));
+  r.style.setProperty('--bg1', dark? '#0f172a' : bg);
+  r.style.setProperty('--bg2', dark? '#1e293b' : soft(sidebar,.25).replace('rgba','rgba'));
+  r.style.setProperty('--card', dark?'#1e293b':'#ffffff');
+  r.style.setProperty('--text', dark?'#e2e8f0':'#0f172a');
+  r.style.setProperty('--muted', dark?'#94a3b8':'#64748b');
+  r.style.setProperty('--border', dark?'#334155':'#e2e8f0');
+  // body gradient from sidebar/accent
+  document.addEventListener('DOMContentLoaded',function(){
+    var body=document.body;
+    if(!body) return;
+    if(dark){
+      body.style.background='radial-gradient(1200px 600px at 10% -10%, '+soft(accent,.35)+' 0%, transparent 55%), linear-gradient(160deg,#0f172a,#1e293b)';
+    } else {
+      body.style.background=
+        'radial-gradient(1200px 600px at 10% -10%, '+soft(sidebar,.55)+' 0%, transparent 55%),'+
+        'radial-gradient(900px 500px at 110% 10%, '+soft(accent,.35)+' 0%, transparent 50%),'+
+        'linear-gradient(160deg,'+bg+','+soft(sidebar,.12)+')';
+    }
+    var btn=document.querySelector('.login-btn, button[type=submit], #login-btn');
+    if(btn){ btn.style.background=accent; btn.style.borderColor=accent; }
+    var mark=document.querySelector('.brand-mark, .login-logo-mark');
+    if(mark) mark.style.background=accent;
+  });
+})();
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-store">
+    <title>ورود | {{ company_name or 'سازگان' }} — سامانه خدمات پس از فروش</title>
+    <meta name="description" content="ورود به سامانه خدمات پس از فروش {{ company_name or 'سازگان' }} — مدیریت پذیرش، تعمیر، نصب، گارانتی و پشتیبانی مشتریان.">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="googlebot" content="noindex, nofollow, noarchive">
+    <meta name="language" content="fa">
+    <meta http-equiv="content-language" content="fa-IR">
+    <link rel="canonical" href="{{ request.url_root.rstrip('/') }}/login">
+    <meta property="og:locale" content="fa_IR">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ company_name or 'سازگان' }}">
+    <meta property="og:title" content="ورود | {{ company_name or 'سازگان' }}">
+    <meta property="og:description" content="سامانه خدمات پس از فروش {{ company_name or 'سازگان' }}">
+    <meta property="og:url" content="{{ request.url_root.rstrip('/') }}/login">
+    <meta property="og:image" content="{{ request.url_root.rstrip('/') }}/static/icons/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="{{ company_name or 'سازگان' }}">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <style>
+        @font-face {
+            font-family: Vazirmatn;
+            src: url('/static/fonts/Vazirmatn-Regular.woff2') format('woff2');
+            font-weight: 400; font-display: swap;
+        }
+        @font-face {
+            font-family: Vazirmatn;
+            src: url('/static/fonts/Vazirmatn-Bold.woff2') format('woff2');
+            font-weight: 700; font-display: swap;
+        }
+        :root {
+            --bg1: #0b1220;
+            --bg2: #132033;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --accent: #2563eb;
+            --accent2: #1d4ed8;
+            --border: #e2e8f0;
+            --radius: 20px;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh;
+            font-family: Vazirmatn, Tahoma, "Segoe UI", system-ui, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #1e3a8a 0%, transparent 55%),
+                radial-gradient(900px 500px at 110% 10%, #0e7490 0%, transparent 50%),
+                linear-gradient(160deg, var(--bg1), var(--bg2));
+        }
+        .login-page {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 24px 16px;
+        }
+        .login-box {
+            width: 100%; max-width: 400px;
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 28px 24px 22px;
+            box-shadow: 0 24px 60px rgba(0,0,0,.35);
+        }
+        .brand { text-align: center; margin-bottom: 22px; }
+        .brand-name {
+            margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.04em;
+            color: #0f172a; text-transform: uppercase;
+        }
+        .brand-sub { margin-top: 6px; font-size: 13px; color: var(--muted); }
+        .login-error {
+            background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;
+            border-radius: 12px; padding: 10px 12px; margin-bottom: 14px;
+            font-size: 13px; text-align: center;
+        }
+        .field { margin-bottom: 14px; }
+        .field label {
+            display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #334155;
+        }
+        .pass-wrap { position: relative; }
+        input[type="text"], input[type="password"] {
+            width: 100%; direction: ltr; text-align: left;
+            background: #fff !important; color: #0f172a !important;
+            border: 1.5px solid #cbd5e1 !important; border-radius: 12px !important;
+            padding: 13px 14px !important; font-size: 15px !important; min-height: 48px;
+            font-family: inherit; transition: border-color .15s, box-shadow .15s;
+            -webkit-text-fill-color: #0f172a !important;
+        }
+        .pass-wrap input { padding-left: 14px !important; padding-right: 48px !important; }
+        input:focus {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 4px rgba(37,99,235,.15) !important;
+            outline: none;
+        }
+        .pass-toggle {
+            position: absolute; top: 50%; right: 8px; left: auto; transform: translateY(-50%);
+            border: 0; background: #f1f5f9; color: #475569; cursor: pointer;
+            width: 36px; height: 36px; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 16px; line-height: 1; z-index: 2;
+            font-family: inherit; padding: 0;
+        }
+        .pass-toggle:hover { background: #e2e8f0; color: #0f172a; }
+        .pass-toggle svg {
+            width: 20px; height: 20px; display: block; pointer-events: none;
+        }
+        .pass-toggle .icon-hide { display: none; }
+        .pass-toggle.is-visible .icon-show { display: none; }
+        .pass-toggle.is-visible .icon-hide { display: block; }
+        .btn-login {
+            width: 100%; margin-top: 8px; border: none; cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff; font-weight: 800; font-size: 15px;
+            padding: 14px 16px; border-radius: 12px; font-family: inherit;
+            box-shadow: 0 10px 24px rgba(37,99,235,.28);
+        }
+        .btn-login:hover { filter: brightness(1.05); }
+        .btn-login:disabled { opacity: .7; cursor: wait; }
+        /* Contact-support is a mobile-only affordance: on desktop web the
+           company's support channel is reachable elsewhere in the app, so
+           it stays hidden here and only appears at mobile widths below. */
+        .support-toggle {
+            display: none; width: 100%; margin-top: 14px; border: 0; background: transparent;
+            color: var(--accent); font-size: 13px; font-weight: 700; cursor: pointer;
+            font-family: inherit; text-align: center; padding: 8px;
+        }
+        .support-toggle:hover { text-decoration: underline; }
+        .support-panel {
+            display: none; margin-top: 10px; padding: 14px;
+            background: #f8fafc; border: 1px solid var(--border); border-radius: 14px;
+            font-size: 13px; line-height: 1.9; color: #334155;
+        }
+        .support-panel.open { display: block; }
+        .support-panel .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0; }
+        .support-panel .lbl { color: var(--muted); min-width: 70px; }
+        .support-panel a.tel {
+            color: var(--accent); font-weight: 700; text-decoration: none;
+            direction: ltr; display: inline-block;
+        }
+        .support-panel a.tel:hover { text-decoration: underline; }
+        .login-version { margin-top: 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+        @media (max-width: 420px) {
+            .login-box { padding: 22px 16px 16px; border-radius: 16px; }
+            .brand-name { font-size: 22px; }
+            .support-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-box">
+            <div class="brand">
+                <h1 class="brand-name">MY SAZGAN</h1>
+                <div class="brand-sub">سامانه خدمات پس از فروش</div>
+            </div>
+            {% if error %}
+            <div class="login-error">{{ error }}</div>
+            {% endif %}
+            <form id="login-form" method="post" action="/login" accept-charset="UTF-8" autocomplete="on">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="field">
+                    <label for="username">نام کاربری</label>
+                    <input id="username" type="text" name="username" required autofocus
+                           placeholder="username" dir="ltr" autocomplete="username" spellcheck="false">
+                </div>
+                <div class="field">
+                    <label for="password">رمز عبور</label>
+                    <div class="pass-wrap">
+                        <input id="password" type="password" name="password" required
+                               placeholder="••••••••" dir="ltr" autocomplete="current-password">
+                        <button type="button" class="pass-toggle" id="pass-toggle" title="نمایش / پنهان" aria-label="نمایش رمز">
+                            <!-- گزینه ۱: چشم باز (نمایش رمز) -->
+                            <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <!-- گزینه ۲: همان چشم باز + فقط یک خط مورب روی آن (بدون برش) -->
+                            <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                                <line x1="4" y1="4" x2="20" y2="20"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button id="login-btn" type="submit" class="btn-login">ورود</button>
+            </form>
+
+            <button type="button" class="support-toggle" id="support-toggle">تماس با پشتیبانی ▾</button>
+            <div class="support-panel" id="support-panel">
+                <div class="row"><span class="lbl">شرکت:</span> <strong>{{ company_name or '—' }}</strong></div>
+                {% if company_mobile %}
+                <div class="row">
+                    <span class="lbl">موبایل:</span>
+                    <a class="tel" href="tel:{{ company_mobile_tel }}">{{ company_mobile }}</a>
+                </div>
+                {% endif %}
+                {% if company_phone %}
+                <div class="row">
+                    <span class="lbl">تلفن:</span>
+                    <a class="tel" href="tel:{{ company_phone_tel }}">{{ company_phone }}</a>
+                </div>
+                {% endif %}
+                {% if company_address %}
+                <div class="row"><span class="lbl">آدرس:</span> <span>{{ company_address }}</span></div>
+                {% endif %}
+                {% if not company_mobile and not company_phone and not company_address %}
+                <div style="color:var(--muted)">اطلاعات پشتیبانی هنوز در تنظیمات شرکت ثبت نشده است.</div>
+                {% endif %}
+            </div>
+
+            <p class="login-version">{{ app_version_label or 'v2.8.8' }}</p>
+        </div>
+    </div>
+    <script>
+    (function () {
+      var pass = document.getElementById('password');
+      var btn = document.getElementById('pass-toggle');
+      if (pass && btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (pass.type === 'password') {
+            pass.type = 'text';
+            btn.classList.add('is-visible');
+            btn.setAttribute('aria-label', 'پنهان کردن رمز');
+            btn.setAttribute('title', 'پنهان کردن رمز');
+          } else {
+            pass.type = 'password';
+            btn.classList.remove('is-visible');
+            btn.setAttribute('aria-label', 'نمایش رمز');
+            btn.setAttribute('title', 'نمایش رمز');
+          }
+          pass.focus();
+        });
+      }
+
+      var st = document.getElementById('support-toggle');
+      var sp = document.getElementById('support-panel');
+      if (st && sp) {
+        st.addEventListener('click', function () {
+          var open = sp.classList.toggle('open');
+          st.textContent = open ? 'تماس با پشتیبانی ▴' : 'تماس با پشتیبانی ▾';
+        });
+      }
+
+      var form = document.getElementById('login-form');
+      var loginBtn = document.getElementById('login-btn');
+      if (form && loginBtn) {
+        form.addEventListener('submit', function () {
+          loginBtn.disabled = true;
+          loginBtn.textContent = 'در حال ورود...';
+        });
+      }
+    })();
+    </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js', {scope:'/'}).catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

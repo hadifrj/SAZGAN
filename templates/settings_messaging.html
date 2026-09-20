@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}پیام‌رسانی{% endblock %}
+{% block content %}
+<div class="card"><div class="card-header">تنظیم اعلان نماینده (پیامک / بله / ایتا)</div>
+<div class="card-body">
+<p style="color:var(--text-muted);font-size:13px">فعلاً ارسال واقعی غیرفعال است؛ تنظیمات ذخیره و در لاگ ثبت می‌شود. بعداً API وصل می‌شود.</p>
+<form method="POST" class="form-grid">
+<label>فعال</label>
+<select name="enabled" class="field-select">
+<option value="0" {% if not conf.enabled %}selected{% endif %}>خیر</option>
+<option value="1" {% if conf.enabled %}selected{% endif %}>بله</option>
+</select>
+<label>سرویس</label>
+<select name="provider" class="field-select">
+<option value="none">هیچکدام</option>
+<option value="sms" {% if conf.provider=='sms' %}selected{% endif %}>پیامک</option>
+<option value="bale" {% if conf.provider=='bale' %}selected{% endif %}>بله</option>
+<option value="eitaa" {% if conf.provider=='eitaa' %}selected{% endif %}>ایتا</option>
+</select>
+<label>API Key</label><input name="api_key" value="{{ conf.api_key or '' }}">
+<label>فرستنده</label><input name="sender" value="{{ conf.sender or '' }}">
+<button class="btn" type="submit">ذخیره</button>
+</form>
+</div></div>
+{% endblock %}

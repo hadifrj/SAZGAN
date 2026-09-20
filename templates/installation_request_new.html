@@ -1,0 +1,51 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | درخواست نصب{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>ثبت درخواست نصب و آموزش</span>
+            {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+            {% set back_url = request.args.get('back') or '/service/installation/requests' %}
+            {% include '_page_nav_icons.html' %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {% import '_rq_section_macro.html' as rq %}
+            {% set rq_ns = namespace(n=0) %}
+            {% set date_label = 'تاریخ درخواست (شمسی)' %}
+            {% set show_serial = false %}
+            {% set show_device = false %}
+            {% set show_warranty = false %}
+            {% set tech_label = 'نماینده مسئول' %}
+            {% set problem_name = 'install_notes' %}
+            {% set problem_label = 'توضیحات / شرح درخواست' %}
+            {% set problem_required = false %}
+            {% include '_common_request_fields.html' %}
+
+            <div class="rq-acc">
+            {% call rq.section(rq_ns, 'مدل‌های دستگاه', icon='🖥️') %}
+                <div class="form-grid">
+                <div class="field-full">
+                    <label>مدل‌های دستگاه (هر خط یک مدل — سریال الزامی نیست)</label>
+                    <textarea name="device_models_text" rows="3" placeholder="هر خط یک مدل دستگاه"></textarea>
+                </div>
+                </div>
+            {% endcall %}
+            </div>
+
+
+            {% if embed %}
+            <div class="form-actions-sticky">
+                <button type="submit" class="btn">ثبت درخواست نصب</button>
+            </div>
+            {% else %}
+            <div class="form-actions-sticky"><button type="submit" class="btn">ثبت درخواست نصب</button></div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% include '_common_request_scripts.html' %}
+{% endblock %}

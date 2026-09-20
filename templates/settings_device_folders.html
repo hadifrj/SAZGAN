@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}پرونده دستگاه‌ها | سازگان{% endblock %}
+{% block content %}
+{% set products_active = 'device-folders' %}
+{% include '_settings_products_tabs.html' %}
+<div style="max-width:820px;margin:0 auto;">
+  <h2 style="margin:0 0 6px;font-size:1.3rem;font-weight:800;">پرونده دستگاه‌ها</h2>
+  <p style="margin:0 0 16px;color:var(--text-muted);font-size:13px;line-height:1.6;">
+    ساختار واقعی: ریشه \ SH 10 \ سریال. مسیر ریشه را تنظیم کنید؛ اکسل یا اسکن دیسک ایندکس می‌سازد.
+  </p>
+
+  {% if msg %}<div class="import-success" style="margin-bottom:12px;">{{ msg }}</div>{% endif %}
+  {% if err %}<div class="login-error" style="margin-bottom:12px;">{{ err }}</div>{% endif %}
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header">مسیر ریشه</div>
+    <div class="card-body">
+      <form method="POST">
+        <input type="hidden" name="action" value="save">
+        <label>مسیر پوشه «پرونده دستگاه‌ها»</label>
+        <input name="root_path" value="{{ root_path or '' }}" placeholder="F:\پرونده دستگاه ها" style="width:100%;margin-bottom:10px;">
+        <p style="font-size:12px;color:var(--text-muted);margin:0 0 10px;">
+          اگر درایو عوض شد فقط این مسیر را به‌روز کنید. مسیر نسبی داخل ایندکس ثابت می‌ماند.
+        </p>
+        <button class="btn" type="submit">ذخیره مسیر</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header">ورود ایندکس</div>
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--text-muted);margin:0 0 12px;">
+        جمع ایندکس فعلی: <strong>{{ index_total }}</strong> سریال
+      </p>
+      <form method="POST" enctype="multipart/form-data" style="margin-bottom:14px;">
+        <input type="hidden" name="action" value="import_excel">
+        <label>فایل اکسل (ستون سریال + مسیر کامل)</label>
+        <input type="file" name="excel" accept=".xlsx,.xls" style="margin-bottom:10px;">
+        <button class="btn" type="submit">ورود از اکسل (جایگزینی کامل)</button>
+      </form>
+      <form method="POST" style="display:inline-block;margin-left:8px;">
+        <input type="hidden" name="action" value="scan_disk">
+        <button class="btn-cancel" type="submit" onclick="return confirm('اسکن پوشه‌های SH روی دیسک؟');">اسکن از دیسک</button>
+      </form>
+      <form method="POST" style="display:inline-block;">
+        <input type="hidden" name="action" value="clear">
+        <button class="btn-cancel" type="submit" onclick="return confirm('ایندکس پاک شود؟');">پاک کردن ایندکس</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">آزمایش جستجو</div>
+    <div class="card-body">
+      <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <input name="q" value="{{ q or '' }}" placeholder="سریال دستگاه" style="flex:1;min-width:160px;">
+        <button class="btn" type="submit">جستجو</button>
+      </form>
+      {% if q %}
+        {% if sample %}
+        <table>
+          <tr><th>سریال</th><th>دستور</th><th>مسیر</th><th></th></tr>
+          {% for r in sample %}
+          <tr>
+            <td>{{ r.serial_raw or r.serial }}</td>
+            <td>{{ r.sh_folder or '—' }}</td>
+            <td style="font-size:12px;direction:ltr;text-align:left;">{{ r.resolved_path or r.full_path }}</td>
+            <td>
+              <button type="button" class="btn-edit" onclick="openFolder({{ (r.resolved_path or r.full_path or '')|tojson }})">باز کردن</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}
+        <p style="color:var(--text-muted);">موردی یافت نشد.</p>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+<script>
+function openFolder(path){
+  var tok = (document.querySelector('meta[name="csrf-token"]')||{}).content || '';
+  var fd = new FormData();
+  fd.append('path', path);
+  if (tok) fd.append('csrf_token', tok);
+  fetch('/api/device-folder/open', {
+    method:'POST', body:fd, credentials:'same-origin',
+    headers: tok ? {'X-CSRF-Token': tok} : {}
+  }).then(function(r){return r.json()}).then(function(d){
+    if(!d || !d.ok) alert((d && d.error) || 'باز نشد');
+  }).catch(function(){ alert('خطا در ارتباط'); });
+}
+</script>
+{% endblock %}

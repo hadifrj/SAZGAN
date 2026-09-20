@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}سازگان | تنظیمات{% endblock %}
+{% block content %}
+
+{% set parties_active = 'accounts' %}
+{% include '_settings_parties_tabs.html' %}
+
+
+
+    <div class="card">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>حساب کاربری — کاربران سامانه</span>
+                <div class="list-header-actions">
+                    <a href="/settings/users/archive" class="btn-cancel">بایگانی غیرفعال‌ها</a>
+                    <a href="/account?from=settings" class="btn">تنظیمات کاربری من</a>
+                    <button type="button" class="btn" onclick="openModal('add-user-modal')">+ افزودن کاربر</button>
+                </div>
+            </div>
+        </div>
+        {% if users|length == 0 %}
+            <div class="empty-state">هنوز کاربری ثبت نشده است.</div>
+        {% else %}
+        <div class="table-wrap">
+        <table>
+            <tr>
+                <th>#</th><th>عکس</th><th>نام و نام خانوادگی</th><th>نام کاربری</th><th>نقش</th><th>استان</th><th>شهرستان</th><th>شهر</th><th>عملیات</th>
+            </tr>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.id }}</td>
+                <td>
+                    {% if u.photo_filename %}
+                    <img src="/static/uploads/users/{{ u.photo_filename }}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border);">
+                    {% else %}
+                    <span style="display:inline-flex;width:36px;height:36px;border-radius:50%;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ u.full_name }}</td>
+                <td>{{ u.username }}</td>
+                <td>
+                    {% set _disp_role = 'مدیر سیستم' if ((u.username or '')|lower == 'admin') else (u.role or '') %}
+                    {% if _disp_role == 'مدیر سیستم' %}
+                        <span class="role-badge role-reception">مدیر سیستم</span>
+                    {% elif _disp_role == 'مسئول پذیرش' %}
+                        <span class="role-badge role-reception">{{ _disp_role }}</span>
+                    {% elif _disp_role == 'کنترل کیفیت' %}
+                        <span class="role-badge role-qc">{{ _disp_role }}</span>
+                    {% elif _disp_role == 'تکنسین کارخانه' %}
+                        <span class="role-badge role-factory">{{ _disp_role }}</span>
+                    {% else %}
+                        <span class="role-badge role-province">{{ _disp_role }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ u.province if u.province else '—' }}</td>
+                <td>{{ u.county if u.county else '—' }}</td>
+                <td>{{ u.city if u.city else '—' }}</td>
+                <td style="white-space:nowrap;text-align:left;">
+                    <div style="display:inline-flex;align-items:center;justify-content:flex-start;gap:6px;flex-wrap:wrap;">
+                    {% if current_user and u.id == current_user.id %}
+                    <a class="btn-edit" href="/account?from=settings">حساب کاربری</a>
+                    {% else %}
+                    <a class="btn-edit" href="/settings/users/edit/{{ u.id }}">حساب کاربری</a>
+                    {% endif %}
+                    {# حذف: مدیر سیستم / مسئول پذیرش / admin — نه روی خود کاربر #}
+                    {% set _role = (current_user.role if current_user else '') or '' %}
+                    {% set _user = ((current_user.username if current_user else '') or '')|lower %}
+                    {% set can_manage = _user == 'admin' or _role == 'مدیر سیستم' %}
+                    {% if can_manage and current_user and (u.id|string) != (current_user.id|string) %}
+                    <form method="POST" action="/settings/users/deactivate/{{ u.id }}" style="display:inline;margin:0;" onsubmit="return confirm('کاربر «{{ u.full_name or u.username }}» غیرفعال شود و به بایگانی برود؟');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                      <button type="submit" class="btn-delete" title="غیرفعال‌سازی">غیرفعال</button>
+                    </form>
+                    {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="modal-overlay {% if error %}open{% endif %}" id="add-user-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>افزودن کاربر جدید</span>
+                <button type="button" class="modal-close" onclick="closeModal('add-user-modal')"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+            </div>
+            <div class="modal-body">
+                {% if error %}
+                <div class="login-error">{{ error }}</div>
+                {% endif %}
+                <form method="POST">
+                    <div class="form-grid">
+                        <div id="fullname-field">
+                            <label>نام و نام خانوادگی</label>
+                            <input type="text" name="full_name" id="full_name_input">
+                        </div>
+                        <div>
+                            <label>نقش</label>
+                            <select name="role" id="role-select" class="field-select" onchange="toggleRoleFields()" required>
+                                {% for role in roles %}
+                                <option value="{{ role }}">{% if role == 'تکنسین استانی' %}نماینده{% else %}{{ role }}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>نام کاربری</label>
+                            <input type="text" name="username" required>
+                        </div>
+                        <div>
+                            <label>رمز عبور</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <div id="representative-field" class="field-full" style="display:none;">
+                            <label>انتخاب نماینده (استان از پروفایل نماینده خودکار گرفته می‌شود)</label>
+                            <select name="representative_id" id="representative-select" class="field-select">
+                                <option value="">— انتخاب کنید —</option>
+                                {% for r in representatives %}
+                                <option value="{{ r.id }}">{% if r.rep_type == 'حقوقی' and r.company_name %}{{ r.company_name }} ({{ r.first_name }} {{ r.last_name }}){% else %}{{ r.first_name }} {{ r.last_name }}{% endif %} — {{ r.province }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if representatives|length == 0 %}
+                            <p style="font-size:12.5px; color:var(--text-muted); margin-top:6px;">
+                                هنوز نماینده‌ای ثبت نشده. اول از تب «نمایندگی‌ها» یک نماینده اضافه کنید.
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">افزودن کاربر</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleRoleFields() {
+            var role = document.getElementById('role-select').value;
+            var repField = document.getElementById('representative-field');
+            var nameField = document.getElementById('fullname-field');
+            var nameInput = document.getElementById('full_name_input');
+
+            if (role === 'تکنسین استانی') {
+                repField.style.display = 'block';
+                nameField.style.display = 'none';
+                nameInput.removeAttribute('required');
+            } else {
+                repField.style.display = 'none';
+                nameField.style.display = 'block';
+                nameInput.setAttribute('required', 'required');
+            }
+        }
+        toggleRoleFields();
+    </script>
+
+{% endblock %}

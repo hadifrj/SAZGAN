@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}سازگان | جدول دستمزد{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span style="display:inline-flex;align-items:center;gap:8px;">
+        جدول دستمزد (per case) — مبالغ به ریال
+</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <form method="POST" style="display:inline;" onsubmit="return confirm('مبالغ پیش‌فرض جدول کارفرما بارگذاری شود؟');">
+          <input type="hidden" name="action" value="seed_defaults">
+          <button type="submit" class="btn-cancel">بارگذاری پیش‌فرض جدول</button>
+        </form>
+        <button type="button" class="btn" onclick="openModal('add-wage-modal')">+ افزودن آیتم</button>
+      </div>
+    </div>
+  </div>
+
+  {% if msg %}
+  <div class="alert alert-success" style="margin:12px 16px;">{{ msg }}</div>
+  {% endif %}
+  {% if error %}
+  <div class="alert alert-danger" style="margin:12px 16px;">{{ error }}</div>
+  {% endif %}
+
+  {% if wage_rates|length == 0 %}
+  <div class="empty-state">هنوز موردی ثبت نشده — پیش‌فرض را بارگذاری کنید.</div>
+  {% else %}
+  <div style="overflow-x:auto;">
+  <table>
+    <tr>
+      <th>#</th><th>کد</th><th>شرح</th><th>نوع دستگاه</th><th>نوبت نصب</th><th>دسته</th>
+      <th>مبلغ / محل نمایندگی</th><th>خارج محل</th><th>هر کیلومتر</th><th>فعال</th><th>عملیات</th>
+    </tr>
+    {% for w in wage_rates %}
+    <tr style="{% if w.is_active is defined and not w.is_active %}opacity:.5;{% endif %}">
+      <td>{{ w.sort_order or w.id }}</td>
+      <td style="font-size:11px;direction:ltr;">{{ w.rate_code or '—' }}</td>
+      <td>{{ w.work_description }}</td>
+      <td>{{ w.device_type or 'همه' }}</td>
+      <td>{% if w.install_slot == 'first' %}اول{% elif w.install_slot == 'next' %}دوم به بعد{% elif w.install_slot == 'central' %}سانترال{% elif w.install_slot == 'any' %}هر نوبت{% else %}—{% endif %}</td>
+      <td>{{ w.category or '—' }}</td>
+      <td>{{ '{:,}'.format(w.wage_amount or 0) }}</td>
+      <td>{% if w.amount_outside %}{{ '{:,}'.format(w.amount_outside) }}{% else %}—{% endif %}</td>
+      <td>{% if w.is_per_km %}بله{% else %}—{% endif %}</td>
+      <td>{% if w.is_active is not defined or w.is_active %}✓{% else %}—{% endif %}</td>
+      <td style="white-space:nowrap;">
+        <button type="button" class="btn-cancel" style="font-size:11px;padding:4px 8px;"
+          onclick='editWage({{ w.id }}, {{ w.work_description|tojson }}, {{ w.wage_amount or 0 }}, {{ w.amount_outside if w.amount_outside is not none else "null" }}, {{ (w.rate_code or "")|tojson }}, {{ (w.category or "")|tojson }}, {{ w.is_per_km or 0 }}, {{ w.sort_order or 0 }}, {{ (w.device_type or "")|tojson }}, {{ (w.install_slot or "")|tojson }})'>ویرایش</button>
+        <form method="POST" action="/settings/wages/delete/{{ w.id }}" style="display:inline;" onsubmit="return confirm('حذف شود؟');">
+          <button type="submit" class="btn-delete" style="font-size:11px;padding:4px 8px;">حذف</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="modal-overlay" id="add-wage-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>افزودن آیتم دستمزد</span>
+      <button type="button" class="modal-close" onclick="closeModal('add-wage-modal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST">
+        <input type="hidden" name="action" value="add">
+        <div class="form-grid">
+          <div class="field-full"><label>شرح کار</label><input type="text" name="work_description" required></div>
+          <div><label>کد (اختیاری)</label><input type="text" name="rate_code" dir="ltr" placeholder="repair"></div>
+          <div><label>دسته</label><input type="text" name="category" placeholder="تعمیر / نصب / ..."></div>
+          <div><label>مبلغ (ریال) / محل نمایندگی</label><input type="number" name="wage_amount" required min="0"></div>
+          <div><label>مبلغ خارج محل</label><input type="number" name="amount_outside" min="0"></div>
+          <div><label>ترتیب</label><input type="number" name="sort_order" value="99"></div>
+          <div>
+            <label>نوع دستگاه</label>
+            <input type="text" name="device_type" list="device-types-list" placeholder="خالی = همه دستگاه‌ها">
+          </div>
+          <div>
+            <label>نوبت نصب</label>
+            <select name="install_slot" class="field-select">
+              <option value="">—</option>
+              <option value="first">دستگاه اول</option>
+              <option value="next">دوم به بعد</option>
+              <option value="central">سانترال</option>
+              <option value="any">هر نوبت</option>
+            </select>
+          </div>
+          <div><label style="display:flex;gap:6px;align-items:center;cursor:pointer;"><input type="checkbox" name="is_per_km" value="1" style="width:auto;min-height:0;"> نرخ هر کیلومتر</label></div>
+        </div>
+        <button type="submit" class="btn">افزودن</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-wage-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>ویرایش آیتم دستمزد</span>
+      <button type="button" class="modal-close" onclick="closeModal('edit-wage-modal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST">
+        <input type="hidden" name="action" value="edit">
+        <input type="hidden" name="wage_id" id="edit_wage_id">
+        <div class="form-grid">
+          <div class="field-full"><label>شرح کار</label><input type="text" name="work_description" id="edit_desc" required></div>
+          <div><label>کد</label><input type="text" name="rate_code" id="edit_code" dir="ltr"></div>
+          <div><label>دسته</label><input type="text" name="category" id="edit_cat"></div>
+          <div><label>مبلغ (ریال) / محل نمایندگی</label><input type="number" name="wage_amount" id="edit_amount" required min="0"></div>
+          <div><label>مبلغ خارج محل</label><input type="number" name="amount_outside" id="edit_outside" min="0"></div>
+          <div><label>ترتیب</label><input type="number" name="sort_order" id="edit_sort"></div>
+          <div>
+            <label>نوع دستگاه</label>
+            <input type="text" name="device_type" id="edit_device" list="device-types-list" placeholder="خالی = همه">
+          </div>
+          <div>
+            <label>نوبت نصب</label>
+            <select name="install_slot" id="edit_slot" class="field-select">
+              <option value="">—</option>
+              <option value="first">دستگاه اول</option>
+              <option value="next">دوم به بعد</option>
+              <option value="central">سانترال</option>
+              <option value="any">هر نوبت</option>
+            </select>
+          </div>
+          <div><label style="display:flex;gap:6px;align-items:center;cursor:pointer;"><input type="checkbox" name="is_per_km" id="edit_per_km" value="1" style="width:auto;min-height:0;"> نرخ هر کیلومتر</label></div>
+        </div>
+        <button type="submit" class="btn">ذخیره</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function editWage(id, desc, amount, outside, code, cat, perKm, sort, deviceType, installSlot) {
+  document.getElementById('edit_wage_id').value = id;
+  document.getElementById('edit_desc').value = desc || '';
+  document.getElementById('edit_amount').value = amount || 0;
+  document.getElementById('edit_outside').value = (outside === null || outside === undefined) ? '' : outside;
+  document.getElementById('edit_code').value = code || '';
+  document.getElementById('edit_cat').value = cat || '';
+  document.getElementById('edit_sort').value = sort || 0;
+  document.getElementById('edit_per_km').checked = !!perKm;
+  var ed = document.getElementById('edit_device');
+  if (ed) ed.value = deviceType || '';
+  var es = document.getElementById('edit_slot');
+  if (es) es.value = installSlot || '';
+  openModal('edit-wage-modal');
+}
+</script>
+{% endblock %}

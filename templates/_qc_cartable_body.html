@@ -1,0 +1,76 @@
+
+
+    {% set delayed_n = tasks|selectattr('is_delayed')|list|length %}
+    {% set qc_n = qc_open if qc_open is defined else (tasks|selectattr('in_qc_stage')|list|length) %}
+
+    <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+            <div class="stat-label">کل پرونده‌های داخلی</div>
+            <div class="stat-value">{{ total_count }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">در مرحله QC / تست</div>
+            <div class="stat-value" style="color:var(--info-text);">{{ qc_n }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">تأخیری</div>
+            <div class="stat-value" style="color:var(--danger-text);">{{ delayed_n }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">بسته / پایان</div>
+            <div class="stat-value" style="color:var(--success-text);">{{ closed_count }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>کارتابل کنترل کیفیت — {{ current_user.full_name }}</span>
+            </div>
+        </div>
+        <div class="card-body" style="font-size:13px;color:var(--text-muted);padding-bottom:8px;">
+            پرونده‌های <strong>تعمیر داخلی</strong> اینجا نمایش داده می‌شوند. موارد با علامت ★ در مرحله تست / QC هستند و اولویت بالاتری دارند.
+            آستانه تأخیر: {{ delay_threshold or 3 }} روز.
+        </div>
+
+        {% if tasks|length == 0 %}
+            <div class="empty-state">پرونده‌ای برای کنترل کیفیت وجود ندارد.</div>
+        {% else %}
+        <div style="overflow-x:auto;">
+        <table>
+            <tr>
+                <th>#</th>
+                <th>نوع</th>
+                <th>تاریخ پذیرش</th>
+                <th>مشتری</th>
+                <th>دستگاه / سریال</th>
+                <th>تکنسین</th>
+                <th>وضعیت</th>
+                <th>روز</th>
+                <th>عملیات</th>
+            </tr>
+            {% for t in tasks %}
+            <tr class="{% if t.is_delayed %}row-delayed{% endif %}" {% if t.is_closed %}style="opacity:0.6;"{% endif %}>
+                <td>{{ t.id }}</td>
+                <td><span class="tag">{{ t.kind }}</span></td>
+                <td>{{ t.reception_date or '—' }}</td>
+                <td>{{ t.customer_name }}</td>
+                <td>
+                    {{ t.device_type or '—' }}
+                    {% if t.serial_number %}<br><small style="color:var(--text-muted)">{{ t.serial_number }}</small>{% endif %}
+                </td>
+                <td>{{ t.assigned_technician or '—' }}</td>
+                <td>
+                    {% if t.is_delayed %}<span class="delay-badge">تأخیر</span>{% endif %}
+                    {% if t.in_qc_stage %}<span class="tag" style="background:var(--purple-bg);color:var(--purple-text);">نیاز به QC</span>{% endif %}
+                    <span class="badge">{{ t.status }}</span>
+                </td>
+                <td><strong {% if t.is_delayed %}style="color:var(--danger-text)"{% endif %}>{{ t.days_in_status if t.days_in_status is defined else '—' }}</strong></td>
+                <td><a href="{{ t.detail_url }}" class="btn-edit">ثبت گزارش QC</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+        {% endif %}
+    </div>
+

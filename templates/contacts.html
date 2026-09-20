@@ -1,0 +1,483 @@
+{% extends "base.html" %}
+{% block title %}سازگان | مخاطبین{% endblock %}
+{% block content %}
+<div class="cp" id="contactsPage" dir="rtl">
+
+  <div class="cp-header">
+    <div class="cp-header-text">
+      <h1 class="cp-title">مخاطبین</h1>
+      <p class="cp-subtitle">مدیریت لیست مخاطبین و اطلاعات تماس</p>
+    </div>
+    <button type="button" class="btn cp-add-btn" onclick="openModal('contact-add-modal')">
+      <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      مخاطب جدید
+    </button>
+  </div>
+
+  <form class="cp-toolbar" method="get" action="/contacts" id="cpFilterForm">
+    <div class="cp-search-wrap">
+      <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.3" y1="16.3" x2="21" y2="21"/></svg>
+      <input type="search" name="q" class="cp-search-input" value="{{ filter_q }}" placeholder="جستجو در مخاطبین...">
+    </div>
+
+    <select name="status" class="cp-select" onchange="document.getElementById('cpFilterForm').submit()">
+      <option value="">همه وضعیت‌ها</option>
+      {% for s in status_options %}
+      <option value="{{ s }}" {% if filter_status == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="group" class="cp-select" onchange="document.getElementById('cpFilterForm').submit()">
+      <option value="">همه گروه‌ها</option>
+      {% for g in group_options %}
+      <option value="{{ g }}" {% if filter_group == g %}selected{% endif %}>{{ g }}</option>
+      {% endfor %}
+    </select>
+
+    {% if filter_q or filter_status or filter_group %}
+    <a href="/contacts" class="cp-icon-btn" title="پاک کردن فیلترها">
+      <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </a>
+    {% endif %}
+
+    <button type="submit" class="cp-icon-btn" title="بروزرسانی">
+      <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v6h-6"/></svg>
+    </button>
+
+    <div class="cp-more-wrap">
+      <button type="button" class="cp-icon-btn" title="بیشتر" onclick="cpToggleMore()">
+        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+      </button>
+      <div class="cp-more-menu" id="cpMoreMenu">
+        <a href="/contacts?per_page=25{% if filter_q %}&q={{ filter_q }}{% endif %}">نمایش ۲۵ مورد در صفحه</a>
+        <a href="/contacts?per_page=50{% if filter_q %}&q={{ filter_q }}{% endif %}">نمایش ۵۰ مورد در صفحه</a>
+        <button type="button" onclick="window.print()">چاپ لیست</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="cp-body">
+
+    <div class="cp-list-panel">
+      <div class="cp-table-wrap">
+        <table class="cp-table no-cardify" id="cpTable">
+          <thead>
+            <tr>
+              <th class="cp-col-check"><input type="checkbox" onclick="cpToggleAll(this)"></th>
+              <th>نام مخاطب</th>
+              <th class="cp-hide-sm">شرکت</th>
+              <th>تلفن</th>
+              <th class="cp-hide-md">ایمیل</th>
+              <th>وضعیت</th>
+              <th class="cp-col-menu"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in contacts %}
+            <tr class="cp-row" data-key="{{ c.key }}" onclick="cpSelectContact('{{ c.key }}')">
+              <td class="cp-col-check" data-label="انتخاب" onclick="event.stopPropagation()"><input type="checkbox"></td>
+              <td data-label="نام مخاطب">
+                <div class="cp-name-cell">
+                  <span class="cp-avatar cp-avatar-sm" data-initials>{{ (c.name or '؟')[:1] }}</span>
+                  <span class="cp-name-text">{{ c.name or '—' }}</span>
+                </div>
+              </td>
+              <td class="cp-hide-sm" data-label="شرکت">{{ c.company or '—' }}</td>
+              <td dir="ltr" class="cp-ltr" data-label="تلفن">{{ c.mobile or c.phone or '—' }}</td>
+              <td class="cp-hide-md" data-label="ایمیل">{{ c.email or '—' }}</td>
+              <td data-label="وضعیت"><span class="cp-badge" data-status="{{ c.status }}">{{ c.status or '—' }}</span></td>
+              <td class="cp-col-menu" data-label="" onclick="event.stopPropagation()">
+                <button type="button" class="cp-row-menu-btn" title="گزینه‌ها">
+                  <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                </button>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="cp-empty">مخاطبی یافت نشد.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "_pagination.html" %}
+    </div>
+
+    <aside class="cp-detail" id="cpDetail">
+      <button type="button" class="cp-detail-close" id="cpDetailClose" onclick="cpCloseDetail()" aria-label="بستن">
+        <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <span>بازگشت</span>
+      </button>
+
+      <div class="cp-detail-empty" id="cpDetailEmpty">
+        <svg class="ui-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <p>مخاطبی را برای مشاهده جزئیات انتخاب کنید</p>
+      </div>
+
+      <div class="cp-detail-content" id="cpDetailContent" style="display:none;">
+        <div class="cp-detail-top">
+          <span class="cp-avatar cp-avatar-lg" id="cpDName-avatar">؟</span>
+          <div class="cp-detail-name-wrap">
+            <div class="cp-detail-name" id="cpDName">—</div>
+            <span class="cp-badge" id="cpDStatus"></span>
+            <div class="cp-detail-role" id="cpDRole"></div>
+          </div>
+        </div>
+
+        <div class="cp-detail-actions">
+          <a href="#" id="cpDMailBtn" class="cp-action-btn" title="ارسال ایمیل">
+            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+          </a>
+          <a href="#" id="cpDCallBtn" class="cp-action-btn" title="تماس">
+            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg>
+          </a>
+          <button type="button" class="cp-action-btn" title="اطلاعات تماس (vCard)" onclick="cpDownloadVcf()">
+            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><line x1="13" y1="10" x2="18" y2="10"/><line x1="13" y1="14" x2="18" y2="14"/></svg>
+          </button>
+          <button type="button" class="cp-action-btn" title="بیشتر">
+            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+          </button>
+        </div>
+
+        <div class="cp-tabs">
+          <button type="button" class="cp-tab" data-tab="activity" onclick="cpSwitchTab('activity')">فعالیت‌ها</button>
+          <button type="button" class="cp-tab" data-tab="notes" onclick="cpSwitchTab('notes')">یادداشت‌ها</button>
+          <button type="button" class="cp-tab active" data-tab="info" onclick="cpSwitchTab('info')">اطلاعات تماس</button>
+        </div>
+
+        <div class="cp-tab-panel" data-panel="info">
+          <div class="cp-field">
+            <div class="cp-field-icon"><svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg></div>
+            <div class="cp-field-body"><span class="cp-field-label">تلفن همراه</span><span class="cp-field-value" id="cpDMobile">—</span></div>
+          </div>
+          <div class="cp-field">
+            <div class="cp-field-icon"><svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg></div>
+            <div class="cp-field-body"><span class="cp-field-label">تلفن ثابت</span><span class="cp-field-value" id="cpDPhone">—</span></div>
+          </div>
+          <div class="cp-field">
+            <div class="cp-field-icon"><svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg></div>
+            <div class="cp-field-body"><span class="cp-field-label">ایمیل</span><span class="cp-field-value" id="cpDEmail">—</span></div>
+          </div>
+          <div class="cp-field">
+            <div class="cp-field-icon"><svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></svg></div>
+            <div class="cp-field-body"><span class="cp-field-label">وب‌سایت</span><span class="cp-field-value" id="cpDWebsite">—</span></div>
+          </div>
+          <div class="cp-field">
+            <div class="cp-field-icon"><svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div class="cp-field-body"><span class="cp-field-label">آدرس</span><span class="cp-field-value" id="cpDAddress">—</span></div>
+          </div>
+          <div class="cp-field">
+            <div class="cp-field-icon"><svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="cp-field-body"><span class="cp-field-label">گروه</span><span class="cp-field-value" id="cpDGroup">—</span></div>
+          </div>
+          <div class="cp-field">
+            <div class="cp-field-icon"><svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="cp-field-body"><span class="cp-field-label">تاریخ ایجاد</span><span class="cp-field-value" id="cpDCreated">—</span></div>
+          </div>
+        </div>
+
+        <div class="cp-tab-panel" data-panel="notes" style="display:none;">
+          <p class="cp-tab-empty" id="cpDNotes">یادداشتی ثبت نشده است.</p>
+        </div>
+        <div class="cp-tab-panel" data-panel="activity" style="display:none;">
+          <p class="cp-tab-empty">هنوز فعالیتی برای این مخاطب ثبت نشده است.</p>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<div class="cp-backdrop" id="cpBackdrop" onclick="cpCloseDetail()"></div>
+
+<div class="modal-overlay" id="contact-add-modal" onclick="if(event.target===this)closeModal('contact-add-modal')">
+  <div class="modal-box modal-box-lg">
+    <div class="modal-header">
+      <span>مخاطب جدید</span>
+      <button type="button" class="modal-close" onclick="closeModal('contact-add-modal')">
+        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/contacts/add" class="form-grid">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div>
+          <label>نام</label>
+          <input type="text" name="name" required placeholder="نام شخص">
+        </div>
+        <div>
+          <label>شرکت</label>
+          <input type="text" name="company" placeholder="نام شرکت">
+        </div>
+        <div>
+          <label>موبایل</label>
+          <input type="text" name="mobile" inputmode="tel" placeholder="09...">
+        </div>
+        <div>
+          <label>تلفن ثابت</label>
+          <input type="text" name="phone" inputmode="tel" placeholder="021...">
+        </div>
+        <div>
+          <label>ایمیل</label>
+          <input type="email" name="email" placeholder="name@example.com">
+        </div>
+        <div>
+          <label>وب‌سایت</label>
+          <input type="text" name="website" placeholder="www.example.com">
+        </div>
+        <div>
+          <label>شهر</label>
+          <input type="text" name="city" placeholder="مثلاً تهران">
+        </div>
+        <div>
+          <label>وضعیت</label>
+          <select name="status" class="field-select">
+            <option value="مشتری">مشتری</option>
+            <option value="مشتری بالقوه">مشتری بالقوه</option>
+            <option value="همکار">همکار</option>
+            <option value="متعاقب شود">متعاقب شود</option>
+          </select>
+        </div>
+        <div>
+          <label>گروه</label>
+          <input type="text" name="group_name" placeholder="مثلاً مشتریان" value="مشتریان">
+        </div>
+        <div class="field-full">
+          <label>آدرس</label>
+          <input type="text" name="address" placeholder="آدرس کامل">
+        </div>
+        <div class="field-full">
+          <label>یادداشت</label>
+          <input type="text" name="notes" placeholder="اختیاری">
+        </div>
+        <div class="field-full" style="display:flex;gap:8px;">
+          <button type="submit" class="btn">ذخیره</button>
+          <button type="button" class="btn-cancel" onclick="closeModal('contact-add-modal')">انصراف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.cp{display:flex;flex-direction:column;gap:16px;}
+.cp-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.cp-title{font-size:22px;font-weight:700;margin:0 0 4px;color:var(--text);}
+.cp-subtitle{margin:0;color:var(--text-muted);font-size:13px;}
+.cp-add-btn{display:inline-flex;align-items:center;gap:6px;}
+
+.cp-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;}
+.cp-search-wrap{position:relative;flex:1 1 220px;min-width:180px;display:flex;align-items:center;}
+.cp-search-wrap svg{position:absolute;right:12px;color:var(--text-muted);pointer-events:none;}
+.cp-search-input{width:100%;padding:9px 36px 9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:inherit;font-size:13.5px;color:var(--text);}
+.cp-search-input:focus{outline:none;border-color:var(--brand);}
+.cp-select{padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-family:inherit;font-size:13px;color:var(--text);min-width:130px;}
+.cp-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);cursor:pointer;flex-shrink:0;}
+.cp-icon-btn:hover{background:var(--sidebar-hover);}
+.cp-more-wrap{position:relative;}
+.cp-more-menu{display:none;position:absolute;left:0;top:44px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow);min-width:190px;z-index:30;overflow:hidden;flex-direction:column;}
+.cp-more-menu.open{display:flex;}
+.cp-more-menu a,.cp-more-menu button{display:block;width:100%;text-align:right;padding:10px 12px;border:none;background:none;font-family:inherit;font-size:13px;color:var(--text);cursor:pointer;text-decoration:none;}
+.cp-more-menu a:hover,.cp-more-menu button:hover{background:var(--sidebar-hover);}
+
+.cp-body{display:flex;align-items:flex-start;gap:16px;}
+.cp-list-panel{flex:1 1 auto;min-width:0;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.cp-table-wrap{overflow-x:auto;}
+.cp-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.cp-table th{text-align:right;padding:12px 14px;color:var(--text-muted);font-weight:500;font-size:12.5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.cp-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+.cp-row{cursor:pointer;transition:background .12s;}
+.cp-row:hover{background:var(--sidebar-hover);}
+.cp-row.active{background:var(--accent-soft);}
+.cp-col-check{width:36px;}
+.cp-col-menu{width:36px;text-align:center;}
+.cp-name-cell{display:flex;align-items:center;gap:10px;}
+.cp-name-text{font-weight:500;color:var(--text);}
+.cp-ltr{direction:ltr;text-align:right;}
+.cp-empty{text-align:center;color:var(--text-muted);padding:32px 10px;}
+
+.cp-avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--accent-soft);color:var(--brand);font-weight:700;flex-shrink:0;}
+.cp-avatar-sm{width:32px;height:32px;font-size:13px;}
+.cp-avatar-lg{width:64px;height:64px;font-size:24px;}
+
+.cp-badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:500;background:var(--info-bg);color:var(--info-text);white-space:nowrap;}
+.cp-badge[data-status="مشتری"]{background:var(--success-bg);color:var(--success-text);}
+.cp-badge[data-status="مشتری بالقوه"]{background:var(--info-bg);color:var(--info-text);}
+.cp-badge[data-status="همکار"]{background:var(--purple-bg);color:var(--purple-text);}
+.cp-badge[data-status="متعاقب شود"]{background:var(--warn-bg);color:var(--warn-text);}
+
+.cp-row-menu-btn{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;border-radius:6px;}
+.cp-row-menu-btn:hover{background:var(--sidebar-hover);}
+
+.cp-detail{flex:0 0 340px;width:340px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:sticky;top:16px;}
+.cp-detail-close{display:none;align-items:center;gap:6px;background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:13px;cursor:pointer;padding:0 0 12px;}
+.cp-detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text-muted);text-align:center;padding:50px 10px;font-size:13px;}
+.cp-detail-top{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.cp-detail-name{font-size:17px;font-weight:700;color:var(--text);}
+.cp-detail-name-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.cp-detail-role{font-size:12.5px;color:var(--text-muted);}
+.cp-detail-actions{display:flex;justify-content:center;gap:10px;margin-bottom:16px;}
+.cp-action-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--brand);cursor:pointer;text-decoration:none;}
+.cp-action-btn:hover{background:var(--accent-soft);}
+
+.cp-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px;gap:4px;}
+.cp-tab{flex:1;background:none;border:none;padding:9px 4px;font-family:inherit;font-size:12.5px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.cp-tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600;}
+.cp-tab-panel{display:flex;flex-direction:column;gap:14px;}
+.cp-tab-empty{color:var(--text-muted);font-size:13px;text-align:center;padding:20px 4px;}
+.cp-field{display:flex;align-items:flex-start;gap:10px;}
+.cp-field-icon{color:var(--text-muted);flex-shrink:0;margin-top:2px;}
+.cp-field-body{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.cp-field-label{font-size:11.5px;color:var(--text-muted);}
+.cp-field-value{font-size:13.5px;color:var(--text);word-break:break-word;}
+
+.cp-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;}
+
+@media (max-width:980px){
+  .cp-hide-md{display:none;}
+}
+@media (max-width:760px){
+  .cp-hide-sm{display:none;}
+  .cp-body{position:relative;}
+  .cp-detail{
+    position:fixed;inset:0 0 0 auto;top:0;bottom:0;right:0;left:0;
+    width:100%;max-width:420px;height:100%;border-radius:0;
+    transform:translateX(100%);transition:transform .25s ease;
+    z-index:50;overflow-y:auto;box-shadow:-6px 0 24px rgba(0,0,0,.15);
+  }
+  html[dir="rtl"] .cp-detail, .cp{direction:rtl;}
+  .cp-detail{transform:translateX(-100%);}
+  .cp-detail.open{transform:translateX(0);}
+  .cp-detail-close{display:flex;}
+  .cp-backdrop.open{display:block;}
+  .cp-header{flex-direction:column;align-items:stretch;}
+  .cp-add-btn{width:100%;justify-content:center;}
+  .cp-search-wrap{flex:1 1 100%;}
+}
+
+/* V11 mobile contacts: Android-style contact list */
+@media (max-width:760px){
+  .cp{gap:12px;}
+  .cp-toolbar{padding:8px;gap:8px;border-radius:14px;}
+  .cp-search-wrap{min-width:0!important;order:1;}
+  .cp-select{flex:1 1 calc(50% - 4px);min-width:0;}
+  .cp-icon-btn{width:40px;height:40px;}
+  .cp-list-panel{border:0;background:transparent;overflow:visible;}
+  .cp-table-wrap{overflow:visible;}
+  .cp-table{display:block;width:100%;border:0;}
+  .cp-table thead{display:none;}
+  .cp-table tbody{display:flex;flex-direction:column;gap:8px;}
+  .cp-table tbody tr.cp-row{display:grid;grid-template-columns:36px 1fr auto;grid-template-areas:"check name menu" "check phone menu" "check status menu";gap:2px 8px;align-items:center;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);}
+  .cp-table tbody tr.cp-row>td{display:flex!important;border:0!important;padding:0!important;white-space:normal!important;min-width:0;align-items:center;}
+  .cp-table tbody tr.cp-row>td::before{display:none;}
+  .cp-table tbody tr.cp-row>.cp-col-check{grid-area:check;justify-content:center;width:auto;}
+  .cp-table tbody tr.cp-row>.cp-col-check input{width:18px;height:18px;}
+  .cp-table tbody tr.cp-row>td:nth-child(2){grid-area:name;}
+  .cp-table tbody tr.cp-row>td:nth-child(4){grid-area:phone;padding-right:42px!important;}
+  .cp-table tbody tr.cp-row>td:nth-child(6){grid-area:status;justify-content:flex-start;padding-right:42px!important;}
+  .cp-table tbody tr.cp-row>.cp-col-menu{grid-area:menu;justify-content:center;align-self:center;width:auto;}
+  .cp-name-cell{gap:9px;min-width:0;}
+  .cp-avatar-sm{width:42px;height:42px;font-size:15px;}
+  .cp-name-text{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cp-table tbody tr.cp-row>td:nth-child(4)::before{content:'تلفن';display:block;position:absolute;right:56px;color:var(--text-muted);font-size:10px;transform:translateY(-14px);}
+  .cp-table tbody tr.cp-row>td:nth-child(4){position:relative;font-size:12.5px;color:var(--text-muted);}
+  .cp-table tbody tr.cp-row>td:nth-child(6){font-size:11px;}
+  .cp-table tbody tr.cp-row>td:nth-child(3),.cp-table tbody tr.cp-row>td:nth-child(5){display:none!important;}
+  .cp-table tbody tr.cp-row>.cp-col-menu .cp-row-menu-btn{padding:8px;}
+  .cp-detail{max-width:100%;}
+}
+</style>
+
+<script>
+var CP_CONTACTS = {{ contacts|tojson }};
+
+function cpFindContact(key){
+  for (var i=0;i<CP_CONTACTS.length;i++){ if (CP_CONTACTS[i].key === key) return CP_CONTACTS[i]; }
+  return null;
+}
+
+function cpToggleAll(cb){
+  document.querySelectorAll('#cpTable tbody .cp-row input[type=checkbox]').forEach(function(el){ el.checked = cb.checked; });
+}
+
+function cpToggleMore(){
+  document.getElementById('cpMoreMenu').classList.toggle('open');
+}
+document.addEventListener('click', function(e){
+  var wrap = document.querySelector('.cp-more-wrap');
+  if (wrap && !wrap.contains(e.target)) document.getElementById('cpMoreMenu').classList.remove('open');
+});
+
+function cpSelectContact(key){
+  var c = cpFindContact(key);
+  if (!c) return;
+
+  document.querySelectorAll('.cp-row').forEach(function(r){ r.classList.remove('active'); });
+  var row = document.querySelector('.cp-row[data-key="'+key+'"]');
+  if (row) row.classList.add('active');
+
+  document.getElementById('cpDetailEmpty').style.display = 'none';
+  document.getElementById('cpDetailContent').style.display = 'block';
+
+  var initials = (c.name || '؟').trim().slice(0,1);
+  document.getElementById('cpDName-avatar').textContent = initials;
+  document.getElementById('cpDName').textContent = c.name || '—';
+  document.getElementById('cpDRole').textContent = c.company || c.notes || '';
+
+  var statusEl = document.getElementById('cpDStatus');
+  statusEl.textContent = c.status || '—';
+  statusEl.setAttribute('data-status', c.status || '');
+
+  document.getElementById('cpDMobile').textContent = c.mobile || '—';
+  document.getElementById('cpDPhone').textContent = c.phone || '—';
+  document.getElementById('cpDEmail').textContent = c.email || '—';
+  document.getElementById('cpDWebsite').textContent = c.website || '—';
+  document.getElementById('cpDAddress').textContent = c.address || c.city || '—';
+  document.getElementById('cpDGroup').textContent = c.group_name || '—';
+  document.getElementById('cpDCreated').textContent = c.created_at || '—';
+  document.getElementById('cpDNotes').textContent = c.notes ? c.notes : 'یادداشتی ثبت نشده است.';
+
+  document.getElementById('cpDMailBtn').href = c.email ? ('mailto:'+c.email) : '#';
+  document.getElementById('cpDCallBtn').href = (c.mobile || c.phone) ? ('tel:'+(c.mobile||c.phone)) : '#';
+
+  window.CP_ACTIVE = c;
+
+  if (window.matchMedia('(max-width:760px)').matches){
+    document.getElementById('cpDetail').classList.add('open');
+    document.getElementById('cpBackdrop').classList.add('open');
+  }
+}
+
+function cpCloseDetail(){
+  document.getElementById('cpDetail').classList.remove('open');
+  document.getElementById('cpBackdrop').classList.remove('open');
+}
+
+function cpSwitchTab(name){
+  document.querySelectorAll('.cp-tab').forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-tab')===name); });
+  document.querySelectorAll('.cp-tab-panel').forEach(function(p){ p.style.display = (p.getAttribute('data-panel')===name) ? 'flex' : 'none'; });
+}
+
+function cpDownloadVcf(){
+  var c = window.CP_ACTIVE;
+  if (!c) return;
+  var lines = ['BEGIN:VCARD','VERSION:3.0','FN:'+(c.name||''),
+    c.company ? 'ORG:'+c.company : '',
+    c.mobile ? 'TEL;TYPE=CELL:'+c.mobile : '',
+    c.phone ? 'TEL;TYPE=WORK:'+c.phone : '',
+    c.email ? 'EMAIL:'+c.email : '',
+    c.address ? 'ADR:;;'+c.address+';;;;' : '',
+    'END:VCARD'].filter(Boolean);
+  var blob = new Blob([lines.join('\n')], {type:'text/vcard'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (c.name || 'contact') + '.vcf';
+  a.click();
+}
+
+(function(){
+  if (!window.matchMedia('(max-width:760px)').matches && CP_CONTACTS.length){
+    cpSelectContact(CP_CONTACTS[0].key);
+  }
+})();
+</script>
+{% endblock %}

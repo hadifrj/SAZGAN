@@ -1,0 +1,107 @@
+
+/* Sazgan v5 — Neutral White + Dark Mode
+   Primary accent intentionally neutral; blue is not the default brand color. */
+
+:root {
+  --primary: #374151;
+  --primary-hover: #1f2937;
+  --primary-soft: #f3f4f6;
+  --primary-border: #d1d5db;
+  --accent: #374151;
+  --focus-ring: rgba(55, 65, 81, .18);
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-muted: #6b7280;
+}
+
+body {
+  background: #f8fafc;
+  color: var(--text);
+}
+
+button,
+.btn,
+.btn-primary,
+input[type="submit"],
+a.button {
+  --button-bg: #374151;
+  --button-hover: #1f2937;
+}
+
+.sidebar,
+.app-sidebar,
+.main-sidebar {
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.sidebar .active,
+.app-sidebar .active,
+.main-sidebar .active,
+.nav-item.active {
+  background: #f3f4f6;
+  color: #111827;
+  box-shadow: inset 3px 0 0 #374151;
+}
+
+.card,
+.panel,
+.settings-card,
+.table-container {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+/* Dark Mode: charcoal/graphite, never pure black. */
+html.dark,
+body.dark,
+[data-theme="dark"] {
+  --primary: #d1d5db;
+  --primary-hover: #f3f4f6;
+  --primary-soft: #1f2937;
+  --primary-border: #4b5563;
+  --accent: #d1d5db;
+  --focus-ring: rgba(209, 213, 219, .20);
+  --surface: #111827;
+  --surface-soft: #1f2937;
+  --border: #374151;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+}
+
+html.dark body,
+body.dark,
+[data-theme="dark"] body {
+  background: #0f172a;
+  color: #f3f4f6;
+}
+
+html.dark .sidebar,
+html.dark .app-sidebar,
+html.dark .main-sidebar,
+body.dark .sidebar,
+body.dark .app-sidebar,
+body.dark .main-sidebar,
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .app-sidebar,
+[data-theme="dark"] .main-sidebar {
+  background: #111827;
+  border-color: #374151;
+}
+
+html.dark .sidebar .active,
+html.dark .app-sidebar .active,
+html.dark .main-sidebar .active,
+body.dark .sidebar .active,
+body.dark .app-sidebar .active,
+body.dark .main-sidebar .active,
+[data-theme="dark"] .sidebar .active,
+[data-theme="dark"] .app-sidebar .active,
+[data-theme="dark"] .main-sidebar .active {
+  background: #1f2937;
+  color: #f3f4f6;
+  box-shadow: inset 3px 0 0 #d1d5db;
+}

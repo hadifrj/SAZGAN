@@ -1,0 +1,121 @@
+/* Color Picker — فشرده و کارتی */
+.cp-modal {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10050;
+  opacity: 0; transition: opacity .2s ease;
+  pointer-events: none;
+}
+.cp-modal.open { opacity: 1; pointer-events: auto; }
+.cp-overlay {
+  position: absolute; inset: 0;
+  background: rgba(15, 23, 42, .45);
+}
+.cp-card {
+  position: relative;
+  width: min(280px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.25);
+  padding: 12px;
+  direction: ltr;
+  z-index: 1;
+  transform: translateY(8px);
+  transition: transform .2s ease;
+}
+.cp-modal.open .cp-card { transform: translateY(0); }
+
+.cp-gradient {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.35 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: crosshair;
+  background: #1a237e;
+}
+.cp-pointer {
+  position: absolute;
+  width: 18px; height: 18px;
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  top: 20%; left: 70%;
+}
+
+.cp-hue {
+  position: relative;
+  height: 14px;
+  margin: 12px 2px 14px;
+  border-radius: 999px;
+  background: linear-gradient(to right,
+    #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  cursor: pointer;
+}
+.cp-hue-pointer {
+  position: absolute;
+  top: 50%;
+  width: 18px; height: 18px;
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.2), 0 2px 5px rgba(0,0,0,.25);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  left: 60%;
+}
+
+.cp-presets {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 0 2px;
+}
+.cp-swatch {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.08);
+  transition: transform .12s, border-color .12s;
+}
+.cp-swatch:hover { transform: scale(1.08); }
+.cp-swatch.active {
+  border-color: #1e293b;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #1e293b;
+}
+
+.cp-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+.cp-btn {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.cp-btn:hover { background: #f8fafc; }
+.cp-btn-primary {
+  background: var(--accent, #E2231A);
+  border-color: var(--accent, #E2231A);
+  color: #fff;
+}
+.cp-btn-primary:hover { filter: brightness(.95); }
+.cp-btn-ghost { color: #64748b; }
+
+[data-theme="dark"] .cp-card { background: #1e293b; }
+[data-theme="dark"] .cp-btn { background: #334155; border-color: #475569; color: #e2e8f0; }
+[data-theme="dark"] .cp-btn-primary { background: var(--accent, #E2231A); color: #fff; }

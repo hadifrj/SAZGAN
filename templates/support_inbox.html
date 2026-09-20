@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}گفتگوی مشتری | سازگان{% endblock %}
+{% block content %}
+<div class="sc-shell">
+  <aside class="sc-list-pane">
+    <div class="sc-inbox-head">
+      <div>
+        <h2 class="sc-title">گفتگوی مشتری</h2>
+        <p class="sc-sub">پیگیری مشتریان — اعلام خرابی، پیام‌ها و پاسخ شرکت</p>
+      </div>
+    </div>
+
+    <div class="sc-toolbar">
+      <div class="sc-tabs">
+        <a href="/support/inbox?status={{ 'باز'|urlencode }}{% if q %}&q={{ q|urlencode }}{% endif %}"
+           class="sc-tab {% if status_filter=='باز' %}active{% endif %}">
+          باز {% if open_count is defined %}<span class="sc-tab-n">{{ open_count }}</span>{% endif %}
+        </a>
+        <a href="/support/inbox?status={{ 'بسته'|urlencode }}{% if q %}&q={{ q|urlencode }}{% endif %}"
+           class="sc-tab {% if status_filter=='بسته' %}active{% endif %}">
+          بسته {% if closed_count is defined %}<span class="sc-tab-n">{{ closed_count }}</span>{% endif %}
+        </a>
+        <a href="/support/inbox?status=all{% if q %}&q={{ q|urlencode }}{% endif %}"
+           class="sc-tab {% if status_filter=='all' %}active{% endif %}">همه</a>
+      </div>
+      <form method="GET" class="sc-search" action="/support/inbox">
+        <input type="hidden" name="status" value="{{ status_filter or 'باز' }}">
+        <input type="search" name="q" value="{{ q or '' }}" placeholder="جستجو موضوع، نام، شماره پرونده...">
+        <button type="submit" class="btn">جستجو</button>
+      </form>
+    </div>
+
+    <div class="sc-list card" id="sc-list">
+      {% if threads %}
+        {% for t in threads %}
+        <a href="/support/thread/{{ t.id }}" class="sc-row" data-thread-id="{{ t.id }}">
+          <div class="sc-avatar {% if t.status=='بسته' %}is-closed{% endif %}">
+            {{ (t.opened_by_name or '؟')[:1] }}
+          </div>
+          <div class="sc-row-body">
+            <div class="sc-row-top">
+              <span class="sc-row-title">{{ t.opened_by_name or ('گفتگو #' ~ t.id) }}</span>
+              <span class="sc-row-time">{{ t.last_message_at or t.created_at or '—' }}</span>
+            </div>
+            <div class="sc-row-meta">
+              {% if t.opened_by_role %}<span>{{ t.opened_by_role }}</span>{% endif %}
+              {% if t.request_id %}<span class="sc-pill">پرونده #{{ t.request_id }}</span>{% endif %}
+              {% if t.status=='بسته' %}<span class="sc-pill muted">بسته</span>{% else %}<span class="sc-pill ok">باز</span>{% endif %}
+            </div>
+            {% if t.last_body %}
+            <div class="sc-row-preview">{{ t.last_body[:120] }}{% if t.last_body|length > 120 %}…{% endif %}</div>
+            {% endif %}
+          </div>
+          {% set ur = (t.unread_user if is_staff else t.unread_support) or 0 %}
+          {% if ur %}
+          <span class="sc-unread">{{ ur if ur < 100 else '99+' }}</span>
+          {% endif %}
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="sc-empty">
+          <div class="sc-empty-icon">💬</div>
+          <p>گفتگویی{% if status_filter=='باز' %} باز{% elif status_filter=='بسته' %} بسته‌شده{% endif %} یافت نشد.</p>
+          <p class="sc-empty-hint">از صفحه پرونده دکمه «گفتگوی مشتری» را بزنید.</p>
+        </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <main class="sc-chat-pane" id="sc-chat-pane">
+    <div class="sc-chat-empty" id="sc-chat-empty">
+      <div class="sc-chat-empty-icon">💬</div>
+      <p id="sc-empty-text">گفتگویی موجود نیست</p><p class="sc-empty-hint">برای مشاهده یک گفتگو، از فهرست سمت راست انتخاب کنید.</p>
+    </div>
+    <iframe id="sc-chat-iframe" class="sc-chat-iframe" title="گفتگو" hidden></iframe>
+  </main>
+</div>
+
+<style>
+.sc-shell{direction:rtl;display:flex;height:min(84vh,760px);min-height:540px;border:1px solid rgba(15,23,42,.08);border-radius:16px;overflow:hidden;background:#f8fafc;}
+.sc-list-pane{order:1;width:380px;flex-shrink:0;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#ffffff;border-inline-end:1px solid #e2e8f0;box-shadow:inset -6px 0 10px -8px rgba(15,23,42,.12);}
+.sc-inbox-head{padding:16px 16px 8px;}
+.sc-title{margin:0 0 4px;font-size:1.2rem;font-weight:800;color:#0f172a;}
+.sc-sub{margin:0;color:#64748b;font-size:12.5px;}
+.sc-toolbar{display:flex;flex-direction:column;gap:10px;padding:8px 16px 12px;}
+.sc-tabs{display:flex;gap:6px;background:#ffffff;border:1px solid rgba(15,23,42,.08);border-radius:999px;padding:4px;}
+.sc-tab{flex:1;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;border-radius:999px;font-size:12.5px;font-weight:700;color:#64748b;text-decoration:none;}
+.sc-tab.active{background:#2aabee;color:#fff;}
+.sc-tab-n{background:rgba(255,255,255,.12);color:#0f172a;font-size:11px;padding:1px 7px;border-radius:999px;}
+.sc-tab.active .sc-tab-n{background:rgba(255,255,255,.25);color:#fff;}
+.sc-search{display:flex;gap:8px;}
+.sc-search input{flex:1;min-width:0;height:38px;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:0 12px;background:#f8fafc;color:#0f172a;}
+.sc-search input::placeholder{color:#6b7c8c;}
+.sc-search .btn{background:#2aabee;color:#fff;border:0;flex-shrink:0;}
+.sc-list{flex:1;min-height:0;padding:0;overflow-y:auto;background:transparent;border:0;border-radius:0;}
+.sc-row{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none;color:inherit;transition:background .12s;position:relative;}
+.sc-row:last-child{border-bottom:0;}
+.sc-row:hover{background:#ffffff;}
+.sc-row.active{background:#f8fafc;}
+.sc-row.active::before{content:"";position:absolute;top:0;bottom:0;inset-inline-start:0;width:3px;background:#2aabee;}
+.sc-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2aabee,#229ed9);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;}
+.sc-avatar.is-closed{opacity:.55;filter:grayscale(.3);}
+.sc-row-body{flex:1;min-width:0;}
+.sc-row-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+.sc-row-title{font-weight:800;font-size:14px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sc-row-time{font-size:11px;color:#64748b;flex-shrink:0;}
+.sc-row-meta{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:3px;font-size:11.5px;color:#64748b;}
+.sc-pill{display:inline-flex;padding:1px 7px;border-radius:999px;background:rgba(15,23,42,.08);border:1px solid rgba(255,255,255,.08);font-size:10.5px;font-weight:700;color:#9aa7b5;}
+.sc-pill.ok{background:rgba(76,217,100,.12);border-color:rgba(76,217,100,.25);color:#4cd964;}
+.sc-pill.muted{opacity:.75;}
+.sc-row-preview{margin-top:4px;font-size:12.5px;color:#8b9aab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sc-unread{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#2aabee;color:#fff;font-size:10.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;}
+.sc-empty{padding:48px 20px;text-align:center;color:#64748b;}
+.sc-empty-icon{font-size:36px;margin-bottom:8px;}
+.sc-empty-hint{font-size:12.5px;opacity:.85;}
+
+.sc-chat-pane{order:2;flex:1;min-width:0;display:flex;flex-direction:column;position:relative;background:#f1f5f9;}
+.sc-chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#64748b;}
+.sc-chat-empty[hidden]{display:none;}
+.sc-chat-empty-icon{font-size:44px;opacity:.7;}
+.sc-chat-iframe{flex:1;width:100%;height:100%;border:0;display:block;}
+.sc-chat-iframe[hidden]{display:none;}
+
+@media(max-width:900px){
+  .sc-shell{display:block;height:auto;border:0;border-radius:0;background:transparent;}
+  .sc-list-pane{width:100%;border-inline-end:0;box-shadow:none;}
+  .sc-list{background:#f8fafc;border:1px solid rgba(15,23,42,.08);border-radius:14px;overflow:hidden;}
+  .sc-chat-pane{display:none;}
+}
+
+/* روشن، مدرن و یکپارچه */
+.sc-shell{background:#f8fafc;border:1px solid #e2e8f0;box-shadow:0 18px 50px rgba(15,23,42,.08);border-radius:22px;height:min(86vh,820px)}
+.sc-list-pane{width:410px;order:1;background:#fff;border-inline-end:1px solid #e2e8f0}.sc-inbox-head{padding:22px 20px 12px}.sc-title{color:#172033;font-size:1.35rem}.sc-sub{color:#64748b}.sc-tabs{background:#f1f5f9;border-color:#e2e8f0}.sc-tab{color:#64748b}.sc-tab.active{background:linear-gradient(135deg,#6d5dfc,#5146d8);color:#fff;box-shadow:0 6px 16px rgba(79,70,229,.2)}.sc-search input{background:#fff;color:#172033;border-color:#e2e8f0}.sc-search .btn{background:#5b4ee5;border-radius:10px}.sc-row{padding:14px 18px;border-bottom-color:#eef2f7}.sc-row:hover{background:#f8faff}.sc-row.active{background:#eef2ff}.sc-row.active::before{background:#5b4ee5}.sc-row-title{color:#172033}.sc-row-time,.sc-row-meta,.sc-row-preview{color:#64748b}.sc-pill{background:#f8fafc;border-color:#e2e8f0;color:#64748b}.sc-pill.ok{background:#ecfdf5;border-color:#bbf7d0;color:#15803d}.sc-avatar{background:linear-gradient(135deg,#6d5dfc,#5146d8);box-shadow:0 8px 18px rgba(79,70,229,.18)}.sc-unread{background:#5b4ee5}.sc-chat-pane{order:2;background:#f8fafc}.sc-chat-empty{color:#64748b;background:radial-gradient(circle at center,rgba(99,102,241,.08),transparent 38%)}.sc-chat-empty-icon{font-size:58px}.sc-chat-iframe{background:#fff}
+@media(max-width:900px){.sc-shell{height:auto;border:0;box-shadow:none;background:transparent}.sc-list-pane{width:100%}.sc-list{background:#fff;border-color:#e2e8f0}.sc-chat-pane{display:none}}
+</style>
+
+<script>
+(function(){
+  var isDesktop = function(){ return window.innerWidth >= 900; };
+  var pane = document.getElementById('sc-chat-pane');
+  var empty = document.getElementById('sc-chat-empty');
+  var frame = document.getElementById('sc-chat-iframe');
+  var list = document.getElementById('sc-list');
+  if (!list || !frame) return;
+
+  var currentOpenId = null;
+
+  function openThread(id, row){
+    currentOpenId = String(id);
+    frame.src = '/support/thread/' + id + '/embed';
+    frame.hidden = false;
+    if (empty) empty.hidden = true;
+    list.querySelectorAll('.sc-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (row) row.classList.add('active');
+  }
+
+  list.addEventListener('click', function(e){
+    if (!isDesktop()) return; // موبایل: ناوبری معمولی به صفحه کامل گفتگو
+    var row = e.target.closest('.sc-row');
+    if (!row) return;
+    e.preventDefault();
+    openThread(row.getAttribute('data-thread-id'), row);
+  });
+
+  {% if open_thread_id %}
+  (function(){
+    var target = list.querySelector('.sc-row[data-thread-id="{{ open_thread_id }}"]');
+    if (isDesktop()) openThread({{ open_thread_id }}, target);
+  })();
+  {% endif %}
+
+  // پیام‌های جدید از سایر مشتریان: فهرست را دوره‌ای به‌روزرسانی کن،
+  // بدون نیاز به کلیک روی ساید‌بار یا رفرش صفحه
+  var refreshing = false;
+  function refreshList(){
+    if (refreshing || document.hidden) return;
+    refreshing = true;
+    fetch(window.location.href, {credentials:'same-origin', cache:'no-store'})
+      .then(function(r){ return r.text(); })
+      .then(function(html){
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var freshList = doc.getElementById('sc-list');
+        if (!freshList) return;
+        list.innerHTML = freshList.innerHTML;
+        if (currentOpenId){
+          var row = list.querySelector('.sc-row[data-thread-id="' + currentOpenId + '"]');
+          if (row) row.classList.add('active');
+        }
+      })
+      .catch(function(){})
+      .finally(function(){ refreshing = false; });
+  }
+  setInterval(refreshList, 8000);
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) refreshList();
+  });
+  window.addEventListener('sazgan:support-unread', refreshList);
+  function showNoConversation(){
+    currentOpenId = null;
+    if (frame) { frame.hidden = true; frame.src = 'about:blank'; }
+    if (empty) empty.hidden = false;
+    var msg = document.getElementById('sc-empty-text');
+    if (msg) msg.textContent = 'گفتگویی موجود نیست';
+    refreshList();
+  }
+  window.addEventListener('message', function(ev){
+    try {
+      if (!ev.data) return;
+      if (ev.data.type === 'sazgan-thread-closed' || ev.data.type === 'sazgan-chat-exit') {
+        showNoConversation();
+      }
+    } catch(e) {}
+  });
+
+  // ---- اعلام آنلاین بودن به سرور تا مشتری در صفحه‌ی گفتگو وضعیت «آنلاین» را ببیند ----
+  (function(){
+    function csrfToken(){
+      var meta = document.querySelector('meta[name="csrf-token"]');
+      return meta ? (meta.getAttribute('content') || '') : '';
+    }
+    function pingPresence(){
+      var tok = csrfToken();
+      fetch('/api/support/presence/ping', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: tok ? {'X-CSRF-Token': tok} : {}
+      }).catch(function(){});
+    }
+    pingPresence();
+    setInterval(pingPresence, 20000);
+  })();
+})();
+</script>
+{% endblock %}

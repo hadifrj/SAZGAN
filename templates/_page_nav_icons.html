@@ -1,0 +1,20 @@
+{# نوار آیکن ناوبری: برگشت + خانه #}
+{% set _back = (back_url if (back_url is defined and back_url) else '') %}
+{% set _home = (home_url if (home_url is defined and home_url) else '/') %}
+{% set _show_home = (show_home if show_home is defined else true) %}
+<nav class="sg-nav-icons" aria-label="ناوبری صفحه">
+  {% if _back %}
+  <a href="{{ _back }}" class="sg-nav-btn sg-nav-back" aria-label="بازگشت" title="بازگشت">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+  </a>
+  {% else %}
+  <button type="button" class="sg-nav-btn sg-nav-back" aria-label="بازگشت" title="بازگشت" onclick="if(history.length>1){history.back()}else{location.href='{{ _home }}'}">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+  </button>
+  {% endif %}
+  {% if _show_home %}
+  <a href="{{ _home }}" class="sg-nav-btn sg-nav-home" aria-label="خانه" title="خانه">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 8-7 8 7"/><path d="M5 9v10a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1V9"/></svg>
+  </a>
+  {% endif %}
+</nav>

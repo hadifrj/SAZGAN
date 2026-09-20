@@ -1,0 +1,746 @@
+{% extends "base.html" %}
+{% block title %}سازگان | تنظیمات نمایش{% endblock %}
+
+{% block content %}
+<div class="stg-page-head">
+  <h1 class="stg-page-title">تم و نمایش</h1>
+  <p class="stg-page-sub">حالت رنگی، رنگ اصلی، فونت و اندازه‌ها را شخصی‌سازی کنید — تغییرات بلافاصله روی کل سامانه اعمال و در همین مرورگر ذخیره می‌شوند.</p>
+</div>
+
+<div class="stg-layout">
+  <!-- ستون اصلی -->
+  <div class="stg-main">
+
+    <!-- ظاهر -->
+    <div class="stg-card">
+      <div class="stg-card-title">ظاهر</div>
+      <p class="stg-card-sub">حالت رنگی سامانه را انتخاب کنید</p>
+      <div class="stg-appearance-grid" id="ds-theme">
+        <button type="button" class="stg-mode-card" data-theme="light">
+          <span class="stg-mode-thumb"><span class="stg-mode-thumb-dot"></span></span>
+          <span class="stg-mode-label"><span class="stg-mode-radio"></span> روشن</span>
+        </button>
+        <button type="button" class="stg-mode-card" data-theme="dark">
+          <span class="stg-mode-thumb"><span class="stg-mode-thumb-dot"></span></span>
+          <span class="stg-mode-label"><span class="stg-mode-radio"></span> تیره</span>
+        </button>
+        <button type="button" class="stg-mode-card" data-theme="system">
+          <span class="stg-mode-thumb"><span class="stg-mode-thumb-dot"></span></span>
+          <span class="stg-mode-label"><span class="stg-mode-radio"></span> پیروی از سیستم</span>
+        </button>
+      </div>
+
+      <div class="stg-card-title" style="padding-top:18px;">سبک کامل نرم‌افزار</div>
+      <p class="stg-card-sub">این انتخاب رنگ اصلی، سطوح، کارت‌ها و ظاهر کلی را یکپارچه در وب، PWA و نسخه Native اعمال می‌کند.</p>
+      <div class="stg-appearance-grid" id="ds-ui-theme">
+        <button type="button" class="stg-mode-card sg-ui-theme-card" data-uitheme="light_modern_indigo">
+          <span class="stg-mode-thumb sg-indigo-thumb"><span class="stg-mode-thumb-dot"></span></span>
+          <span class="stg-mode-label"><span class="stg-mode-radio"></span> Light Modern Indigo</span>
+        </button>
+        <button type="button" class="stg-mode-card sg-ui-theme-card" data-uitheme="dark_modern_indigo">
+          <span class="stg-mode-thumb sg-dark-thumb"><span class="stg-mode-thumb-dot"></span></span>
+          <span class="stg-mode-label"><span class="stg-mode-radio"></span> Dark Modern Indigo</span>
+        </button>
+        <button type="button" class="stg-mode-card sg-ui-theme-card" data-uitheme="minimal_premium">
+          <span class="stg-mode-thumb sg-minimal-thumb"><span class="stg-mode-thumb-dot"></span></span>
+          <span class="stg-mode-label"><span class="stg-mode-radio"></span> Minimal Premium <small>پیش‌فرض</small></span>
+        </button>
+      </div>
+      <div class="stg-card-title" style="padding-top:2px;">رنگ‌ها</div>
+      <p class="stg-card-sub">رنگ اصلی، پس‌زمینه و سایدبار را سفارشی کنید</p>
+      <div class="stg-swatch-row">
+        <button type="button" class="stg-swatch-btn" id="ds-accent-swatch" data-cp-target="accent" title="رنگ اصلی — دکمه و هایلایت"></button>
+        <span id="ds-bg-section" style="display:inline-block;line-height:0;">
+          <button type="button" class="stg-swatch-btn" id="ds-bg-swatch" data-cp-target="bg" title="پس‌زمینه (فقط روز)"></button>
+        </span>
+        <button type="button" class="stg-swatch-btn" id="ds-sidebar-swatch" data-cp-target="sidebar" title="سایدبار — منوی کناری"></button>
+      </div>
+      <div class="stg-row" style="border-top:1px solid var(--border);">
+        <div class="stg-row-label"><b>راهنمای رنگ‌ها</b><span>روی هر دایره بزنید تا رنگ آن را با چرخ رنگی انتخاب کنید — از راست: اصلی، پس‌زمینه، سایدبار</span></div>
+      </div>
+    </div>
+
+    <!-- فونت و اندازه -->
+    <div class="stg-card">
+      <div class="stg-card-title">فونت و اندازه متن</div>
+      <p class="stg-card-sub">اگر فونت دیده نشد، فایل woff2 را در static/fonts بگذارید یا فونت را روی ویندوز نصب کنید.</p>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>فونت رابط کاربری</b><span>فونت استفاده‌شده در سراسر سامانه</span></div>
+        <div class="stg-row-control">
+          <div class="stg-seg" id="ds-font">
+            <button type="button" data-font="vazirmatn">وزیر</button>
+            <button type="button" data-font="iransans">ایران‌سنس</button>
+            <button type="button" data-font="iransansx">IRANSansX</button>
+            <button type="button" data-font="iranyekan">ایران‌یکان</button>
+            <button type="button" data-font="bnazanin">B Nazanin</button>
+            <button type="button" data-font="yekanbakh">یکان‌بخ</button>
+            <button type="button" data-font="tahoma">تاهوما</button>
+            <button type="button" data-font="system">سیستم</button>
+          </div>
+        </div>
+      </div>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>اندازه متن</b><span>اندازهٔ متن در سراسر سامانه</span></div>
+        <div class="stg-row-control">
+          <div class="stg-seg" id="ds-size">
+            <button type="button" data-size="sm">کوچک</button>
+            <button type="button" data-size="md">متوسط</button>
+            <button type="button" data-size="lg">بزرگ</button>
+            <button type="button" data-size="xl">خیلی بزرگ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- مقیاس و چیدمان -->
+    <div class="stg-card">
+      <div class="stg-card-title">مقیاس و چیدمان</div>
+      <p class="stg-card-sub">تراکم فاصله‌ها و گردی گوشه‌های اجزای رابط کاربری</p>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>تراکم</b><span>فاصله‌گذاری کارت‌ها، جدول‌ها و منو</span></div>
+        <div class="stg-row-control">
+          <div class="stg-seg" id="ds-density">
+            <button type="button" data-density="compact">فشرده</button>
+            <button type="button" data-density="comfortable">عادی</button>
+            <button type="button" data-density="spacious">راحت</button>
+          </div>
+        </div>
+      </div>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>گردی گوشه‌ها</b><span>شکل ظاهری دکمه‌ها و کارت‌ها</span></div>
+        <div class="stg-row-control">
+          <div class="stg-seg" id="ds-radius">
+            <button type="button" data-radius="sharp">تیز</button>
+            <button type="button" data-radius="soft">متوسط</button>
+            <button type="button" data-radius="round">گرد</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- فونت خروجی/پرینت -->
+    <div class="stg-card">
+      <div class="stg-card-title">فونت خروجی / پرینت</div>
+      <p class="stg-card-sub">برای برگه‌های چاپی، PDF و خروجی پرینت</p>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>فونت چاپ</b></div>
+        <div class="stg-row-control">
+          <div class="stg-seg" id="ds-print-font">
+            <button type="button" data-printfont="vazirmatn">وزیر</button>
+            <button type="button" data-printfont="iransans">ایران‌سنس</button>
+            <button type="button" data-printfont="iransansx">IRANSansX</button>
+            <button type="button" data-printfont="iranyekan">ایران‌یکان</button>
+            <button type="button" data-printfont="bnazanin">B Nazanin</button>
+            <button type="button" data-printfont="yekanbakh">یکان‌بخ</button>
+            <button type="button" data-printfont="tahoma">تاهوما</button>
+          </div>
+        </div>
+      </div>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>اندازهٔ چاپ</b></div>
+        <div class="stg-row-control">
+          <div class="stg-seg" id="ds-print-size">
+            <button type="button" data-printsize="10pt">۱۰pt</button>
+            <button type="button" data-printsize="11pt">۱۱pt</button>
+            <button type="button" data-printsize="12pt">۱۲pt</button>
+            <button type="button" data-printsize="14pt">۱۴pt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- دسترس‌پذیری -->
+    <div class="stg-card">
+      <div class="stg-card-title">دسترس‌پذیری</div>
+      <p class="stg-card-sub">تنظیمات مربوط به راحتی و وضوح استفاده</p>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>کاهش انیمیشن</b><span>توقف افکت‌های حرکتی و ترنزیشن‌ها</span></div>
+        <div class="stg-row-control">
+          <label class="ds-switch"><input type="checkbox" id="ds-reduce-motion"><span class="ds-switch-track"><span class="ds-switch-thumb"></span></span></label>
+        </div>
+      </div>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>افزایش کنتراست</b><span>متن و مرزهای پررنگ‌تر برای خوانایی بهتر</span></div>
+        <div class="stg-row-control">
+          <label class="ds-switch"><input type="checkbox" id="ds-increase-contrast"><span class="ds-switch-track"><span class="ds-switch-thumb"></span></span></label>
+        </div>
+      </div>
+      <div class="stg-row">
+        <div class="stg-row-label"><b>حالت AMOLED</b><span>پس‌زمینه مشکی خالص در حالت تیره (کاهش مصرف باتری در صفحات OLED)</span></div>
+        <div class="stg-row-control">
+          <label class="ds-switch"><input type="checkbox" id="ds-amoled"><span class="ds-switch-track"><span class="ds-switch-thumb"></span></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- تم‌های آماده -->
+    <div class="stg-card">
+      <div class="stg-card-title">تم‌های آماده</div>
+      <p class="stg-card-sub">یکی از تم‌های آماده را انتخاب یا تم دلخواه خود را ذخیره کنید</p>
+      <div style="padding:0 18px 6px;">
+        <div class="ds-theme-grid" id="ds-preset-themes"></div>
+        <h4 class="ds-subtitle">تم‌های من</h4>
+        <div class="ds-theme-grid" id="ds-custom-themes"></div>
+        <div class="ds-save-theme-row">
+          <input type="text" id="ds-theme-name" class="ds-theme-name-input" placeholder="نام تم" maxlength="40">
+          <button type="button" class="btn" id="ds-theme-save-btn">ذخیره</button>
+        </div>
+        <p id="ds-theme-msg" class="muted-note" style="margin-top:6px;"></p>
+      </div>
+    </div>
+
+    <div class="ds-actions">
+      <button type="button" class="btn" id="ds-apply-btn">اعمال تنظیمات</button>
+      <button type="button" class="btn-cancel" id="ds-reset-btn">بازگشت به پیش‌فرض</button>
+    </div>
+    <p id="ds-msg" class="muted-note"></p>
+    <p class="muted-note" style="font-size:12px;">تغییرات در پیش‌نمایش دیده می‌شوند؛ برای اعمال روی کل سامانه «اعمال تنظیمات» را بزنید.</p>
+  </div>
+
+  <!-- ستون پیش‌نمایش -->
+  <div class="stg-preview-col">
+    <div class="stg-card stg-preview-sticky">
+      <div class="stg-card-title">پیش‌نمایش زنده</div>
+      <div style="padding:0 18px 18px;">
+        <div class="ds-preview-frame" id="ds-preview">
+          <div class="pv-sidebar" id="pv-sidebar">
+            <div class="pv-brand">Sazgan</div>
+            <div class="pv-link active">داشبورد</div>
+            <div class="pv-link">کارتابل</div>
+            <div class="pv-link">گزارش‌ها</div>
+            <div class="pv-link">تنظیمات</div>
+          </div>
+          <div class="pv-main" id="pv-main">
+            <div class="pv-top">
+              <span class="pv-title">نمونه صفحه</span>
+              <button type="button" class="pv-btn">دکمه</button>
+            </div>
+            <div class="pv-card">
+              <div class="pv-card-title">کارت نمونه</div>
+              <p class="pv-text">متن نمونه ظاهر سامانه.</p>
+              <div class="pv-actions">
+                <button type="button" class="pv-btn">تأیید</button>
+                <button type="button" class="pv-btn-ghost">انصراف</button>
+              </div>
+            </div>
+            <div class="pv-card">
+              <div class="pv-chip">فعال</div>
+              <div class="pv-bar"><span id="pv-bar-fill"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Color Picker -->
+<div class="cp-modal" id="cp-modal" style="display:none;" aria-hidden="true">
+  <div class="cp-overlay" id="cp-overlay"></div>
+  <div class="cp-card" role="dialog">
+    <div class="cp-gradient" id="cp-gradient"><div class="cp-pointer" id="cp-pointer"></div></div>
+    <div class="cp-hue" id="cp-hue"><div class="cp-hue-pointer" id="cp-hue-pointer"></div></div>
+    <div class="cp-presets" id="cp-presets"></div>
+    <div class="cp-footer">
+      <button type="button" class="cp-btn cp-btn-ghost" id="cp-cancel">خیر</button>
+      <button type="button" class="cp-btn cp-btn-primary" id="cp-ok">انتخاب</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.muted-note{font-size:13px;color:var(--text-muted);}
+.ds-subtitle{margin:10px 0 6px;font-size:12px;font-weight:600;color:var(--text-muted);}
+
+/* تم‌های آماده / تم‌های من */
+.ds-theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:7px;}
+.ds-theme-card{
+  border:1px solid var(--border);border-radius:10px;padding:7px;cursor:pointer;
+  background:var(--card,#fff);text-align:center;position:relative;
+}
+.ds-theme-card.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);}
+.ds-theme-swatches{display:flex;gap:3px;justify-content:center;margin-bottom:4px;}
+.ds-theme-swatches span{width:14px;height:14px;border-radius:4px;}
+.ds-theme-name{font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ds-theme-del{position:absolute;top:1px;left:3px;border:none;background:0;color:#b91c1c;cursor:pointer;font-size:13px;}
+.ds-save-theme-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.ds-theme-name-input{
+  flex:1;min-width:100px;padding:7px 10px;border:1px solid var(--border);
+  border-radius:8px;font-family:inherit;font-size:12.5px;
+}
+
+/* پیش‌نمایش زنده */
+.ds-preview-frame{
+  display:flex;border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;min-height:240px;box-shadow:0 4px 16px rgba(0,0,0,.07);direction:rtl;
+}
+.pv-sidebar{width:78px;padding:10px 6px;color:#fff;flex-shrink:0;display:flex;flex-direction:column;gap:3px;}
+.pv-brand{font-weight:800;font-size:11px;margin-bottom:8px;text-align:center;}
+.pv-link{font-size:10px;padding:5px;border-radius:5px;opacity:.75;text-align:center;}
+.pv-link.active{background:rgba(255,255,255,.2);opacity:1;font-weight:700;}
+.pv-main{flex:1;padding:10px;background:#f1f5f9;min-width:0;}
+.pv-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;}
+.pv-title{font-weight:700;font-size:12px;color:#1e293b;}
+.pv-card{background:#fff;border-radius:8px;padding:10px;margin-bottom:6px;border:1px solid #e2e8f0;}
+.pv-card-title{font-weight:700;font-size:12px;margin-bottom:3px;color:#1e293b;}
+.pv-text{font-size:11px;color:#64748b;margin:0 0 6px;}
+.pv-actions{display:flex;gap:5px;}
+.pv-btn{border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;font-family:inherit;}
+.pv-btn-ghost{border:1px solid #e2e8f0;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;background:#fff;color:#64748b;font-family:inherit;}
+.pv-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;color:#fff;margin-bottom:6px;}
+.pv-bar{height:5px;background:#e2e8f0;border-radius:999px;overflow:hidden;}
+.pv-bar span{display:block;height:100%;width:65%;border-radius:999px;}
+
+/* انتخاب‌گر رنگ */
+.cp-modal{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;}
+.cp-modal.open{display:flex;}
+.cp-overlay{position:absolute;inset:0;background:rgba(15,23,42,.45);}
+.cp-card{position:relative;z-index:1;width:min(280px,calc(100vw - 32px));background:#fff;border-radius:16px;padding:12px;box-shadow:0 20px 50px rgba(0,0,0,.25);direction:ltr;}
+.cp-gradient{position:relative;width:100%;aspect-ratio:1.35/1;border-radius:10px;overflow:hidden;cursor:crosshair;background:#1a237e;}
+.cp-pointer{position:absolute;width:18px;height:18px;border:2.5px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.25);transform:translate(-50%,-50%);pointer-events:none;top:30%;left:70%;}
+.cp-hue{position:relative;height:14px;margin:12px 2px 14px;border-radius:999px;cursor:pointer;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);}
+.cp-hue-pointer{position:absolute;top:50%;width:18px;height:18px;border:2.5px solid #fff;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.2);left:50%;}
+.cp-presets{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;padding:0 2px;}
+.cp-swatch{aspect-ratio:1;border-radius:8px;border:2px solid transparent;cursor:pointer;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);}
+.cp-swatch.active{border-color:#1e293b;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #1e293b;}
+.cp-footer{display:flex;justify-content:flex-end;gap:8px;}
+.cp-btn{border:1px solid #e2e8f0;background:#fff;color:#334155;font-family:inherit;font-size:13px;font-weight:600;padding:7px 16px;border-radius:999px;cursor:pointer;}
+.cp-btn-primary{background:var(--accent,#E2231A);border-color:var(--accent,#E2231A);color:#fff;}
+.cp-btn-ghost{color:#64748b;}
+
+.ds-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 6px;}
+.ds-actions .btn{min-width:140px;}
+.ds-dirty{outline:2px solid var(--accent,#0284c7);outline-offset:2px;}
+
+/* سوییچ دسترس‌پذیری */
+.ds-switch{position:relative;display:inline-block;width:42px;height:24px;cursor:pointer;}
+.ds-switch input{opacity:0;width:0;height:0;position:absolute;}
+.ds-switch-track{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:background .15s;}
+.ds-switch-thumb{position:absolute;top:3px;right:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.ds-switch input:checked + .ds-switch-track{background:var(--accent,#0284c7);}
+.ds-switch input:checked + .ds-switch-track .ds-switch-thumb{transform:translateX(-18px);}
+.sg-indigo-thumb{background:#eef2ff!important}.sg-dark-thumb{background:#111827!important}.sg-dark-thumb::before,.sg-dark-thumb::after{background:#1f2937!important}.sg-minimal-thumb{background:#fff!important;border:1px solid #d1d5db}.sg-ui-theme-card small{display:block;color:#64748b;font-size:10px;margin-top:3px}
+</style>
+
+
+<script>
+(function () {
+  var KEY = (window.SazganDisplay && window.SazganDisplay.KEY) || 'sazgan-display';
+  var THEMES_KEY = 'sazgan-custom-themes';
+
+  /* پیش‌فرض اولین اجرا: Minimal Premium */
+  var defaults = {
+    uiTheme: 'minimal_premium',
+    theme: 'light',
+    accent: '#111827',
+    bg: '#f8fafc',
+    sidebar: '#ffffff',
+    font: 'vazirmatn',
+    size: 'md',
+    density: 'comfortable',
+    radius: 'soft',
+    printFont: 'vazirmatn',
+    printSize: '12pt',
+    cardTheme: 'mono',
+    colorThemeId: 'minimal-premium',
+    reduceMotion: false,
+    increaseContrast: false,
+    amoled: false
+  };
+
+  var PRESET_THEMES = [
+    { id: 'ocean', name: 'اقیانوس', accent: '#0284c7', bg: '#f0f9ff', sidebar: '#0c4a6e' },
+    { id: 'sazgan', name: 'سازگان', accent: '#E2231A', bg: '#f8fafc', sidebar: '#6E0D0D' },
+    { id: 'forest', name: 'جنگل', accent: '#16a34a', bg: '#f0fdf4', sidebar: '#14532d' },
+    { id: 'violet', name: 'بنفش', accent: '#7c3aed', bg: '#f5f3ff', sidebar: '#4c1d95' },
+    { id: 'slate', name: 'سربی', accent: '#475569', bg: '#f8fafc', sidebar: '#1e293b' },
+    { id: 'classic', name: 'آبی کلاسیک', accent: '#2563eb', bg: '#e8f1fb', sidebar: '#0b1220' }
+  ];
+
+  function loadSaved() {
+    if (window.SazganDisplay && typeof window.SazganDisplay.load === 'function') {
+      try { return Object.assign({}, defaults, window.SazganDisplay.load()); } catch (e) {}
+    }
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return Object.assign({}, defaults);
+      return Object.assign({}, defaults, JSON.parse(raw));
+    } catch (e) { return Object.assign({}, defaults); }
+  }
+
+  function persist(cfg) {
+    cfg.accent = (cfg.accent || '').toLowerCase();
+    cfg.bg = (cfg.bg || '').toLowerCase();
+    cfg.sidebar = (cfg.sidebar || '').toLowerCase();
+    try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {}
+    try { localStorage.setItem('sazgan-theme', cfg.theme === 'dark' ? 'dark' : 'light'); } catch (e) {}
+    if (window.SazganDisplay && typeof window.SazganDisplay.apply === 'function') {
+      window.SazganDisplay.apply(cfg);
+    }
+  }
+
+  function loadCustomThemes() {
+    try { return JSON.parse(localStorage.getItem(THEMES_KEY) || '[]'); } catch (e) { return []; }
+  }
+  function saveCustomThemes(list) {
+    try { localStorage.setItem(THEMES_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  function updatePreview(cfg) {
+    var side = document.getElementById('pv-sidebar');
+    var main = document.getElementById('pv-main');
+    if (side) side.style.background = cfg.sidebar;
+    if (main) {
+      main.style.background = cfg.theme === 'dark' ? '#0f172a' : (cfg.bg || '#f0f9ff');
+      main.querySelectorAll('.pv-card').forEach(function (c) {
+        c.style.background = cfg.theme === 'dark' ? '#1e293b' : '#fff';
+        c.style.borderColor = cfg.theme === 'dark' ? '#334155' : '#e2e8f0';
+        var rmap = { sharp: '6px', soft: '12px', round: '16px' };
+        c.style.borderRadius = rmap[cfg.radius] || '12px';
+      });
+      main.querySelectorAll('.pv-title, .pv-card-title').forEach(function (el) {
+        el.style.color = cfg.theme === 'dark' ? '#f1f5f9' : '#1e293b';
+      });
+      main.querySelectorAll('.pv-text').forEach(function (el) {
+        el.style.color = cfg.theme === 'dark' ? '#94a3b8' : '#64748b';
+      });
+    }
+    document.querySelectorAll('.pv-btn').forEach(function (b) {
+      b.style.background = cfg.accent;
+      var rmap = { sharp: '4px', soft: '8px', round: '14px' };
+      b.style.borderRadius = rmap[cfg.radius] || '8px';
+    });
+    document.querySelectorAll('.pv-chip').forEach(function (c) { c.style.background = cfg.accent; });
+    var bar = document.getElementById('pv-bar-fill');
+    if (bar) bar.style.background = cfg.accent;
+    var frame=document.getElementById('ds-preview');
+    if(frame){
+      var fmap={vazirmatn:"'Vazirmatn',Tahoma,sans-serif",iransans:"'IRANSans',Tahoma,sans-serif",
+        iransansx:"'IRANSansX',Tahoma,sans-serif",iranyekan:"'IRANYekan',Tahoma,sans-serif",
+        bnazanin:"'B Nazanin',Tahoma,serif",yekanbakh:"'Yekan Bakh',Tahoma,sans-serif",
+        tahoma:"Tahoma,sans-serif",system:"system-ui,Tahoma,sans-serif"};
+      var smap={sm:'12px',md:'13.5px',lg:'15px',xl:'16.5px'};
+      frame.style.fontFamily=fmap[cfg.font]||fmap.vazirmatn;
+      frame.style.fontSize=smap[cfg.size]||'13.5px';
+    }
+    /* نشان تراکم در پیش‌نمایش */
+    var pad = { compact: '6px', comfortable: '10px', spacious: '16px' }[cfg.density] || '10px';
+    if (main) main.style.padding = pad;
+  }
+
+  function mark(groupId, attr, value) {
+    var root = document.getElementById(groupId);
+    if (!root) return;
+    root.querySelectorAll('[data-' + attr + ']').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-' + attr) === String(value));
+    });
+  }
+  function setSwatches(cfg) {
+    var map = { accent: 'ds-accent-swatch', bg: 'ds-bg-swatch', sidebar: 'ds-sidebar-swatch' };
+    Object.keys(map).forEach(function (k) {
+      var el = document.getElementById(map[k]);
+      if (el) el.style.background = cfg[k];
+    });
+    var bgSec = document.getElementById('ds-bg-section');
+    if (bgSec) bgSec.style.opacity = cfg.theme === 'dark' ? '0.45' : '1';
+  }
+  function syncUI(cfg) {
+    mark('ds-theme', 'theme', cfg.theme === 'dark' ? 'dark' : (cfg.theme === 'system' ? 'system' : 'light'));
+    mark('ds-font', 'font', cfg.font);
+    mark('ds-size', 'size', cfg.size);
+    mark('ds-density', 'density', cfg.density);
+    mark('ds-radius', 'radius', cfg.radius);
+    mark('ds-ui-theme', 'uitheme', cfg.uiTheme || 'minimal_premium');
+    mark('ds-print-font', 'printfont', cfg.printFont || cfg.font || 'vazirmatn');
+    mark('ds-print-size', 'printsize', cfg.printSize || '12pt');
+    var rmEl = document.getElementById('ds-reduce-motion');
+    if (rmEl) rmEl.checked = !!cfg.reduceMotion;
+    var icEl = document.getElementById('ds-increase-contrast');
+    if (icEl) icEl.checked = !!cfg.increaseContrast;
+    var amEl = document.getElementById('ds-amoled');
+    if (amEl) amEl.checked = !!cfg.amoled;
+    setSwatches(cfg);
+    updatePreview(cfg);
+  }
+
+  var applied = loadSaved();
+  var draft = Object.assign({}, applied);
+  syncUI(draft);
+  /* اعمال ذخیره‌شده روی سامانه */
+  persist(applied);
+
+  function setDirty(on) {
+    var btn = document.getElementById('ds-apply-btn');
+    if (btn) btn.classList.toggle('ds-dirty', !!on);
+  }
+  function touchDraft() {
+    setDirty(true);
+    syncUI(draft);
+    updatePreview(draft);
+    var msg = document.getElementById('ds-msg');
+    if (msg) msg.textContent = 'پیش‌نمایش به‌روز شد — برای اعمال روی سامانه دکمه «اعمال تنظیمات» را بزنید.';
+  }
+
+  function bindGroup(id, attr) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-' + attr + ']');
+      if (!btn) return;
+      draft[attr] = btn.getAttribute('data-' + attr);
+      touchDraft();
+    });
+  }
+  bindGroup('ds-theme', 'theme');
+  bindGroup('ds-font', 'font');
+  bindGroup('ds-size', 'size');
+  bindGroup('ds-density', 'density');
+  bindGroup('ds-radius', 'radius');
+  bindGroup('ds-ui-theme', 'uitheme');
+  (function(){
+    var preset={light_modern_indigo:{theme:'light',accent:'#4f46e5',bg:'#f8fafc',sidebar:'#ffffff',cardTheme:'default'},dark_modern_indigo:{theme:'dark',accent:'#6366f1',bg:'#0f172a',sidebar:'#111827',cardTheme:'default'},minimal_premium:{theme:'light',accent:'#111827',bg:'#f8fafc',sidebar:'#ffffff',cardTheme:'mono'}};
+    document.querySelectorAll('#ds-ui-theme [data-uitheme]').forEach(function(b){b.addEventListener('click',function(){var p=preset[this.dataset.uitheme]; if(!p)return; draft.uiTheme=this.dataset.uitheme; Object.assign(draft,p); touchDraft();});});
+  })();
+  // print font/size
+  (function(){
+    var el=document.getElementById('ds-print-font');
+    if(el) el.addEventListener('click', function(e){
+      var b=e.target.closest('[data-printfont]'); if(!b) return;
+      draft.printFont=b.getAttribute('data-printfont'); touchDraft();
+    });
+    var el2=document.getElementById('ds-print-size');
+    if(el2) el2.addEventListener('click', function(e){
+      var b=e.target.closest('[data-printsize]'); if(!b) return;
+      draft.printSize=b.getAttribute('data-printsize'); touchDraft();
+    });
+  })();
+
+  // دسترس‌پذیری
+  (function(){
+    var rm=document.getElementById('ds-reduce-motion');
+    if(rm) rm.addEventListener('change', function(){ draft.reduceMotion=rm.checked; touchDraft(); });
+    var ic=document.getElementById('ds-increase-contrast');
+    if(ic) ic.addEventListener('change', function(){ draft.increaseContrast=ic.checked; touchDraft(); });
+    var am=document.getElementById('ds-amoled');
+    if(am) am.addEventListener('change', function(){ draft.amoled=am.checked; touchDraft(); });
+  })();
+
+  /* Apply */
+  document.getElementById('ds-apply-btn').addEventListener('click', function () {
+    applied = Object.assign({}, draft);
+    persist(applied);
+    setDirty(false);
+    if (window.SazganDisplay && typeof window.SazganDisplay.saveToServer === 'function') {
+      window.SazganDisplay.saveToServer(applied);
+    }
+    var msg = document.getElementById('ds-msg');
+    if (msg) msg.textContent = 'تنظیمات روی کل سامانه (و صفحه ورود) اعمال شد.';
+  });
+
+  /* Reset to Light Modern Indigo defaults */
+  document.getElementById('ds-reset-btn').addEventListener('click', function () {
+    if (!confirm('بازگشت به تنظیمات پیش‌فرض (Light Modern Indigo)؟')) return;
+    draft = Object.assign({}, defaults);
+    applied = Object.assign({}, defaults);
+    persist(applied);
+    syncUI(applied);
+    setDirty(false);
+    renderThemeGrids();
+    var msg = document.getElementById('ds-msg');
+    if (msg) msg.textContent = 'به پیش‌فرض Light Modern Indigo بازگشت.';
+  });
+
+  /* Color Picker */
+  var cp = {
+    hue: 0, sat: 80, bri: 90, color: '#0284c7', target: null,
+    modal: document.getElementById('cp-modal'),
+    grad: document.getElementById('cp-gradient'),
+    ptr: document.getElementById('cp-pointer'),
+    hueBar: document.getElementById('cp-hue'),
+    huePtr: document.getElementById('cp-hue-pointer'),
+    presets: document.getElementById('cp-presets')
+  };
+  var PRESET_COLORS = [
+    '#0284c7','#0c4a6e','#E2231A','#EF5350','#AB47BC','#5C6BC0',
+    '#42A5F5','#26A69A','#66BB6A','#16a34a','#FFA726','#7c3aed',
+    '#475569','#0f172a','#6E0D0D','#1e293b','#14532d','#f0f9ff'
+  ];
+  function hsbToHex(h, s, b) {
+    s /= 100; b /= 100;
+    var k = function (n) { return (n + h / 60) % 6; };
+    var f = function (n) { return b * (1 - s * Math.max(0, Math.min(k(n), 4 - k(n), 1))); };
+    var r = Math.round(f(5) * 255), g = Math.round(f(3) * 255), bl = Math.round(f(1) * 255);
+    return '#' + [r, g, bl].map(function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+  }
+  function hexToHsb(hex) {
+    var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+    var r = 0, g = 0, b = 0;
+    if (m) { r = parseInt(m[1],16)/255; g = parseInt(m[2],16)/255; b = parseInt(m[3],16)/255; }
+    var max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+    var h = 0;
+    if (d) {
+      if (max === r) h = ((g - b) / d) % 6;
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60; if (h < 0) h += 360;
+    }
+    return { h: h, s: max === 0 ? 0 : (d / max) * 100, b: max * 100 };
+  }
+  function cpUpdate() {
+    cp.color = hsbToHex(cp.hue, cp.sat, cp.bri);
+    var pure = hsbToHex(cp.hue, 100, 100);
+    cp.grad.style.background = 'linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,' + pure + ')';
+    var r = cp.grad.getBoundingClientRect();
+    if (r.width) {
+      cp.ptr.style.left = (cp.sat / 100 * r.width) + 'px';
+      cp.ptr.style.top = ((100 - cp.bri) / 100 * r.height) + 'px';
+    }
+    var hr = cp.hueBar.getBoundingClientRect();
+    if (hr.width) cp.huePtr.style.left = (cp.hue / 360 * hr.width) + 'px';
+  }
+  function cpOpen(target, color) {
+    cp.target = target;
+    var hsb = hexToHsb(color || '#0284c7');
+    cp.hue = hsb.h; cp.sat = hsb.s; cp.bri = hsb.b;
+    cp.modal.style.display = 'flex';
+    cp.modal.classList.add('open');
+    requestAnimationFrame(cpUpdate);
+  }
+  function cpClose() {
+    cp.modal.classList.remove('open');
+    cp.modal.style.display = 'none';
+  }
+  function cpApply() {
+    if (!cp.target) return;
+    draft[cp.target] = cp.color;
+    draft.colorThemeId = null;
+    touchDraft();
+    cpClose();
+  }
+  PRESET_COLORS.forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'cp-swatch'; b.style.background = c;
+    b.addEventListener('click', function () {
+      var hsb = hexToHsb(c);
+      cp.hue = hsb.h; cp.sat = hsb.s; cp.bri = hsb.b;
+      cpUpdate();
+    });
+    cp.presets.appendChild(b);
+  });
+  document.getElementById('cp-cancel').addEventListener('click', cpClose);
+  document.getElementById('cp-overlay').addEventListener('click', cpClose);
+  document.getElementById('cp-ok').addEventListener('click', cpApply);
+  var dragG = false, dragH = false;
+  function onGrad(e) {
+    e.preventDefault();
+    var pt = e.touches ? e.touches[0] : e;
+    var r = cp.grad.getBoundingClientRect();
+    var x = Math.max(0, Math.min(pt.clientX - r.left, r.width));
+    var y = Math.max(0, Math.min(pt.clientY - r.top, r.height));
+    cp.sat = (x / r.width) * 100;
+    cp.bri = 100 - (y / r.height) * 100;
+    cpUpdate();
+  }
+  function onHue(e) {
+    e.preventDefault();
+    var pt = e.touches ? e.touches[0] : e;
+    var r = cp.hueBar.getBoundingClientRect();
+    cp.hue = (Math.max(0, Math.min(pt.clientX - r.left, r.width)) / r.width) * 360;
+    cpUpdate();
+  }
+  cp.grad.addEventListener('mousedown', function (e) { dragG = true; onGrad(e); });
+  cp.hueBar.addEventListener('mousedown', function (e) { dragH = true; onHue(e); });
+  cp.grad.addEventListener('touchstart', function (e) { dragG = true; onGrad(e); }, { passive: false });
+  cp.hueBar.addEventListener('touchstart', function (e) { dragH = true; onHue(e); }, { passive: false });
+  window.addEventListener('mousemove', function (e) { if (dragG) onGrad(e); if (dragH) onHue(e); });
+  window.addEventListener('touchmove', function (e) { if (dragG) onGrad(e); if (dragH) onHue(e); }, { passive: false });
+  window.addEventListener('mouseup', function () { dragG = dragH = false; });
+  window.addEventListener('touchend', function () { dragG = dragH = false; });
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-cp-target]');
+    if (!t) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var key = t.getAttribute('data-cp-target');
+    cpOpen(key, draft[key] || defaults[key]);
+  });
+
+  function makeThemeCard(t, isCustom) {
+    var card = document.createElement('div');
+    card.className = 'ds-theme-card' + (draft.colorThemeId === t.id ? ' active' : '');
+    var swatches = document.createElement('div');
+    swatches.className = 'ds-theme-swatches';
+    [t.accent, t.bg, t.sidebar].forEach(function (color) {
+      var sw = document.createElement('span');
+      sw.style.background = /^#[0-9a-f]{6}$/i.test(color || '') ? color : '#94a3b8';
+      swatches.appendChild(sw);
+    });
+    var nameEl = document.createElement('div');
+    nameEl.className = 'ds-theme-name';
+    nameEl.textContent = String(t.name || '').slice(0, 40);
+    card.appendChild(swatches);
+    card.appendChild(nameEl);
+    if (isCustom) {
+      var del = document.createElement('button');
+      del.type = 'button'; del.className = 'ds-theme-del'; del.textContent = '×';
+      del.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        saveCustomThemes(loadCustomThemes().filter(function (x) { return x.id !== t.id; }));
+        renderThemeGrids();
+      });
+      card.appendChild(del);
+    }
+    card.addEventListener('click', function () {
+      draft.accent = t.accent;
+      draft.bg = t.bg;
+      draft.sidebar = t.sidebar;
+      draft.colorThemeId = t.id;
+      touchDraft();
+      renderThemeGrids();
+    });
+    return card;
+  }
+  function renderThemeGrids() {
+    var presetRoot = document.getElementById('ds-preset-themes');
+    var customRoot = document.getElementById('ds-custom-themes');
+    if (presetRoot) {
+      presetRoot.innerHTML = '';
+      PRESET_THEMES.forEach(function (t) { presetRoot.appendChild(makeThemeCard(t, false)); });
+    }
+    if (customRoot) {
+      customRoot.innerHTML = '';
+      var customs = loadCustomThemes();
+      if (!customs.length) {
+        var empty = document.createElement('p');
+        empty.className = 'muted-note';
+        empty.style.cssText = 'grid-column:1/-1;margin:0;font-size:12px;';
+        empty.textContent = 'تم سفارشی نیست.';
+        customRoot.appendChild(empty);
+      } else {
+        customs.forEach(function (t) { customRoot.appendChild(makeThemeCard(t, true)); });
+      }
+    }
+  }
+  document.getElementById('ds-theme-save-btn').addEventListener('click', function () {
+    var nameEl = document.getElementById('ds-theme-name');
+    var name = (nameEl && nameEl.value || '').trim();
+    var msg = document.getElementById('ds-theme-msg');
+    if (!name) { if (msg) msg.textContent = 'نام وارد کنید.'; return; }
+    var list = loadCustomThemes();
+    var theme = { id: 'c-' + Date.now().toString(36), name: name.slice(0,40), accent: draft.accent, bg: draft.bg, sidebar: draft.sidebar };
+    var idx = list.findIndex(function (x) { return x.name === theme.name; });
+    if (idx >= 0) { theme.id = list[idx].id; list[idx] = theme; } else list.unshift(theme);
+    if (list.length > 20) list = list.slice(0, 20);
+    saveCustomThemes(list);
+    draft.colorThemeId = theme.id;
+    if (nameEl) nameEl.value = '';
+    renderThemeGrids();
+    if (msg) msg.textContent = 'تم ذخیره شد — برای اعمال روی سامانه «اعمال تنظیمات» را بزنید.';
+    setDirty(true);
+  });
+  renderThemeGrids();
+})();
+</script>
+{% endblock %}

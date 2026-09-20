@@ -1,0 +1,107 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | ویرایش شناسنامه کالا{% endblock %}
+{% block content %}
+
+{% set products_active = 'warranty' %}
+{% include '_settings_products_tabs.html' %}
+
+    <div class="card">
+        <div class="card-header">ویرایش شناسنامه #{{ card.id }} — وضعیت: {{ card.warranty_status }}</div>
+        <div class="card-body">
+            {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+            <form method="POST">
+                <div class="form-grid">
+                    <div>
+                        <label>نام مشتری (اختیاری)</label>
+                        <input type="text" name="customer_name" list="customer-datalist" value="{{ card.customer_name or '' }}" autocomplete="off">
+                        <datalist id="customer-datalist">
+                            {% for c in customers %}
+                            <option value="{{ c.name }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div>
+                        <label>نوع دستگاه</label>
+                        <select name="device_type" id="wc_device_type" class="field-select" onchange="filterModels()" required>
+                            {% for dt in devices|map(attribute='device_type')|unique %}
+                            <option value="{{ dt }}" {% if dt == card.device_type %}selected{% endif %}>{{ dt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>مدل دستگاه</label>
+                        <select name="model" id="wc_model" class="field-select">
+                            {% for d in devices %}
+                            <option value="{{ d.model }}" data-devicetype="{{ d.device_type }}"
+                                {% if d.model == card.model and d.device_type == card.device_type %}selected{% endif %}>
+                                {{ d.model }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>سریال</label>
+                        <input type="text" name="serial_number" value="{{ card.serial_number }}" required>
+                    </div>
+                    <div>
+                        <label>شهریار</label>
+                        <input type="text" name="shahriar" value="{{ card.shahriar or '' }}">
+                    </div>
+                    <div>
+                        <label>تاریخ تولید</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" name="prod_date" class="field-select jalali-date" value="{{ (card.production_date if card is defined and card.production_date else '') }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+                        </div>
+                    </div>
+                    <div class="field-full" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+                        <strong>گارانتی (فعال‌سازی / به‌روزرسانی)</strong>
+                    </div>
+                    <div>
+                        <label>تاریخ نصب</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" name="inst_date" class="field-select jalali-date" value="{{ (card.installation_date if card is defined and card.installation_date else '') }}" placeholder="1405/01/01" autocomplete="off" dir="ltr">
+                        </div>
+                    </div>
+                    <div>
+                        <label>مدت گارانتی</label>
+                        <select name="warranty_months" class="field-select">
+                            <option value="">— بدون تغییر —</option>
+                            {% for m in warranty_month_options %}
+                            <option value="{{ m }}" {% if card.warranty_months == m %}selected{% endif %}>{{ m }} ماه</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>تاریخ اتمام (محاسبه‌شده)</label>
+                        <input type="text" value="{{ card.warranty_end_date or '—' }}" disabled>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:16px;">
+                    <button type="submit" class="btn">ذخیره</button>
+                    {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+                    {% set back_url = '/settings/warranty' %}
+                    {% include '_page_nav_icons.html' %}
+                    {% endif %}
+                    {% if card.warranty_status != 'فعال' %}
+                    <a href="/settings/warranty/activate/{{ card.id }}" class="btn-complete">فعال‌سازی گارانتی</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function filterModels() {
+            var deviceType = document.getElementById('wc_device_type').value;
+            var modelSelect = document.getElementById('wc_model');
+            var firstVisible = null;
+            for (var i = 0; i < modelSelect.options.length; i++) {
+                var opt = modelSelect.options[i];
+                if (!opt.hasAttribute('data-devicetype')) continue;
+                var matches = opt.getAttribute('data-devicetype') === deviceType;
+                opt.style.display = matches ? 'block' : 'none';
+                if (matches && firstVisible === null) firstVisible = opt.value;
+            }
+            if (firstVisible) modelSelect.value = firstVisible;
+        }
+    </script>
+{% endblock %}

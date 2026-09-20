@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}سازگان | آرشیو کاربران{% endblock %}
+{% block content %}
+{% set parties_active = 'users' %}
+{% include '_settings_parties_tabs.html' %}
+
+<div class="card">
+  <div class="card-header list-header-row">
+    <span>آرشیو کاربران ({{ users|length }})</span>
+  </div>
+  <div class="card-body">
+    {% if users|length == 0 %}
+    <div class="empty-state">کاربر آرشیو‌شده‌ای وجود ندارد.</div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>نام و نام خانوادگی</th>
+          <th>نام کاربری</th>
+          <th>نقش کاربری</th>
+          <th>واحد</th>
+          <th>شماره تماس</th>
+          <th>وضعیت</th>
+          <th>تاریخ آرشیو</th>
+          <th>علت آرشیو</th>
+          <th>آرشیوکننده</th>
+          <th>عملیات</th>
+        </tr>
+        {% for u in users %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ u.full_name or '—' }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.role or '—' }}</td>
+          <td>{{ u.unit or u.department or u.province or '—' }}</td>
+          <td>{{ u.phone or '—' }}</td>
+          <td><span class="badge">{{ 'غیرفعال' if u.is_active == 0 else (u.status or 'آرشیو') }}</span></td>
+          <td>{{ u.archive_date or u.deactivated_at or '—' }}</td>
+          <td>{{ u.archive_reason or '—' }}</td>
+          <td>{{ u.archived_by or '—' }}</td>
+          <td>
+            {% if can_reactivate is defined and can_reactivate %}
+            <form method="POST" action="/settings/users/activate/{{ u.id }}" style="display:inline;margin:0;" onsubmit="return confirm('کاربر «{{ u.full_name or u.username }}» دوباره فعال شود؟');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button type="submit" class="btn-edit">فعال‌سازی</button>
+            </form>
+            {% else %}
+            <a href="/settings/users/view/{{ u.id }}" class="btn-edit">مشاهده</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

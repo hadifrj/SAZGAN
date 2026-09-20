@@ -1,0 +1,158 @@
+{#
+  دکمه انتخاب متن آماده — نام دکمه = نام فیلد
+  منو وسط صفحه نرم‌افزار باز می‌شود.
+  متغیرها: target_id, presets, label, codes_field
+#}
+{% set target_id = target_id if target_id is defined else 'ready_target' %}
+{% set presets = presets if presets is defined else [] %}
+{% set label = label if label is defined else 'انتخاب متن' %}
+{% set codes_field = codes_field if codes_field is defined else '' %}
+<div class="rtp-wrap" data-target="{{ target_id }}" {% if codes_field %}data-codes-field="{{ codes_field }}"{% endif %}
+     style="margin-bottom:8px;display:inline-block;max-width:100%;">
+  <button type="button" class="rtp-btn btn-cancel"
+          style="padding:6px 12px;font-size:12.5px;min-height:32px;max-width:100%;white-space:normal;text-align:right;line-height:1.35;"
+          onclick="toggleReadyMenu(this)">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-left:4px;flex-shrink:0;"><path d="M12 5v14M5 12h14"/></svg>
+    {{ label }}
+  </button>
+  <div class="rtp-menu rtp-menu-source" hidden>
+    <div class="rtp-list">
+      {% if presets and presets|length > 0 %}
+        {% for p in presets %}
+        {% set raw = p if p is string else (p.text if p.text is defined else p|string) %}
+        {% set code = '' %}
+        {% if raw.startswith('[') and ']' in raw %}
+          {% set code = raw[1:raw.index(']')] %}
+        {% endif %}
+        <button type="button" class="rtp-item" data-text="{{ raw|e }}" data-code="{{ code|e }}"
+                onclick="pickReadyText(this)">
+          {% if code %}<span class="rtp-code">[{{ code }}]</span> {% endif %}{{ raw }}
+        </button>
+        {% endfor %}
+      {% else %}
+        <div class="rtp-empty">متن آماده‌ای تعریف نشده است.<br>از تنظیمات نرم‌افزار → لیست‌های کشویی اضافه کنید.</div>
+      {% endif %}
+    </div>
+  </div>
+  {% if codes_field %}
+  <input type="hidden" name="{{ codes_field }}" id="{{ codes_field }}" value="">
+  {% endif %}
+</div>
+<script>
+(function(){
+  if (window._rtpInit) return;
+  window._rtpInit = true;
+
+  function ensureRtpOverlay() {
+    var ov = document.getElementById('rtp-overlay');
+    if (ov) return ov;
+    ov = document.createElement('div');
+    ov.id = 'rtp-overlay';
+    ov.className = 'sg-modal-overlay rtp-overlay';
+    ov.innerHTML =
+      '<div class="sg-modal rtp-modal" role="dialog" aria-modal="true">' +
+      '  <div class="rtp-modal-header">' +
+      '    <span class="rtp-modal-title">انتخاب متن آماده</span>' +
+      '    <button type="button" class="rtp-modal-close" aria-label="بستن">×</button>' +
+      '  </div>' +
+      '  <div class="rtp-modal-body">' +
+      '    <input type="search" class="rtp-search" placeholder="جستجو در متن‌ها یا کد..." autocomplete="off">' +
+      '    <div class="rtp-modal-list"></div>' +
+      '    <div class="rtp-modal-hint">می‌توانید چند مورد پشت‌سرهم انتخاب کنید. برای بستن خارج از کادر کلیک کنید یا Esc بزنید.</div>' +
+      '  </div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if (e.target === ov) closeRtpOverlay(); });
+    ov.querySelector('.rtp-modal-close').addEventListener('click', closeRtpOverlay);
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && ov.classList.contains('open')) closeRtpOverlay();
+    });
+    return ov;
+  }
+
+  var activeWrap = null;
+
+  function closeRtpOverlay() {
+    var ov = document.getElementById('rtp-overlay');
+    if (ov) {
+      ov.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    activeWrap = null;
+  }
+
+  window.toggleReadyMenu = function(btn) {
+    var wrap = btn.closest('.rtp-wrap');
+    if (!wrap) return;
+    var ov = ensureRtpOverlay();
+    if (ov.classList.contains('open') && activeWrap === wrap) {
+      closeRtpOverlay();
+      return;
+    }
+    activeWrap = wrap;
+    var title = (btn.textContent || '').replace(/\+/g,'').trim() || 'انتخاب متن آماده';
+    ov.querySelector('.rtp-modal-title').textContent = title;
+    var list = ov.querySelector('.rtp-modal-list');
+    list.innerHTML = '';
+    var src = wrap.querySelector('.rtp-menu-source .rtp-list');
+    if (src) {
+      src.querySelectorAll('.rtp-item').forEach(function(item){
+        var clone = item.cloneNode(true);
+        clone.onclick = function(){ pickReadyText(clone, wrap); };
+        list.appendChild(clone);
+      });
+      var empty = src.querySelector('.rtp-empty');
+      if (empty && !list.children.length) {
+        var d = document.createElement('div');
+        d.className = 'rtp-empty';
+        d.innerHTML = empty.innerHTML;
+        list.appendChild(d);
+      }
+    }
+    var search = ov.querySelector('.rtp-search');
+    search.value = '';
+    search.oninput = function(){ filterReadyMenu(search); };
+    ov.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ search.focus(); }, 40);
+  };
+
+  window.filterReadyMenu = function(input) {
+    var q = (input.value || '').trim().toLowerCase();
+    var list = document.querySelector('#rtp-overlay .rtp-modal-list');
+    if (!list) return;
+    list.querySelectorAll('.rtp-item').forEach(function(item){
+      var t = (item.getAttribute('data-text') || item.textContent || '').toLowerCase();
+      var c = (item.getAttribute('data-code') || '').toLowerCase();
+      item.style.display = (!q || t.indexOf(q) >= 0 || c.indexOf(q) >= 0) ? 'block' : 'none';
+    });
+  };
+
+  window.pickReadyText = function(btn, wrapOverride) {
+    var wrap = wrapOverride || btn.closest('.rtp-wrap') || activeWrap;
+    if (!wrap) return;
+    var targetId = wrap.getAttribute('data-target');
+    var text = (btn.getAttribute('data-text') || btn.textContent || '').trim();
+    var code = (btn.getAttribute('data-code') || '').trim();
+    var el = document.getElementById(targetId);
+    if (el) {
+      var cur = el.value || '';
+      if (cur && !cur.endsWith('\n') && cur.trim()) cur += '\n';
+      el.value = cur + text;
+      el.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    var codesName = wrap.getAttribute('data-codes-field');
+    if (codesName && code) {
+      var hidden = document.getElementById(codesName) || wrap.querySelector('input[name="'+codesName+'"]');
+      if (hidden) {
+        var parts = (hidden.value || '').split(',').map(function(s){return s.trim();}).filter(Boolean);
+        if (parts.indexOf(code) < 0) parts.push(code);
+        hidden.value = parts.join(',');
+      }
+    }
+    // منو باز می‌ماند برای انتخاب چندتایی
+  };
+
+  window.closeReadyMenu = closeRtpOverlay;
+})();
+</script>

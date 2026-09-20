@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}سازگان | داشبورد{% endblock %}
+{% block content %}
+<style>
+  .v41-dashboard{display:flex;flex-direction:column;gap:18px}
+  .v41-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .v41-hero h1{margin:0;font-size:24px}
+  .v41-hero p{margin:6px 0 0;color:var(--text-muted);font-size:13px}
+  .v41-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+  .v41-kpi{background:var(--card-bg,#fff);border:1px solid var(--border,#e5e7eb);border-radius:14px;padding:15px;box-shadow:0 2px 8px rgba(0,0,0,.04);min-width:0}
+  .v41-kpi-label{font-size:12px;color:var(--text-muted);font-weight:600}
+  .v41-kpi-value{font-size:27px;font-weight:800;margin-top:7px;line-height:1.1}
+  .v41-kpi-meta{font-size:11px;color:var(--text-muted);margin-top:7px}
+  .v41-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr);gap:16px}
+  .v41-card{background:var(--card-bg,#fff);border:1px solid var(--border,#e5e7eb);border-radius:14px;overflow:hidden}
+  .v41-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border,#e5e7eb);font-weight:700}
+  .v41-card-body{padding:16px}
+  .v41-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .v41-action{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border,#e5e7eb);border-radius:12px;text-decoration:none;color:inherit;background:var(--surface,#fff);transition:.15s}
+  .v41-action:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+  .v41-action-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--surface-muted,#f3f4f6);font-size:18px;flex:0 0 auto}
+  .v41-action-title{font-size:13px;font-weight:700}.v41-action-desc{font-size:11px;color:var(--text-muted);margin-top:3px}
+  .v41-bars{display:flex;align-items:flex-end;gap:8px;height:170px;padding:8px 4px 0}
+  .v41-bar-col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}
+  .v41-bar{width:100%;max-width:38px;min-height:2px;border-radius:7px 7px 2px 2px;background:var(--ds-primary,#2563eb)}
+  .v41-bar-label{font-size:10px;color:var(--text-muted);direction:ltr}
+  .v41-table{width:100%;border-collapse:collapse;font-size:12px}
+  .v41-table th,.v41-table td{padding:9px 7px;border-bottom:1px solid var(--border,#e5e7eb);text-align:right}
+  .v41-table th{color:var(--text-muted);font-weight:600}
+  .v41-status{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:var(--surface-muted,#f3f4f6);font-size:11px}
+  .v41-legend{display:flex;flex-direction:column;gap:8px}
+  .v41-legend-row{display:flex;justify-content:space-between;gap:10px;font-size:12px}
+  .v41-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px}
+  .v41-alert{padding:11px 13px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa;font-size:12px}
+  @media(max-width:1100px){.v41-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.v41-layout{grid-template-columns:1fr}}
+  @media(max-width:650px){.v41-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.v41-actions{grid-template-columns:1fr}.v41-hero h1{font-size:20px}}
+</style>
+
+<div class="v41-dashboard">
+  <div class="v41-hero">
+    <div>
+      <h1>داشبورد</h1>
+      <p>نمای کلی و سریع از وضعیت خدمات پس از فروش؛ بدون تغییر در گردش‌کار فعلی.</p>
+    </div>
+    <a class="btn" href="/customer-affairs/open-list">مشاهده درخواست‌ها</a>
+  </div>
+
+  <div class="v41-kpis">
+    <div class="v41-kpi"><div class="v41-kpi-label">کل درخواست‌ها</div><div class="v41-kpi-value">{{ total }}</div><div class="v41-kpi-meta">تمام پرونده‌های ثبت‌شده</div></div>
+    <div class="v41-kpi"><div class="v41-kpi-label">درخواست‌های باز</div><div class="v41-kpi-value">{{ open_count }}</div><div class="v41-kpi-meta">نیازمند اقدام یا پیگیری</div></div>
+    <div class="v41-kpi"><div class="v41-kpi-label">تأخیری</div><div class="v41-kpi-value">{{ delayed_count }}</div><div class="v41-kpi-meta">بیش از {{ delay_threshold }} روز در وضعیت فعلی</div></div>
+    <div class="v41-kpi"><div class="v41-kpi-label">مشتریان</div><div class="v41-kpi-value">{{ customer_count }}</div><div class="v41-kpi-meta">ثبت‌شده در دفتر مشتریان</div></div>
+    <div class="v41-kpi"><div class="v41-kpi-label">موجودی کم</div><div class="v41-kpi-value">{{ low_stock_count }}</div><div class="v41-kpi-meta">قلم با موجودی ≤ ۳</div></div>
+  </div>
+
+  <div class="v41-layout">
+    <div class="v41-card">
+      <div class="v41-card-head"><span>روند پذیرش</span><span style="font-size:11px;color:var(--text-muted)">۸ دوره اخیر</span></div>
+      <div class="v41-card-body">
+        {% if month_sorted %}
+        <div class="v41-bars">
+          {% for m,c in month_sorted %}
+          <div class="v41-bar-col" title="{{ m }}: {{ c }}">
+            <div class="v41-bar" style="height:{{ ((c / max_month) * 100)|int }}%"></div>
+            <div class="v41-bar-label">{{ m }}</div>
+            <strong style="font-size:11px">{{ c }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">داده‌ای برای نمایش وجود ندارد.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="v41-card">
+      <div class="v41-card-head"><span>اقدام سریع</span></div>
+      <div class="v41-card-body">
+        <div class="v41-actions">
+          <a class="v41-action" href="/customer-affairs/new-request" onclick="if(typeof openQuickNew==='function'){openQuickNew('/customer-affairs/new-request','درخواست جدید');return false;}"><span class="v41-action-icon">＋</span><span><div class="v41-action-title">درخواست جدید</div><div class="v41-action-desc">ثبت پرونده خدمات</div></span></a>
+          <a class="v41-action" href="/customer-affairs/open-list"><span class="v41-action-icon">📋</span><span><div class="v41-action-title">درخواست‌های باز</div><div class="v41-action-desc">{{ open_count }} مورد</div></span></a>
+          <a class="v41-action" href="/reports/delays"><span class="v41-action-icon">⏰</span><span><div class="v41-action-title">تأخیرها</div><div class="v41-action-desc">{{ delayed_count }} مورد</div></span></a>
+          <a class="v41-action" href="/reports"><span class="v41-action-icon">📊</span><span><div class="v41-action-title">گزارش‌ها</div><div class="v41-action-desc">گزارش‌های مدیریتی</div></span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v41-layout">
+    <div class="v41-card">
+      <div class="v41-card-head"><span>آخرین درخواست‌ها</span><a href="/customer-affairs/open-list" class="card-action">مشاهده همه</a></div>
+      <div class="v41-card-body" style="padding:0">
+        {% if recent_requests %}
+        <div style="overflow-x:auto">
+          <table class="v41-table">
+            <thead><tr><th>شماره</th><th>مشتری</th><th>دستگاه</th><th>وضعیت</th><th>تاریخ</th></tr></thead>
+            <tbody>
+            {% for r in recent_requests %}
+              <tr>
+                <td><a href="/?highlight={{ r.id }}">{{ r.reception_number }}</a></td>
+                <td>{{ r.customer_name }}</td>
+                <td>{{ r.device_type }}</td>
+                <td><span class="v41-status">{{ r.status }}</span></td>
+                <td>{{ r.reception_date }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}<div class="empty-state">درخواستی ثبت نشده است.</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="v41-card">
+      <div class="v41-card-head"><span>وضعیت درخواست‌ها</span><a href="/customer-affairs/report" class="card-action">مشاهده همه</a></div>
+      <div class="v41-card-body">
+        <div class="v41-legend">
+        {% set palette=['#2563eb','#10b981','#f59e0b','#8b5cf6','#06b6d4','#f43f5e','#64748b','#84cc16'] %}
+        {% for name,count in (status_top or []) %}
+          <div class="v41-legend-row"><span><span class="v41-dot" style="background:{{ palette[loop.index0 % 8] }}"></span>{{ name }}</span><strong>{{ count }}</strong></div>
+        {% else %}<div class="empty-state">وضعیتی ثبت نشده است.</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if delayed_count > 0 or low_stock_count > 0 %}
+  <div class="v41-alert">
+    <strong>نیازمند توجه:</strong>
+    {% if delayed_count > 0 %} {{ delayed_count }} پرونده تأخیری{% endif %}
+    {% if delayed_count > 0 and low_stock_count > 0 %} و {% endif %}
+    {% if low_stock_count > 0 %} {{ low_stock_count }} قلم کم‌موجودی{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

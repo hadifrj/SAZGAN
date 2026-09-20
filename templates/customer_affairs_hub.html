@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}سازگان | مرکز ارتباط با مشتریان{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">مرکز ارتباط با مشتریان</div>
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px;">
+      درخواست‌های خدماتی، گفتگوها، پیگیری‌ها، نظرسنجی و سوابق خدمات مشتریان از اینجا در دسترس است.
+    </p>
+    <div class="sys-tile-grid" data-module="customer">
+<a href="/customer-affairs/new-request" class="sys-tile" onclick="if(typeof openQuickNew==='function'){openQuickNew('/customer-affairs/new-request','درخواست جدید');return false;}">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        <span class="sys-tile-title">درخواست جدید</span>
+        <span class="sys-tile-desc">ثبت درخواست خدماتی تازه</span>
+      </a>
+<a href="/service/internal-repair/archive" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L3 17.5 6.5 21l6.3-6.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.1-2.1z"/></svg></span>
+        <span class="sys-tile-title">تعمیرات داخلی</span>
+        <span class="sys-tile-desc">آرشیو درخواست‌های تعمیر داخل کارخانه</span>
+      </a>
+<a href="/service/external-repair/archive" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L3 17.5 6.5 21l6.3-6.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.1-2.1z"/></svg></span>
+        <span class="sys-tile-title">تعمیرات خارجی</span>
+        <span class="sys-tile-desc">آرشیو تعمیرات نزد نمایندگی‌ها</span>
+      </a>
+<a href="/service/installation/archive" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4"/></svg></span>
+        <span class="sys-tile-title">درخواست نصب / نصب انجام‌شده</span>
+        <span class="sys-tile-desc">آرشیو درخواست‌ها و نصب‌های انجام‌شده</span>
+      </a>
+<a href="/service/inspection/archive" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.3" y1="16.3" x2="21" y2="21"/></svg></span>
+        <span class="sys-tile-title">بررسی و بازدید</span>
+        <span class="sys-tile-desc">آرشیو بازدیدها و بررسی‌های میدانی</span>
+      </a>
+<a href="/service/demo/archive" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3h4"/><path d="M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><line x1="8.3" y1="14" x2="15.7" y2="14"/></svg></span>
+        <span class="sys-tile-title">دمو و امانی</span>
+        <span class="sys-tile-desc">آرشیو نصب Demo و امانی</span>
+      </a>
+<a href="/reports/service-performance?status=closed" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><rect x="8" y="3" width="8" height="5"/></svg></span>
+        <span class="sys-tile-title">بایگانی</span>
+        <span class="sys-tile-desc">درخواست‌های بسته‌شده و پایان‌یافته</span>
+      </a>
+<a href="/contacts" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
+        <span class="sys-tile-title">مخاطبین</span>
+        <span class="sys-tile-desc">دفترچه تماس مشتریان و نمایندگی‌ها</span>
+      </a>
+<a href="/customer-affairs/surveys" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.4 4.9L20 8.7l-4 3.9.9 5.5L12 15.5 7.1 18.1 8 12.6 4 8.7l5.6-.8z"/><path d="M9 21h6"/></svg></span>
+        <span class="sys-tile-title">نظرسنجی مشتریان</span>
+        <span class="sys-tile-desc">ثبت و بررسی بازخورد و رضایت مشتریان</span>
+      </a>
+<a href="/announce/list" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v10H7l-3 3V6z"/></svg></span>
+        <span class="sys-tile-title">اعلام‌های عمومی</span>
+        <span class="sys-tile-desc">اعلام خرابی‌های ثبت‌شده از فرم عمومی</span>
+      </a>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

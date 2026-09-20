@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ category }} | سازگان</title>
+<link rel="manifest" href="/c/manifest.webmanifest">
+<link rel="stylesheet" href="/static/css/customer-portal.css">
+<style>
+.form{display:grid;gap:12px}
+label{font-size:12px;font-weight:700;color:var(--muted)}
+input,textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff}
+textarea{min-height:110px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.err{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;padding:10px;border-radius:10px;font-size:12px}
+.notice{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;padding:10px;border-radius:10px;font-size:12px}
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.step{padding:6px 10px;border-radius:999px;background:#f8fafc;border:1px solid var(--line);font-size:11px}
+.kind-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kind-grid label{display:flex;gap:8px;align-items:center;margin:0;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.kind-grid input{width:auto}
+#repair-box{display:none}
+@media(max-width:560px){.grid,.kind-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="cp-top">
+  <div class="cp-top-row">
+    <div class="cp-brand">{{ category }}</div>
+    <a class="cp-link" href="/c/home">بازگشت</a>
+  </div>
+</header>
+<main class="cp-wrap">
+  <form class="form cp-card" method="post" id="svc-form">
+    <h1>{{ category }}</h1>
+    <div class="steps">
+      <span class="step">۱. انتخاب نوع</span>
+      <span class="step">۲. ثبت اطلاعات</span>
+      <span class="step">۳. بررسی پذیرش</span>
+      <span class="step">۴. پیگیری</span>
+    </div>
+    <div class="notice">💬 گفتگوی عمومی پشتیبانی جداست. پس از ثبت، در صورت نیاز می‌توانید گفتگوی مرتبط با همین پرونده را ادامه دهید.</div>
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+
+    <label>نوع سرویس</label>
+    <div class="kind-grid">
+      {% for key, label in service_kinds %}
+      <label>
+        <input type="radio" name="service_kind" value="{{ key }}" {% if default_kind == key %}checked{% endif %} required>
+        {{ label }}
+      </label>
+      {% endfor %}
+    </div>
+
+    <label>موضوع</label>
+    <input name="subject" id="subject-input" value="درخواست خدمات" required>
+
+    <div class="grid">
+      <div>
+        <label>نوع/نام دستگاه</label>
+        <input name="device_type" placeholder="مثلاً مانیتور علائم حیاتی مدل وکترا">
+      </div>
+      <div>
+        <label>شماره سریال</label>
+        <input name="serial_number" placeholder="شماره سریال دستگاه" required>
+      </div>
+    </div>
+
+    <label>شرح درخواست / خرابی</label>
+    <textarea name="problem_desc" required placeholder="اطلاعات لازم را مختصر و دقیق بنویسید..."></textarea>
+
+    <button class="cp-btn" style="width:100%;margin-top:16px" type="submit">ثبت درخواست خدمات</button>
+  </form>
+</main>
+<script>
+(function(){
+  var kinds = document.querySelectorAll('input[name="service_kind"]');
+  var subject = document.getElementById('subject-input');
+  var labels = {
+    fault: 'اعلام خرابی / تعمیر',
+    periodic: 'سرویس دوره‌ای',
+    visit: 'بازدید / بررسی',
+    install: 'نصب و آموزش',
+    demo: 'نصب Demo / امانی',
+    other: 'سایر خدمات'
+  };
+  function sync(){
+    var k = 'fault';
+    kinds.forEach(function(el){ if(el.checked) k = el.value; });
+    if(subject && (!subject.dataset.touched || subject.value === subject.dataset.lastAuto)){
+      subject.value = labels[k] || 'درخواست خدمات';
+      subject.dataset.lastAuto = subject.value;
+    }
+  }
+  kinds.forEach(function(el){ el.addEventListener('change', sync); });
+  if(subject){
+    subject.addEventListener('input', function(){ subject.dataset.touched = '1'; });
+  }
+  sync();
+})();
+</script>
+</body>
+</html>

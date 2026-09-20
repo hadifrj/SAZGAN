@@ -1,0 +1,46 @@
+<div class="card" style="margin-top:12px">
+<div class="card-header">ابزار پرونده (چک‌لیست / تایم‌لاین / بازگشایی)</div>
+<div class="card-body">
+<div style="margin-bottom:10px">
+<label><input type="checkbox" id="ck_serial"> مطابقت سریال</label>
+<label><input type="checkbox" id="ck_parts"> مطابقت قطعات</label>
+<label><input type="checkbox" id="ck_photo"> عکس گزارش</label>
+<label><input type="checkbox" id="ck_match"> مطابقت پرونده</label>
+<button type="button" class="btn" id="ck_save" style="margin-right:8px">ثبت چک‌لیست</button>
+<span id="ck_msg"></span>
+</div>
+<form method="POST" action="/service/reopen/{{ req.id }}" onsubmit="return confirm('بازگشایی؟')" style="display:inline">
+<button class="btn-cancel" type="submit">بازگشایی پرونده بسته‌شده</button>
+</form>
+<ul id="tl" style="font-size:13px;line-height:1.8;margin-top:12px"></ul>
+</div></div>
+<script>
+(function(){
+  var id={{ req.id }};
+  fetch('/api/checklist/'+id).then(r=>r.json()).then(function(d){
+    if(d.serial_ok) document.getElementById('ck_serial').checked=true;
+    if(d.parts_ok) document.getElementById('ck_parts').checked=true;
+    if(d.photo_ok) document.getElementById('ck_photo').checked=true;
+    if(d.match_ok) document.getElementById('ck_match').checked=true;
+  }).catch(function(){});
+  document.getElementById('ck_save').onclick=function(){
+    var fd=new FormData();
+    fd.append('serial_ok', document.getElementById('ck_serial').checked?'1':'0');
+    fd.append('parts_ok', document.getElementById('ck_parts').checked?'1':'0');
+    fd.append('photo_ok', document.getElementById('ck_photo').checked?'1':'0');
+    fd.append('match_ok', document.getElementById('ck_match').checked?'1':'0');
+    fetch('/api/checklist/'+id,{method:'POST',body:fd}).then(r=>r.json()).then(function(d){
+      document.getElementById('ck_msg').textContent=d.complete?'کامل شد':'ذخیره شد (ناقص)';
+    });
+  };
+  fetch('/api/case-timeline/'+id).then(r=>r.json()).then(function(items){
+    var ul=document.getElementById('tl');
+    if(!items.length){ul.innerHTML='<li>تاریخچه‌ای نیست</li>';return;}
+    items.forEach(function(it){
+      var li=document.createElement('li');
+      li.textContent=(it.date||'')+' — '+(it.title||'')+(it.user?' ('+it.user+')':'')+(it.notes?' | '+it.notes:'');
+      ul.appendChild(li);
+    });
+  }).catch(function(){});
+})();
+</script>

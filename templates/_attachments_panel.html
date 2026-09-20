@@ -1,0 +1,12 @@
+<div class="card" style="margin-top:12px;">
+  <div class="card-header">پیوست‌ها (عکس گزارش / اسناد)</div>
+  <div class="card-body">
+    <form method="POST" action="/service/request/{{ req.id }}/attachments" enctype="multipart/form-data"
+          style="display:flex;flex-wrap:wrap;gap:8px;align-items:end">
+      <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token','') }}">
+      <div><label>فایل</label><input type="file" name="file" required></div>
+      <div style="flex:1"><label>یادداشت</label><input type="text" name="note"></div>
+      <button class="btn" type="submit">آپلود</button>
+    </form>
+  </div>
+</div>

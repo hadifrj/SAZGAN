@@ -1,0 +1,53 @@
+{#
+  Pagination partial
+  Expected context (from pagination_context):
+    page, total_pages, total_rows, has_prev, has_next,
+    from_item, to_item, page_window, page_qs, per_page, per_page_choices
+#}
+{% if total_pages is defined and total_rows is defined and total_rows > 0 %}
+<nav class="sg-pagination no-print" aria-label="صفحه‌بندی" dir="rtl">
+  <div class="sg-pagination-info">
+    <span>
+      {% if total_rows %}
+        {{ from_item }}–{{ to_item }} از {{ total_rows }}
+      {% endif %}
+    </span>
+    {% if per_page_choices is defined and per_page_choices %}
+    <label class="sg-pagination-perpage">
+      <span>تعداد</span>
+      <select onchange="(function(sel){var u=new URL(window.location.href);u.searchParams.set('per_page',sel.value);u.searchParams.set('page','1');window.location.href=u.toString();})(this)">
+        {% for n in per_page_choices %}
+        <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% endif %}
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="sg-pagination-controls">
+    {% if has_prev %}
+    <a class="sg-page-btn sg-page-nav" href="?{% if page_qs %}{{ page_qs }}&{% endif %}page={{ page - 1 }}" aria-label="صفحه قبل">قبلی</a>
+    {% else %}
+    <span class="sg-page-btn sg-page-nav is-disabled" aria-disabled="true">قبلی</span>
+    {% endif %}
+
+    {% for p in page_window %}
+      {% if p is none %}
+      <span class="sg-page-ellipsis" aria-hidden="true">…</span>
+      {% elif p == page %}
+      <span class="sg-page-btn is-active" aria-current="page">{{ p }}</span>
+      {% else %}
+      <a class="sg-page-btn" href="?{% if page_qs %}{{ page_qs }}&{% endif %}page={{ p }}">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if has_next %}
+    <a class="sg-page-btn sg-page-nav" href="?{% if page_qs %}{{ page_qs }}&{% endif %}page={{ page + 1 }}" aria-label="صفحه بعد">بعدی</a>
+    {% else %}
+    <span class="sg-page-btn sg-page-nav is-disabled" aria-disabled="true">بعدی</span>
+    {% endif %}
+  </div>
+  {% endif %}
+</nav>
+{% endif %}

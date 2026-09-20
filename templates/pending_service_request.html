@@ -1,0 +1,125 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | بررسی درخواست خدمات{% endblock %}
+{% block content %}
+<div class="sg-pending-page">
+  <div class="sg-pending-head">
+    <div>
+      <div class="sg-pending-eyebrow">پرونده پذیرش</div>
+      <h1>درخواست خدمات #{{ req.reception_no or req.id }}</h1>
+      <div class="sg-pending-sub">{% if req.tracking_code %}کد پیگیری: <strong>{{ req.tracking_code }}</strong> · {% endif %}{{ req.customer_name or '—' }}</div>
+    </div>
+    <div class="sg-pending-head-actions">
+      <span class="badge">{{ req.status or '—' }}</span>
+      <a class="btn-cancel" href="/cartable">بازگشت</a>
+    </div>
+  </div>
+
+  {% if error %}<div class="alert alert-error" style="margin-bottom:12px;">{{ error }}</div>{% endif %}
+
+  <div class="sg-pending-tabs" role="tablist" aria-label="بخش‌های پرونده پذیرش">
+    <button type="button" class="sg-pending-tab is-active" data-tab="summary">خلاصه</button>
+    <button type="button" class="sg-pending-tab" data-tab="customer">مشتری و دستگاه</button>
+    <button type="button" class="sg-pending-tab" data-tab="acceptance">اقدام پذیرش</button>
+    <button type="button" class="sg-pending-tab" data-tab="history">تاریخچه</button>
+    <button type="button" class="sg-pending-tab" data-tab="close">ثبت پاسخ و بستن درخواست</button>
+  </div>
+
+  <section class="sg-pending-panel is-active" data-panel="summary">
+    <div class="sg-summary-grid">
+      <div class="sg-summary-card"><span>مشتری</span><strong>{{ req.customer_name or '—' }}</strong></div>
+      <div class="sg-summary-card"><span>شماره پذیرش</span><strong>{{ req.reception_no or req.id }}</strong></div>
+      <div class="sg-summary-card"><span>دسته درخواست</span><strong>{{ req.request_category or '—' }}</strong></div>
+      <div class="sg-summary-card"><span>نوع سرویس</span><strong>{{ req.request_subtype or req.service_type or '—' }}</strong></div>
+      <div class="sg-summary-card"><span>دستگاه</span><strong>{{ req.device_type or '—' }}</strong></div>
+      <div class="sg-summary-card"><span>سریال</span><strong dir="ltr">{{ req.serial_number or '—' }}</strong></div>
+      <div class="sg-summary-card sg-wide"><span>شرح درخواست</span><strong>{{ req.problem_desc or '—' }}</strong></div>
+      <div class="sg-summary-card sg-wide"><span>آدرس</span><strong>{{ req.customer_address or '—' }}</strong></div>
+    </div>
+  </section>
+
+  <section class="sg-pending-panel" data-panel="customer" hidden>
+    <form method="post" class="sg-details-form">
+      <input type="hidden" name="action" value="save_details">
+      <div class="sg-section-card">
+        <div class="sg-section-title">اطلاعات مشتری <small>قابل بررسی و اصلاح توسط پذیرش</small></div>
+        <div class="sg-field-grid">
+          <div><label>نام مشتری *</label><input class="field-input" name="customer_name" value="{{ req.customer_name or '' }}" required></div>
+          <div><label>تلفن</label><input class="field-input" name="customer_phone" value="{{ req.customer_phone or req.contact_phone or '' }}" dir="ltr"></div>
+          <div><label>مسئول تجهیزات</label><input class="field-input" name="equipment_manager_name" value="{{ req.equipment_manager_name or '' }}"></div>
+          <div><label>موبایل مسئول تجهیزات</label><input class="field-input" name="equipment_manager_mobile" value="{{ req.equipment_manager_mobile or '' }}" dir="ltr"></div>
+          <div class="sg-field-wide"><label>آدرس</label><textarea class="field-input" name="customer_address" rows="2">{{ req.customer_address or '' }}</textarea></div>
+        </div>
+      </div>
+      <div class="sg-section-card">
+        <div class="sg-section-title">اطلاعات دستگاه</div>
+        <div class="sg-field-grid">
+          <div><label>نوع / نام دستگاه *</label><input class="field-input" name="device_type" value="{{ req.device_type or '' }}" required></div>
+          <div><label>مدل</label><input class="field-input" name="device_model" value="{{ req.device_model or '' }}"></div>
+          <div><label>سریال *</label><input class="field-input" name="serial_number" value="{{ req.serial_number or '' }}" required dir="ltr"></div>
+          <div><label>تاریخ نصب</label><input class="field-input" name="installation_date" value="{{ req.installation_date or '' }}"></div>
+          <div><label>پایان گارانتی</label><input class="field-input" name="warranty_end_date" value="{{ req.warranty_end_date or '' }}"></div>
+          <div class="sg-field-wide"><label>شرح درخواست</label><textarea class="field-input" name="problem_desc" rows="4">{{ req.problem_desc or '' }}</textarea></div>
+        </div>
+        <div class="sg-form-actions"><button class="btn" type="submit">ذخیره و تأیید اطلاعات</button></div>
+      </div>
+    </form>
+  </section>
+  <section class="sg-pending-panel" data-panel="acceptance" hidden>
+    <div class="sg-section-card">
+      <div class="sg-section-title">انتخاب مسیر گردش‌کار</div>
+      <p class="sg-help">پس از انتخاب، پرونده به مسیر مربوط منتقل می‌شود و شماره پذیرش در صورت نیاز تخصیص/تکمیل خواهد شد.</p>
+      <div class="sg-action-grid">
+        <form method="post"><input type="hidden" name="action" value="accept_external"><button class="btn" type="submit"><span>تعمیر خارجی</span><small>در محل</small></button></form>
+        <form method="post"><input type="hidden" name="action" value="accept_install"><button class="btn" type="submit"><span>نصب و آموزش</span><small>اعزام</small></button></form>
+        <form method="post"><input type="hidden" name="action" value="accept_visit"><button class="btn" type="submit"><span>بازدید / بررسی</span><small>کارشناسی</small></button></form>
+        <form method="post"><input type="hidden" name="action" value="accept_periodic"><button class="btn" type="submit"><span>سرویس دوره‌ای</span><small>برنامه‌ریزی</small></button></form>
+        <form method="post"><input type="hidden" name="action" value="accept_demo"><button class="btn" type="submit"><span>Demo / امانی</span><small>نصب موقت</small></button></form>
+      </div>
+    </div>
+  </section>
+
+  <section class="sg-pending-panel" data-panel="history" hidden>
+    <div class="sg-section-card">
+      <div class="sg-section-title">خط زمانی پرونده</div>
+      {% if timeline %}
+      <ol class="sg-timeline">
+        {% for t in timeline %}
+        <li><div class="sg-timeline-dot"></div><div><strong>{{ t.title }}</strong><div class="sg-timeline-meta">{{ t.created_at }}{% if t.actor_name %} · {{ t.actor_name }}{% endif %}</div>{% if t.body %}<p>{{ t.body }}</p>{% endif %}</div></li>
+        {% endfor %}
+      </ol>
+      {% else %}<div class="empty-state">برای این پرونده هنوز سابقه‌ای ثبت نشده است.</div>{% endif %}
+    </div>
+  </section>
+
+  <section class="sg-pending-panel" data-panel="close" hidden>
+    <div class="sg-section-card sg-danger-section">
+      <div class="sg-section-title">بستن درخواست</div>
+      <p class="sg-help">برای سایر خدمات یا مواردی که به پذیرش تبدیل نمی‌شوند، پاسخ نهایی را ثبت و درخواست را ببندید. این پاسخ در تاریخچه اپ مشتری نمایش داده می‌شود.</p>
+      <form method="post" class="sg-close-form">
+        <input type="hidden" name="action" value="close_reject">
+        <div><label>پاسخ به مشتری *</label><textarea name="note" class="field-input" rows="3" placeholder="پاسخ نهایی به درخواست مشتری..." required></textarea></div>
+        <button class="btn btn-danger" type="submit" onclick="return confirm('پرونده بسته شود؟')">ثبت پاسخ و بستن درخواست</button>
+      </form>
+    </div>
+  </section>
+</div>
+
+<style>
+.sg-pending-page{max-width:1120px;margin:0 auto;padding-bottom:18px}.sg-pending-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:4px 2px 16px;margin-bottom:12px;border-bottom:1px solid var(--border)}.sg-pending-eyebrow{font-size:11px;color:var(--text-muted);margin-bottom:3px}.sg-pending-head h1{font-size:20px;margin:0}.sg-pending-sub{font-size:12px;color:var(--text-muted);margin-top:4px}.sg-pending-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.sg-pending-tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;overflow-x:auto;padding:5px;margin-bottom:12px;background:color-mix(in srgb,var(--card) 94%,transparent);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 18px rgba(15,23,42,.05)}.sg-pending-tab{flex:0 0 auto;border:0;background:transparent;color:var(--text-muted);font-family:inherit;font-size:12.5px;font-weight:700;padding:9px 13px;border-radius:9px;cursor:pointer;white-space:nowrap}.sg-pending-tab:hover{background:var(--bg);color:var(--text)}.sg-pending-tab.is-active{background:var(--accent);color:#fff}.sg-pending-panel[hidden]{display:none!important}.sg-summary-grid,.sg-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.sg-summary-card,.sg-section-card{background:var(--card);border:1px solid var(--border);border-radius:13px}.sg-summary-card{padding:12px 13px}.sg-summary-card span{display:block;font-size:11px;color:var(--text-muted);margin-bottom:3px}.sg-summary-card strong{font-size:13px;word-break:break-word}.sg-wide,.sg-field-wide{grid-column:1/-1}.sg-section-card{padding:14px;margin-bottom:12px}.sg-section-title small{font-size:10px;color:var(--text-muted);font-weight:500}.sg-details-form textarea.field-input{resize:vertical}.sg-form-actions{margin-top:14px;display:flex;justify-content:flex-end}.sg-section-title{font-size:14px;font-weight:800;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--border)}.sg-field-grid label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px}.sg-readonly{min-height:40px;border:1px solid var(--border);background:var(--bg);border-radius:9px;padding:8px 10px;font-size:13px;word-break:break-word}.sg-help{font-size:12.5px;color:var(--text-muted);margin:0 0 13px}.sg-action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.sg-action-grid form{margin:0}.sg-action-grid button{width:100%;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.sg-action-grid button small{opacity:.8;font-size:10.5px}.sg-timeline{list-style:none;margin:0;padding:0}.sg-timeline li{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.sg-timeline li:last-child{border-bottom:0}.sg-timeline-dot{width:10px;height:10px;flex:0 0 10px;border-radius:50%;margin-top:6px;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}.sg-timeline-meta{font-size:10.5px;color:var(--text-muted);margin-top:2px}.sg-timeline p{font-size:12.5px;margin:5px 0 0}.sg-danger-section{border-color:color-mix(in srgb,#dc2626 30%,var(--border))}.sg-close-form{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}.sg-close-form>div{flex:1 1 280px}.sg-close-form .btn-danger{flex:0 0 auto}@media(max-width:720px){.sg-pending-head{flex-direction:column}.sg-summary-grid,.sg-field-grid{grid-template-columns:1fr}.sg-wide,.sg-field-wide{grid-column:auto}.sg-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:430px){.sg-action-grid{grid-template-columns:1fr}.sg-pending-head h1{font-size:18px}}
+</style>
+<script>
+(function(){
+  var tabs=document.querySelectorAll('.sg-pending-tab');
+  var panels=document.querySelectorAll('.sg-pending-panel');
+  if(!tabs.length)return;
+  function activate(name,save){
+    tabs.forEach(function(t){var on=t.getAttribute('data-tab')===name;t.classList.toggle('is-active',on);t.setAttribute('aria-selected',on?'true':'false');});
+    panels.forEach(function(p){p.hidden=p.getAttribute('data-panel')!==name;});
+    if(save){try{localStorage.setItem('sazgan-pending-tab-'+location.pathname,name);}catch(e){}}
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){activate(t.getAttribute('data-tab'),true);});});
+  var saved=null;try{saved=localStorage.getItem('sazgan-pending-tab-'+location.pathname);}catch(e){}
+  activate(saved||'summary',false);
+})();
+</script>
+{% endblock %}

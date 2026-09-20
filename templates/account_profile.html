@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}اطلاعات کاربری — سازگان{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px;margin:24px auto;">
+  <div class="card-header list-header-row">
+    <span>اطلاعات کاربری</span>
+    <div class="list-header-actions">
+      
+    </div>
+  </div>
+  <div class="card-body">
+    {% if error %}<div class="login-error">{{ error }}</div>{% endif %}
+    {% if success %}<div class="import-success">{{ success }}</div>{% endif %}
+
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px;">
+      <div>
+        {% if current_user.photo_filename %}
+        <img id="avatar-preview-current" src="/static/uploads/users/{{ current_user.photo_filename }}?v={{ current_user.id }}" alt=""
+             style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:1px solid var(--border);">
+        {% else %}
+        <span id="avatar-preview-current" style="display:inline-flex;width:140px;height:140px;border-radius:50%;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;">بدون عکس</span>
+        {% endif %}
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <div class="info-row"><span class="info-label">نام کامل:</span> {{ current_user.full_name or '—' }}</div>
+        <div class="info-row"><span class="info-label">نام کاربری:</span> {{ current_user.username }}</div>
+        <div class="info-row"><span class="info-label">نقش:</span> {{ current_user.role or '—' }}</div>
+        <div class="info-row"><span class="info-label">استان:</span> {{ current_user.province or '—' }}</div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:8px 0 16px;">
+    <p class="list-header-row " style="font-size:14px;font-weight:700;margin:0 0 10px;">
+      <span>تغییر عکس پروفایل</span>
+</p>
+
+    <form method="POST" enctype="multipart/form-data" id="profile-form" action="/account" data-no-validate="1">
+      <input type="hidden" name="form_section" value="photo">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="photo_cropped" id="photo_cropped" value="">
+      <label>انتخاب فایل</label>
+      <input type="file" name="photo" id="photo-input" data-fp="off" accept="image/png,image/jpeg,image/jpg,image/webp" style="margin-bottom:10px;"><div id="photo-info" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">فرمت‌های مجاز: JPG، PNG، WEBP</div>
+
+      <div id="crop-panel" style="display:none;margin-bottom:16px;">
+        <div id="crop-stage" style="position:relative;max-width:100%;background:#0b1220;border-radius:10px;overflow:hidden;user-select:none;touch-action:none;">
+          <img id="crop-image" alt="" style="display:block;max-width:100%;height:auto;">
+          <div id="crop-box" style="position:absolute;border:2px solid #38bdf8;box-shadow:0 0 0 9999px rgba(0,0,0,.45);cursor:move;box-sizing:border-box;">
+            <span data-h="nw" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;top:-7px;left:-7px;cursor:nwse-resize;"></span>
+            <span data-h="ne" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;top:-7px;right:-7px;cursor:nesw-resize;"></span>
+            <span data-h="sw" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;bottom:-7px;left:-7px;cursor:nesw-resize;"></span>
+            <span data-h="se" style="position:absolute;width:14px;height:14px;background:#38bdf8;border-radius:2px;bottom:-7px;right:-7px;cursor:nwse-resize;"></span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button type="button" class="btn" id="crop-confirm">تأیید برش</button>
+          <button type="button" class="btn-cancel" id="crop-reset">بازنشانی</button>
+          <button type="button" class="btn-cancel" id="crop-cancel">انصراف</button>
+        </div>
+        <p id="crop-status" style="font-size:12px;color:var(--text-muted);margin-top:8px;"></p>
+      </div>
+
+      <button type="submit" class="btn" style="margin-top:8px;">ذخیره عکس</button>
+    </form>
+  </div>
+</div>
+<script src="/static/js/avatar-crop.js?v=3"></script>
+{% endblock %}

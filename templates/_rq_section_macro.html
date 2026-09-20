@@ -1,0 +1,35 @@
+{# ماکروی آکاردئون بخش‌های فرم‌های پذیرش/درخواست (مشتری، دستگاه، شرح مشکل، ...)
+   شماره‌گذاری خودکار است تا با اضافه/حذف‌شدن بخش‌ها (مثل show_device=false) به‌هم نریزد.
+
+   استفاده در هر فرم:
+     {% import '_rq_section_macro.html' as rq %}
+     {% set rq_ns = namespace(n=0) %}
+     <div class="rq-acc">
+       {% call rq.section(rq_ns, 'مشتری و محل نصب', icon='👤') %}
+           ... فیلدها (همون div هایی که قبلاً داخل form-grid بودن) ...
+       {% endcall %}
+     </div>
+
+   برای اینکه شماره‌گذاری بین چند include/template حفظ بشه (مثلاً یک بخش اضافه
+   بعد از include شدن _common_request_fields.html)، همون rq_ns را به هر دو بده؛
+   چون namespace یک آبجکت mutable است، تغییرش در include هم روی نسخه‌ی parent اثر می‌گذارد.
+#}
+
+{% macro _num(n) %}{%- set d = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'] -%}{%- for ch in n|string -%}{{ d[ch|int] }}{%- endfor -%}{% endmacro %}
+
+{% macro section(ns, title, icon='') %}
+{% set ns.n = ns.n + 1 %}
+<div class="acc-item{% if ns.n == 1 %} open{% endif %}">
+    <button type="button" class="acc-head" onclick="rqAccToggle(this)">
+        <span class="sec-n">{{ _num(ns.n) }}</span>
+        {% if icon %}<span class="sec-ic">{{ icon }}</span>{% endif %}
+        <span class="acc-title">{{ title }}</span>
+        <span class="chevron">‹</span>
+    </button>
+    <div class="acc-body">
+        <div class="acc-body-inner">
+            {{ caller() }}
+        </div>
+    </div>
+</div>
+{% endmacro %}

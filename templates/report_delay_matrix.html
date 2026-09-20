@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}ماتریس تأخیر سریال‌محور | سازگان{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>ماتریس تأخیر — ردیف: سریال | ستون: مرحله (روز)</span>
+    </div>
+  </div>
+  <div class="card-body">
+    {% if section_tabs %}
+    <div class="filter-bar" style="margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      {% for t in section_tabs %}
+      <a href="{{ t.href }}" class="btn {% if t.active %}btn-complete{% else %}btn-cancel{% endif %}" style="margin:0;">{{ t.label }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="GET" class="filter-bar" style="gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+      <input type="hidden" name="kind" value="{{ kind }}">
+      <div class="filter-field">
+        <label>سریال</label>
+        <input name="serial" value="{{ serial or '' }}" placeholder="جستجوی سریال">
+      </div>
+      <div class="filter-field">
+        <label>استان</label>
+            <select name="province" class="field-select geo-province" onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                <option value="">همه</option>
+                {% for p in provinces or [] %}
+                <option value="{{ p }}" {% if province == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>شهرستان</label>
+            <select name="county" class="field-select geo-county" onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div>
+            <label>شهر</label>
+            <select name="city" class="field-select geo-city">
+                <option value="">همه</option>
+            </select>
+        </div>
+      <div class="filter-field" style="align-self:end;">
+        <label><input type="checkbox" name="only_delayed" value="1" {% if only_delayed %}checked{% endif %}> فقط دارای تأخیر</label>
+      </div>
+      <div style="align-self:end;"><button class="btn" type="submit">اعمال</button></div>
+    </form>
+
+    <p style="color:var(--text-muted);font-size:12.5px;margin-bottom:10px;">
+      عدد هر سلول = روزهای آن مرحله. سلول قرمز = بیشتر از سقف مجاز مرحله.
+      تعداد ردیف: {{ rows|length }}
+    </p>
+
+    <div class="table-wrap" style="overflow-x:auto;">
+      <table class="no-cardify">
+        <thead>
+          <tr>
+            <th>ردیف</th>
+            <th>شماره پذیرش</th>
+            <th>تاریخ پذیرش</th>
+            <th>نام مشتری</th>
+            <th>نوع خدمت</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>مرحله ایجاد تأخیر</th>
+            <th>علت تأخیر</th>
+            <th>تعداد روز تأخیر</th>
+            <th>مسئول مرحله</th>
+            <th>وضعیت پرونده</th>
+            <th>سریال</th>
+            {% for s in stages %}
+            <th title="سقف: {{ caps.get(s, '—') }} روز" style="max-width:90px;white-space:normal;font-size:11px;">{{ s }}</th>
+            {% endfor %}
+            <th>جمع</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr class="{% if r.is_delayed %}row-delayed{% endif %}">
+            <td>{{ loop.index }}</td>
+            <td>{{ r.reception_no or r.id }}</td>
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.customer or r.customer_name or '—' }}</td>
+            <td>{{ r.service_kind or r.request_category or kind or '—' }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.delay_stage or r.status or '—' }}</td>
+            <td>{{ r.delay_reason or '—' }}</td>
+            <td><strong {% if r.is_delayed %}style="color:var(--danger-text)"{% endif %}>{{ r.total if r.total is defined else (r.days_in_status or '—') }}</strong></td>
+            <td>{{ r.assigned_technician or r.technician or '—' }}</td>
+            <td style="font-size:12px;"><span class="badge">{{ r.status }}</span></td>
+            <td><strong>{{ r.serial or r.serial_number or '—' }}</strong></td>
+            {% for s in stages %}
+            {% set d = r.stage_days.get(s) if r.stage_days is defined else none %}
+            {% set cap = caps.get(s, 5) %}
+            <td style="text-align:center;{% if d is not none and d > cap %}background:#fecaca;font-weight:700;{% endif %}">
+              {% if d is none %}—{% else %}{{ d }}{% endif %}
+            </td>
+            {% endfor %}
+            <td><strong>{{ r.total }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="{{ 14 + (stages|length if stages is defined else 0) }}" class="empty-state">موردی یافت نشد.</td></tr>
+          {% endfor %}
+        </tbody>
+        {% if rows %}
+        <tfoot>
+          <tr style="background:#f8fafc;">
+            <td colspan="13"><strong>میانگین</strong></td>
+            {% for s in stages %}
+            <td style="text-align:center;">{% if averages.get(s) is not none %}{{ averages[s] }}{% else %}—{% endif %}</td>
+            {% endfor %}
+            <td></td>
+          </tr>
+        </tfoot>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

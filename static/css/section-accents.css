@@ -1,0 +1,35 @@
+/*
+  رنگ هویتی هر بخش — فقط یک نوار باریک روی لبهٔ کارت.
+  پس‌زمینهٔ کارت همچنان از تنظیمات تم (var(--card)) پیروی می‌کند؛
+  این فایل فقط یک شناسهٔ رنگی سبک برای هر بخش اضافه می‌کند
+  تا با تغییر رنگ اصلی/تم در تنظیمات نمایش، هماهنگی کلی UI به‌هم نخورد.
+*/
+:root{
+  --sec-cartable:#2563eb;      /* کارتابل */
+  --sec-customer:#7c3aed;      /* امور مشتریان */
+  --sec-warehouse:#ea580c;     /* رهگیری قطعات / انبار */
+  --sec-finance:#16a34a;       /* امور مالی */
+  --sec-reports:#0891b2;       /* گزارش‌ها / داشبورد */
+  --sec-support:#db2777;       /* گفتگوی مشتری / پشتیبانی */
+}
+
+/* حالت پیش‌فرض: بدون نوار (صفحات بدون بخش مشخص، تنظیمات و غیره) */
+.main-content .card{
+  border-inline-start:3px solid transparent;
+  transition:border-color .18s ease, box-shadow .22s ease, transform .22s ease;
+}
+
+body[data-section="cartable"] .main-content .card{ border-inline-start-color:var(--sec-cartable) !important; }
+body[data-section="customer"] .main-content .card{ border-inline-start-color:var(--sec-customer) !important; }
+body[data-section="warehouse"] .main-content .card{ border-inline-start-color:var(--sec-warehouse) !important; }
+body[data-section="finance"] .main-content .card{ border-inline-start-color:var(--sec-finance) !important; }
+body[data-section="reports"] .main-content .card{ border-inline-start-color:var(--sec-reports) !important; }
+body[data-section="support"] .main-content .card{ border-inline-start-color:var(--sec-support) !important; }
+
+/* در تنظیمات و صفحات بدون بخش، کارت‌ها خنثی می‌مانند (بدون نوار رنگی) */
+body[data-section="settings"] .main-content .card,
+body[data-section=""] .main-content .card{
+  border-inline-start-color:transparent !important;
+}
+
+/* روی موبایل هم همین رفتار حفظ شود؛ فقط عرض نوار کمی کمتر برای صرفه‌جویی فضا نیست، همان ۳px کافی است */

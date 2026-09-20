@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}سازگان | {{ page_title }}{% endblock %}
+{% block content %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>{{ page_title }} (<span id="visible-count">{{ requests|length }}</span> از {{ requests|length }})</span>
+                <div class="list-header-actions">
+                    {% if export_url %}
+                    <a href="{{ export_url }}" class="btn-export">خروجی اکسل</a>
+                    {% endif %}
+                    <input type="text" id="req-search" class="search-box" placeholder="جستجوی متنی..." onkeyup="filterRequests()">
+                    {% set quick_new_url = '/customer-affairs/new-request' %}
+                    {% set quick_new_title = 'ثبت درخواست جدید' %}
+                    {% set quick_new_label = 'درخواست جدید' %}
+                    {% include '_quick_new_button.html' %}
+                </div>
+            </div>
+        </div>
+
+        <form method="GET" class="filter-bar">
+            <div class="filter-field">
+                <label>از تاریخ</label>
+                <input type="text" name="date_from" value="{{ date_from or '' }}" placeholder="۱۴۰۵/۰۱/۰۱">
+            </div>
+            <div class="filter-field">
+                <label>تا تاریخ</label>
+                <input type="text" name="date_to" value="{{ date_to or '' }}" placeholder="۱۴۰۵/۱۲/۲۹">
+            </div>
+            <div class="filter-field">
+                <label>استان</label>
+            <select name="province" class="field-select geo-province" onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                <option value="">همه</option>
+                {% for p in provinces or [] %}
+                <option value="{{ p }}" {% if province == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>شهرستان</label>
+            <select name="county" class="field-select geo-county" onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div>
+            <label>شهر</label>
+            <select name="city" class="field-select geo-city">
+                <option value="">همه</option>
+            </select>
+        </div>
+            <div class="filter-field">
+                <label>تأخیر</label>
+                <select name="only_delayed" class="field-select">
+                    <option value="">همه</option>
+                    <option value="1" {% if only_delayed %}selected{% endif %}>فقط تأخیری (≥{{ delay_threshold or 3 }} روز)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn">اعمال فیلتر</button>
+        </form>
+
+        {% set delayed_n = requests|selectattr('is_delayed')|list|length %}
+        {% if delayed_n > 0 %}
+        <div class="delay-summary"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 L22 20 L2 20 Z"/><line x1="12" y1="9.5" x2="12" y2="14"/><circle cx="12" cy="16.8" r="0.9" fill="currentColor" stroke="none"/></svg> {{ delayed_n }} پرونده تأخیری (بیش از {{ delay_threshold or 3 }} روز در وضعیت فعلی)</div>
+        {% endif %}
+
+        {% if requests|length == 0 %}
+            <div class="empty-state">موردی برای نمایش وجود ندارد.</div>
+        {% else %}
+        <div style="overflow-x:auto;">
+        <table id="requests-table">
+            <tr>
+                <th>#</th><th>دسته</th><th>تاریخ ثبت</th><th>نام مشتری</th><th>نوع دستگاه</th>
+                <th>استان</th><th>شهرستان</th><th>شهر</th><th>شرح کار</th><th>تکنسین</th><th>وضعیت</th><th>روز</th><th>عملیات</th>
+            </tr>
+            {% for r in requests %}
+            <tr class="req-row {% if r.is_delayed %}row-delayed{% endif %}">
+                <td>{{ r.id }}</td>
+                <td>
+                    <span class="tag">
+                        {{ r.request_category }}
+                        {% if r.request_category == 'تعمیر' %} ({{ r.service_type }}){% endif %}
+                        {% if r.request_subtype %} / {{ r.request_subtype }}{% endif %}
+                    </span>
+                </td>
+                <td>{{ r.reception_date if r.reception_date else '—' }}</td>
+                <td>{{ r.customer_name }}</td>
+                <td>{{ r.device_type or '—' }}</td>
+                <td>{{ r.province or '—' }}</td>
+                <td>{{ r.county or '—' }}</td>
+                <td>{{ r.city or '—' }}</td>
+                <td style="max-width:160px;white-space:normal;font-size:12.5px;">{{ (r.problem_desc or '—')[:70] }}</td>
+                <td>{{ r.assigned_technician if r.assigned_technician else '—' }}</td>
+                <td>{% if r.is_delayed %}<span class="delay-badge">تأخیر</span>{% endif %}<span class="badge">{{ r.status }}</span></td>
+                <td><strong {% if r.is_delayed %}style="color:var(--danger-text)"{% endif %}>{{ r.days_in_status if r.days_in_status is defined else '—' }}</strong></td>
+                <td>
+                    {% if r.detail_url %}
+                    <a href="{{ r.detail_url }}" class="btn-edit">مشاهده / ویرایش</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+{% include '_pagination.html' %}
+
+        <div id="no-results" class="empty-state" style="display:none;">موردی مطابق جستجوی شما یافت نشد.</div>
+        {% endif %}
+    </div>
+
+    <script>
+        function filterRequests() {
+            var query = document.getElementById('req-search').value.trim();
+            var rows = document.querySelectorAll('#requests-table .req-row');
+            var visibleCount = 0;
+            rows.forEach(function(row) {
+                var matches = row.textContent.indexOf(query) !== -1;
+                row.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+            document.getElementById('visible-count').textContent = visibleCount;
+            document.getElementById('no-results').style.display = (visibleCount === 0 && query !== '') ? 'block' : 'none';
+        }
+    </script>
+
+{% endblock %}

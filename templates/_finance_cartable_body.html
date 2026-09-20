@@ -1,0 +1,40 @@
+
+<div class="card">
+  <div class="card-header list-header-row ">
+    <span>کارتابل امور مالی — پیش‌فاکتور، تاییدیه و فاکتور</span>
+</div>
+  <div class="card-body">
+    <div class="list-header-actions" style="margin-bottom:12px">
+      <a class="btn-export" href="/finance/invoices">ثبت فاکتور نهایی</a>
+      <a class="btn-cancel" href="/finance/wage-calculation">محاسبه دستمزد</a>
+    </div>
+    {% if tasks|length == 0 %}
+    <div class="empty-state">پرونده در انتظار اقدام مالی نیست.</div>
+    {% else %}
+    <div class="table-wrap">
+    <table>
+      <tr>
+        <th>کد</th><th>مشتری</th><th>نوع</th><th>وضعیت</th><th>پیش‌فاکتور</th><th>فاکتور</th><th></th>
+      </tr>
+      {% for r in tasks %}
+      <tr {% if r.is_delayed %}style="background:var(--danger-soft,#fef2f2)"{% endif %}>
+        <td>#{{ r.id }}</td>
+        <td>{{ r.customer_name }}</td>
+        <td>{{ r.request_category }} / {{ r.service_type }}</td>
+        <td>{{ r.status }}</td>
+        <td>{% if r.proforma_confirmed %}تأیید{% else %}—{% endif %}</td>
+        <td>{{ r.invoice_number or '—' }}</td>
+        <td>
+          {% if r.detail_url %}
+          <a class="btn-edit" href="{{ r.detail_url }}">ثبت مالی</a>
+          {% else %}
+          <a class="btn-edit" href="/">مشاهده</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    </div>
+    {% endif %}
+  </div>
+</div>

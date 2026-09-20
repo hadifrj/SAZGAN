@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>چاپ بازدید #{{ req.id }}</title>
+<style>
+body{font-family:Tahoma,sans-serif;margin:24px;font-size:13px;color:#1a2433}
+h1{font-size:16px;margin:0 0 6px} h2{font-size:14px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:16px 0 8px}
+table{width:100%;border-collapse:collapse;margin-bottom:12px}
+th,td{border:1px solid #ddd;padding:6px 10px;text-align:right}
+th{background:#f5f7fa}
+.row{margin-bottom:4px} .row strong{color:#64748b;min-width:110px;display:inline-block}
+@media print{.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="no-print" style="margin-bottom:12px">
+<button onclick="window.print()">چاپ</button>
+<button onclick="window.close()">بستن</button>
+</div>
+{% set page_title = 'پرونده بررسی و بازدید' %}
+{% include '_print_company_header.html' %}
+<p>شماره: <strong>{{ req.id }}</strong> | وضعیت: {{ req.status }} |
+{% if req.is_paid_visit %}غیررایگان{% else %}رایگان{% endif %}</p>
+<h2>اطلاعات مشتری</h2>
+<div class="row"><strong>نام:</strong> {{ req.customer_name }}</div>
+<div class="row"><strong>استان/شهر:</strong> {{ req.province }} / {{ req.city or '—' }}</div>
+<div class="row"><strong>آدرس:</strong> {{ req.customer_address or '—' }}</div>
+<div class="row"><strong>کارشناس:</strong> {{ req.equipment_manager_name or '—' }} — {{ req.equipment_manager_mobile or '' }}</div>
+<div class="row"><strong>تکنسین:</strong> {{ req.assigned_technician or '—' }}</div>
+<div class="row"><strong>نوع/تعداد دستگاه:</strong> {{ req.visit_device_type or '—' }} / {{ req.visit_device_count or '—' }}</div>
+<div class="row"><strong>تاریخ:</strong> {{ req.reception_date or '—' }}</div>
+<div class="row"><strong>شرح درخواست:</strong> {{ req.hospital_request_desc or req.problem_desc or '—' }}</div>
+<div class="row"><strong>شرح تکنسین:</strong> {{ req.technician_desc or '—' }}</div>
+<h2>سریال‌های بازدیدشده</h2>
+{% if visit_serials|length == 0 %}<p>—</p>{% else %}
+<table>
+<tr><th>#</th><th>سریال</th><th>شرح</th></tr>
+{% for vs in visit_serials %}
+<tr><td>{{ loop.index }}</td><td>{{ vs.serial_number }}</td><td>{{ vs.visit_desc or '—' }}</td></tr>
+{% endfor %}
+</table>
+{% endif %}
+<h2>مراحل</h2>
+<table>
+<tr><th>#</th><th>مرحله</th><th>تاریخ</th></tr>
+{% for s in statuses %}
+<tr>
+<td>{{ loop.index }}</td>
+<td>{{ s }}{% if req.status == s %} ★{% endif %}</td>
+<td>{% for d in stage_dates %}{% if d.stage_name == s %}{{ d.stage_date }}{% endif %}{% endfor %}</td>
+</tr>
+{% endfor %}
+</table>
+<p style="margin-top:24px;color:#94a3b8;font-size:11px">سامانه خدمات پس از فروش سازگان</p>
+</body>
+</html>

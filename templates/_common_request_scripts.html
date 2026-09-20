@@ -1,0 +1,190 @@
+<script>
+/** باز/بسته‌کردن هر بخش از فرم‌های آکاردئونی (rq-acc) — مستقل از بقیه‌ی بخش‌ها */
+function rqAccToggle(btn) {
+    var item = btn.closest('.acc-item');
+    if (!item) return;
+    item.classList.toggle('open');
+}
+
+/** اگر فیلد الزامیِ داخل یک بخشِ بسته خالی مونده بود، موقع ثبت اون بخش رو خودکار باز کن
+ *  تا کاربر گیج نشه که چرا فرم ثبت نمی‌شه. */
+document.querySelectorAll('.rq-acc').forEach(function (acc) {
+    acc.addEventListener('invalid', function (e) {
+        var item = e.target.closest && e.target.closest('.acc-item');
+        if (item && !item.classList.contains('open')) {
+            item.classList.add('open');
+        }
+    }, true);
+});
+
+/** تنظیم مقدار select + همگام‌سازی searchable-select */
+function setSelectValue(elId, value) {
+    var sel = document.getElementById(elId);
+    if (!sel) return false;
+    var val = (value || '').toString().trim();
+    if (!val) return false;
+    var found = false;
+    for (var i = 0; i < sel.options.length; i++) {
+        if ((sel.options[i].value || '').trim() === val) {
+            sel.selectedIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        var opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        sel.appendChild(opt);
+        sel.value = val;
+        found = true;
+    } else {
+        sel.value = val;
+    }
+    try {
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        sel.dispatchEvent(new Event('input', { bubbles: true }));
+    } catch (e) {}
+    return found;
+}
+
+function fillCustomer() {
+    var id = document.getElementById('customer_id');
+    if (!id || !id.value) return;
+    fetch('/api/customer/' + id.value)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.found) return;
+            var set = function(elId, val) {
+                var el = document.getElementById(elId);
+                if (el) el.value = val || '';
+            };
+            set('customer_name', data.name);
+            // همگام‌سازی دکمه انتخاب مشتری
+            try {
+              var block = document.querySelector('.customer-field-block');
+              if (block) {
+                var txt = block.querySelector('.cp-text');
+                if (txt && data.name) {
+                  txt.textContent = data.name;
+                  txt.classList.remove('is-placeholder');
+                  var ctrl = block.querySelector('.cp-control');
+                  if (ctrl) ctrl.classList.add('has-value');
+                }
+              }
+            } catch (e) {}
+
+            set('customer_address', data.address);
+            set('province', data.province);
+            set('county', data.county);
+            set('city', data.city);
+            set('equipment_manager_name', data.equipment_manager_name);
+            set('equipment_manager_mobile', data.equipment_manager_mobile);
+            if (data.phone) {
+                set('customer_phone_hidden', data.phone);
+                set('contact_phone', data.phone);
+                set('customer_phone', data.phone);
+            }
+            // همگام‌سازی geo cascade در صورت وجود
+            var provEl = document.getElementById('province');
+            if (provEl && typeof window.onGeoProvinceChange === 'function') {
+                try {
+                    var countyEl = document.getElementById('county');
+                    var cityEl = document.getElementById('city');
+                    if (countyEl && data.county) countyEl.setAttribute('data-selected', data.county);
+                    if (cityEl && data.city) cityEl.setAttribute('data-selected', data.city);
+                    window.onGeoProvinceChange(provEl);
+                } catch (e) {}
+            }
+            if (typeof filterTechs === 'function') filterTechs();
+        })
+        .catch(function() {});
+}
+
+function lookupWarranty() {
+    var serialEl = document.getElementById('serial_number');
+    var hint = document.getElementById('serial-hint');
+    if (!serialEl || !serialEl.value) {
+        if (hint) hint.textContent = '';
+        return;
+    }
+    if (hint) hint.textContent = 'در حال جستجو…';
+    fetch('/api/lookup_warranty/' + encodeURIComponent(serialEl.value.trim()))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.found) {
+                if (hint) hint.textContent = 'سریال در شناسنامه کالا یافت نشد.';
+                return;
+            }
+            var set = function(elId, val) {
+                var el = document.getElementById(elId);
+                if (el && val) el.value = val;
+            };
+            set('installation_date', data.installation_date);
+            set('warranty_end_date', data.warranty_end_date);
+            set('device_type', data.device_type);
+            set('device_model', data.model || data.device_model || '');
+            var cn = document.getElementById('customer_name');
+            if (cn && data.customer_name && !cn.value) cn.value = data.customer_name;
+            var st = data.warranty_status || (data.active ? 'فعال' : '');
+            if (hint) {
+                hint.textContent = 'شناسنامه یافت شد' + (st ? ' — وضعیت: ' + st : '') +
+                    (data.model ? ' | مدل: ' + data.model : '');
+                hint.className = 'field-hint field-hint-ok';
+            }
+        })
+        .catch(function() {
+            if (hint) hint.textContent = 'خطا در جستجوی سریال';
+        });
+}
+
+function filterTechs() {
+    var provinceEl = document.getElementById('province');
+    var techEl = document.getElementById('assigned_technician');
+    if (!provinceEl || !techEl) return;
+    var province = provinceEl.value;
+    var opts = techEl.options;
+    for (var i = 0; i < opts.length; i++) {
+        var opt = opts[i];
+        if (!opt.value) continue;
+        var op = opt.getAttribute('data-province') || '';
+        var show = (!op || op === province);
+        opt.style.display = show ? '' : 'none';
+        opt.hidden = !show;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof filterTechs === 'function') filterTechs();
+    var provinceEl = document.getElementById('province');
+    if (provinceEl && !provinceEl.getAttribute('data-cust-bound')) {
+        provinceEl.setAttribute('data-cust-bound', '1');
+        provinceEl.addEventListener('change', function() {
+            if (typeof filterTechs === 'function') filterTechs();
+        });
+    }
+    var first = document.getElementById('customer_id') || document.querySelector('input, select, textarea');
+    if (first && window.matchMedia('(min-width: 900px)').matches) {
+        try { first.focus(); } catch (e) {}
+    }
+});
+
+/* دراپ‌داون «عملیات» در ردیف‌های جدول لیست پرونده‌ها */
+document.addEventListener('click', function(e) {
+    var toggle = e.target.closest ? e.target.closest('.row-actions-toggle') : null;
+    document.querySelectorAll('.row-actions-menu').forEach(function(menu) {
+        if (!toggle || menu !== toggle.parentElement.querySelector('.row-actions-menu')) {
+            menu.hidden = true;
+        }
+    });
+    if (toggle) {
+        var menu = toggle.parentElement.querySelector('.row-actions-menu');
+        if (menu) menu.hidden = !menu.hidden;
+    }
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.row-actions-menu').forEach(function(menu) { menu.hidden = true; });
+    }
+});
+</script>

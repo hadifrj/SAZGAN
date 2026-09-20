@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block title %}سازگان | محاسبات دستمزد{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header list-header-row ">
+    <span>ثبت دستمزد — موارد غیرپذیرش (دستی)</span>
+</div>
+  <div class="card-body">
+    {% if msg %}
+    <div class="alert alert-success" style="margin-bottom:12px;">{{ msg }}</div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger" style="margin-bottom:12px;">{{ error }}</div>
+    {% endif %}
+
+    {% if representatives|length == 0 %}
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <span style="font-size:13px;color:#b45309;">نماینده‌ای برای انتخاب نیست</span>
+</div>
+    {% endif %}
+
+    <form method="POST" id="wage-form">
+      <div class="form-grid">
+        <div>
+          <label>نماینده</label>
+          <select name="representative_id" id="rep-select" class="field-select" onchange="onRepChange()" required>
+            <option value="">— انتخاب کنید —</option>
+            {% for r in representatives %}
+            <option value="{{ r.id }}"
+              data-name="{% if r.rep_type == 'حقوقی' and r.company_name %}{{ r.company_name }}{% else %}{{ r.first_name }} {{ r.last_name }}{% endif %}"
+              data-city="{{ r.city or '' }}"
+              data-province="{{ r.province or '' }}">
+              {% if r.rep_type == 'حقوقی' and r.company_name %}{{ r.company_name }} ({{ r.first_name }} {{ r.last_name }}){% else %}{{ r.first_name }} {{ r.last_name }}{% endif %}
+              — {{ r.city or r.province or '—' }}
+            </option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="representative_name" id="representative_name">
+        </div>
+
+        <div>
+          <label>آیتم از جدول دستمزد</label>
+          <select name="rate_id" id="rate-select" class="field-select" onchange="onRateChange()" required>
+            <option value="">— انتخاب کنید —</option>
+            {% for w in wage_rates %}
+            <option value="{{ w.id }}"
+              data-code="{{ w.rate_code or '' }}"
+              data-desc="{{ w.work_description }}"
+              data-amount="{{ w.wage_amount or 0 }}"
+              data-outside="{{ w.amount_outside or '' }}"
+              data-perkm="{{ w.is_per_km or 0 }}"
+              data-category="{{ w.category or '' }}">
+              {{ w.work_description }}
+              {% if w.category %} ({{ w.category }}){% endif %}
+              — {{ '{:,}'.format(w.wage_amount or 0) }} ریال
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label>تاریخ (شمسی) — مبنای ماهانه</label>
+          <input type="text" name="calc_date" class="field-select jalali-date"
+            value="{{ today_year }}/{{ '%02d'|format(today_month) }}/{{ '%02d'|format(today_day) }}"
+            placeholder="1405/01/01" autocomplete="off" dir="ltr" required>
+        </div>
+
+        <div>
+          <label>تعداد</label>
+          <input type="number" name="qty" id="qty" value="1" min="1" onchange="recalcAmount()">
+        </div>
+
+        <div>
+          <label>نام مشتری (برای تجمیع ایاب)</label>
+          <input type="text" name="customer_name" id="customer_name" placeholder="اختیاری">
+        </div>
+
+        <div>
+          <label>شهر مشتری</label>
+          <input type="text" name="customer_city" id="customer_city" placeholder="برای محاسبه ایاب">
+        </div>
+
+        <div>
+          <label>استان مشتری</label>
+          <input type="text" name="customer_province" id="customer_province" placeholder="اختیاری">
+        </div>
+
+        <div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:22px;">
+            <input type="checkbox" name="add_travel" id="add_travel" value="1" style="width:auto;min-height:0;" onchange="recalcAmount()">
+            افزودن ایاب‌وذهاب (یک‌بار برای این تاریخ/مشتری)
+          </label>
+        </div>
+
+        <div class="field-full">
+          <label>شرح نهایی</label>
+          <input type="text" name="work_description" id="work_description" required>
+        </div>
+
+        <div>
+          <label>مبلغ آیتم (ریال)</label>
+          <input type="number" name="amount" id="amount" required min="0">
+        </div>
+
+        <div>
+          <label>مبلغ ایاب (ریال)</label>
+          <input type="number" name="travel_amount" id="travel_amount" value="0" readonly>
+        </div>
+
+        <div>
+          <label>جمع کل (ریال)</label>
+          <input type="number" name="total_display" id="total_display" value="0" readonly style="font-weight:700;">
+        </div>
+
+        <div class="field-full">
+          <label>توضیحات</label>
+          <textarea name="notes" rows="2"></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn">ثبت در دستمزد ماهانه</button>
+      <a href="/finance/wage-monthly" class="btn-cancel">گزارش ماهانه</a>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">آخرین ثبت‌ها</div>
+  {% if recent_calcs|length == 0 %}
+  <div class="empty-state">هنوز محاسبه‌ای ثبت نشده است.</div>
+  {% else %}
+  <table>
+    <tr>
+      <th>#</th><th>نماینده</th><th>شرح</th><th>مبلغ (ریال)</th><th>تاریخ</th><th>منبع</th>
+    </tr>
+    {% for c in recent_calcs %}
+    <tr>
+      <td>{{ c.id }}</td>
+      <td>{{ c.representative_name }}</td>
+      <td>{{ c.work_description }}</td>
+      <td>{{ '{:,}'.format(c.amount) }}</td>
+      <td>{{ c.calc_date if c.calc_date else '—' }}</td>
+      <td>{{ c.source if c.source is defined and c.source else '—' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+
+<script>
+var currentRate = null;
+
+function onRepChange() {
+  var select = document.getElementById('rep-select');
+  var opt = select.options[select.selectedIndex];
+  document.getElementById('representative_name').value = opt.getAttribute('data-name') || '';
+  recalcAmount();
+}
+
+function onRateChange() {
+  var select = document.getElementById('rate-select');
+  var opt = select.options[select.selectedIndex];
+  if (!opt || !opt.value) { currentRate = null; return; }
+  currentRate = {
+    code: opt.getAttribute('data-code') || '',
+    desc: opt.getAttribute('data-desc') || '',
+    amount: parseInt(opt.getAttribute('data-amount') || '0', 10),
+    outside: opt.getAttribute('data-outside') ? parseInt(opt.getAttribute('data-outside'), 10) : null,
+    perKm: opt.getAttribute('data-perkm') === '1'
+  };
+  document.getElementById('work_description').value = currentRate.desc;
+  recalcAmount();
+}
+
+function recalcAmount() {
+  var qty = parseInt(document.getElementById('qty').value || '1', 10) || 1;
+  var amount = 0;
+  if (currentRate) {
+    amount = currentRate.amount * qty;
+    // اگر repair و شهر متفاوت باشد later server adjusts; client uses base
+  }
+  document.getElementById('amount').value = amount;
+
+  var addTravel = document.getElementById('add_travel').checked;
+  if (!addTravel) {
+    document.getElementById('travel_amount').value = 0;
+    document.getElementById('total_display').value = amount;
+    return;
+  }
+
+  // درخواست محاسبه ایاب از سرور
+  var rep = document.getElementById('rep-select');
+  var ropt = rep.options[rep.selectedIndex];
+  var fromCity = ropt ? (ropt.getAttribute('data-city') || '') : '';
+  var fromProv = ropt ? (ropt.getAttribute('data-province') || '') : '';
+  var toCity = document.getElementById('customer_city').value.trim();
+  var toProv = document.getElementById('customer_province').value.trim();
+
+  if (!fromCity && !fromProv) {
+    document.getElementById('travel_amount').value = 0;
+    document.getElementById('total_display').value = amount;
+    return;
+  }
+
+  // داخل شهر؟
+  function norm(s){ return (s||'').replace(/ي/g,'ی').replace(/ك/g,'ک').trim(); }
+  if (toCity && norm(fromCity) === norm(toCity)) {
+    // local travel - fetch from rates via data attribute if possible
+    fetch('/api/wage/travel?local=1', {credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var t = d.travel_amount || 2500000;
+        document.getElementById('travel_amount').value = t;
+        document.getElementById('total_display').value = amount + t;
+      }).catch(function(){
+        document.getElementById('travel_amount').value = 2500000;
+        document.getElementById('total_display').value = amount + 2500000;
+      });
+    return;
+  }
+
+  if (toCity || toProv) {
+    var url = '/api/wage/travel?from_city=' + encodeURIComponent(fromCity)
+      + '&from_province=' + encodeURIComponent(fromProv)
+      + '&to_city=' + encodeURIComponent(toCity)
+      + '&to_province=' + encodeURIComponent(toProv);
+    fetch(url, {credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var t = d.travel_amount || 0;
+        document.getElementById('travel_amount').value = t;
+        document.getElementById('total_display').value = amount + t;
+        if (d.description) {
+          /* optional hint */
+        }
+      }).catch(function(){
+        document.getElementById('travel_amount').value = 0;
+        document.getElementById('total_display').value = amount;
+      });
+  } else {
+    document.getElementById('travel_amount').value = 0;
+    document.getElementById('total_display').value = amount;
+  }
+}
+
+document.getElementById('customer_city').addEventListener('change', recalcAmount);
+document.getElementById('customer_city').addEventListener('blur', recalcAmount);
+</script>
+{% endblock %}

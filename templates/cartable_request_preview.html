@@ -1,0 +1,89 @@
+{% extends "embed_base.html" %}
+{% block title %}مشاهده پرونده #{{ req.id if req else '—' }}{% endblock %}
+{% block content %}
+<div class="sg-preview">
+  {% if error %}
+  <div class="card"><div class="card-body"><div class="alert alert-error">{{ error }}</div></div></div>
+  {% else %}
+  <div class="sg-preview-head">
+    <div>
+      <div class="sg-preview-eyebrow">پیش‌نمایش کارتابل</div>
+      <h2>پرونده #{{ req.reception_no or req.id }}</h2>
+      <div class="sg-preview-meta">{{ req.customer_name or '—' }} · {{ req.device_type or '—' }}</div>
+    </div>
+    <span id="sg-preview-status" class="badge">{{ req.status or '—' }}</span>
+  </div>
+
+  <div class="sg-preview-grid">
+    <div class="sg-preview-card"><span>مشتری</span><strong>{{ req.customer_name or '—' }}</strong></div>
+    <div class="sg-preview-card"><span>شماره پذیرش</span><strong>{{ req.reception_no or req.id }}</strong></div>
+    <div class="sg-preview-card"><span>دسته</span><strong>{{ req.request_category or '—' }}</strong></div>
+    <div class="sg-preview-card"><span>نوع سرویس</span><strong>{{ req.request_subtype or req.service_type or '—' }}</strong></div>
+    <div class="sg-preview-card"><span>دستگاه</span><strong>{{ req.device_type or '—' }}</strong></div>
+    <div class="sg-preview-card"><span>سریال</span><strong dir="ltr">{{ req.serial_number or '—' }}</strong></div>
+    <div class="sg-preview-card sg-preview-wide"><span>شرح درخواست</span><strong>{{ req.problem_desc or req.hospital_request_desc or '—' }}</strong></div>
+    <div class="sg-preview-card"><span>استان / شهر</span><strong>{{ req.province or '—' }}{% if req.city %} / {{ req.city }}{% endif %}</strong></div>
+    <div class="sg-preview-card"><span>تاریخ پذیرش</span><strong>{{ req.reception_date or '—' }}</strong></div>
+  </div>
+
+
+  {% if can_edit and statuses and status_endpoint %}
+  <div class="sg-preview-section">
+    <div class="sg-preview-section-title">تغییر وضعیت پرونده</div>
+    <form id="sg-status-form" class="sg-status-form">
+      <input type="hidden" name="action" value="change_status">
+      <div class="sg-status-row">
+        <select name="new_status" id="sg-new-status" required>
+          {% for s in statuses %}
+          <option value="{{ s }}" {% if req.status == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" name="stage_notes" placeholder="یادداشت مرحله (اختیاری)">
+        <button type="submit" class="btn">ثبت وضعیت</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <div id="sg-preview-message" class="sg-preview-message" hidden></div>
+
+  <div class="sg-preview-actions">
+    <a class="btn" href="{{ detail_url }}" title="باز کردن پرونده کامل">باز کردن پرونده کامل</a>
+    <button type="button" class="btn-cancel" onclick="window.parent&&window.parent.sgCloseFormModal?window.parent.sgCloseFormModal():history.back()">بستن</button>
+  </div>
+  {% endif %}
+</div>
+<style>
+.sg-preview{padding:2px 2px 14px}.sg-preview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:6px 2px 16px;border-bottom:1px solid var(--border)}.sg-preview-eyebrow{font-size:11px;color:var(--text-muted);margin-bottom:3px}.sg-preview h2{margin:0;font-size:20px}.sg-preview-meta{font-size:12.5px;color:var(--text-muted);margin-top:4px}.sg-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.sg-preview-card{border:1px solid var(--border);border-radius:12px;padding:11px 12px;background:var(--card)}.sg-preview-card span{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px}.sg-preview-card strong{font-size:13px;font-weight:600;word-break:break-word}.sg-preview-wide{grid-column:1/-1}.sg-preview-section{margin-top:14px;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--card)}.sg-preview-section-title{font-weight:700;font-size:13px;margin-bottom:10px}.sg-status-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(160px,1fr) auto;gap:8px}.sg-status-row select,.sg-status-row input{min-width:0;border:1px solid var(--border);border-radius:9px;padding:9px 10px;background:var(--bg);color:var(--text);font-family:inherit}.sg-preview-message{margin-top:10px;border-radius:9px;padding:9px 10px;font-size:12px}.sg-preview-message.ok{background:#ecfdf5;color:#166534}.sg-preview-message.err{background:#fef2f2;color:#991b1b}.sg-preview-actions{display:flex;justify-content:flex-start;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}@media(max-width:620px){.sg-preview-grid{grid-template-columns:1fr}.sg-preview-wide{grid-column:auto}.sg-preview-head{align-items:stretch;flex-direction:column}.sg-status-row{grid-template-columns:1fr}.sg-status-row button{width:100%}}
+</style>
+<script>
+(function(){
+  var statusForm=document.getElementById('sg-status-form');
+  var message=document.getElementById('sg-preview-message');
+  var statusBadge=document.getElementById('sg-preview-status');
+  function showMessage(text, ok){
+    if(!message) return;
+    message.hidden=false; message.textContent=text||'';
+    message.className='sg-preview-message '+(ok?'ok':'err');
+  }
+  async function postForm(url, formData){
+    var res=await fetch(url,{method:'POST',body:formData,credentials:'same-origin'});
+    var data={}; try{data=await res.json();}catch(e){}
+    if(!res.ok || data.ok===false) throw new Error(data.error||'عملیات ناموفق بود.');
+    return data;
+  }
+  if(statusForm){
+    statusForm.addEventListener('submit',async function(e){
+      e.preventDefault();
+      var btn=statusForm.querySelector('button[type=submit]'); btn.disabled=true;
+      try{
+        var data=await postForm({{ status_endpoint|tojson }},new FormData(statusForm));
+        var selected=document.getElementById('sg-new-status').value;
+        if(statusBadge) statusBadge.textContent=selected;
+        showMessage('وضعیت پرونده با موفقیت تغییر کرد.',true);
+      }catch(err){showMessage(err.message,false)}finally{btn.disabled=false;}
+    });
+  }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,1107 @@
+<style>
+
+.tg-app-wrap{max-width:760px;margin:0 auto;-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;text-size-adjust:100%;}
+.tg-app-card{
+  display:flex;flex-direction:column;
+  height:min(82vh,720px);min-height:520px;max-width:100%;
+  border-radius:18px;overflow:hidden;position:relative;
+  border:1px solid rgba(15,23,42,.08);
+  box-shadow:0 12px 40px rgba(15,23,42,.1);
+  background:#0e1621;
+}
+.tg-top{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;background:#17212b;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.tg-peer{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.tg-peer-av{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,#2aabee,#229ed9);
+  color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:16px;
+}
+.tg-peer-name{font-weight:800;font-size:14.5px;color:#e4e6eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg-peer-status{font-size:12px;color:#708499;margin-top:2px}
+.tg-peer-status a{color:#2aabee;text-decoration:none;font-weight:700}
+.tg-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#708499;margin-left:4px}
+.tg-dot.on{background:#4cd964}
+.tg-top-actions{display:flex;gap:6px}
+.tg-chip{
+  border:0;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;
+  background:rgba(255,255,255,.08);color:#e4e6eb;cursor:pointer;font-family:inherit;
+}
+.tg-chip.danger{background:rgba(239,68,68,.15);color:#fca5a5}
+.tg-icon-btn{
+  width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#242f3d;color:#9fb2c6;text-decoration:none!important;flex-shrink:0;
+  transition:background .15s ease,color .15s ease;
+}
+.tg-icon-btn:hover{background:#2c3b4d;color:#fff}
+.tg-icon-btn.attach input{display:none}
+.tg-stream{
+  flex:1;overflow-y:auto;padding:14px 12px 10px;
+  background-color:#0e1621;
+  background-image:
+    radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:22px 22px;
+}
+.tg-row{display:flex;width:100%;margin-bottom:8px;flex:0 0 auto;height:auto;align-items:flex-end}
+.tg-row.mine{justify-content:flex-end}
+.tg-row.theirs{justify-content:flex-start}
+.tg-bubble{display:inline-block;width:fit-content;max-width:min(82%,340px);min-width:48px;height:auto!important;padding:8px 12px 6px;border-radius:14px;font-size:14.5px;line-height:1.45;color:#e4e6eb;word-break:break-word;overflow-wrap:break-word;box-sizing:border-box;}
+.tg-text{white-space:pre-wrap;}
+.tg-row.mine .tg-bubble{background:#2b5278;border-bottom-left-radius:4px}
+.tg-row.theirs .tg-bubble{background:#182533;border-bottom-right-radius:4px}
+.tg-from{font-size:11px;font-weight:800;color:#2aabee;margin-bottom:3px}
+.tg-foot{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:3px;direction:ltr}
+.tg-time{font-size:11px;color:#7f8b99}
+.tg-row.theirs .tg-time{color:#9ab0c7}
+.tg-edited-flag{font-size:10.5px;color:#8b9aab;font-style:normal}
+.tg-ticks{display:inline-flex;align-items:center;height:14px}
+.tg-ticks svg{width:16px;height:11px}
+.tg-ticks.sent,.tg-ticks.delivered{color:#7f8b99}
+.tg-ticks.read{color:#4fc3f7}
+.tg-img{max-width:240px;max-height:200px;border-radius:8px;display:block;margin:2px 0 4px}
+.tg-file{display:inline-flex;gap:6px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.2);color:#c5d4e3;text-decoration:none!important;font-size:12.5px;font-weight:700}
+.tg-closed{padding:12px;text-align:center;color:#8b9aab;font-size:13px;background:#17212b;border-top:1px solid rgba(255,255,255,.06)}
+.tg-hint{font-size:12px;color:#2aabee;padding:6px 14px 0;background:#17212b}
+.tg-composer{
+  display:flex;flex-direction:row-reverse;align-items:flex-end;gap:8px;padding:8px 10px 12px;
+  background:#17212b;border-top:1px solid rgba(255,255,255,.06);
+}
+.tg-composer textarea{
+  flex:1;min-width:0;resize:none;min-height:44px;max-height:130px;overflow-y:auto;
+  border:0;border-radius:22px;padding:12px 16px;
+  background:#242f3d;color:#e4e6eb;font-family:inherit;font-size:15px;line-height:1.4;outline:none;
+}
+.tg-composer textarea::placeholder{color:#6b7c8c}
+.tg-send{
+  width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;
+  background:#2aabee;color:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.tg-send:disabled{opacity:.5;cursor:default}
+.tg-send:hover:not(:disabled){filter:brightness(1.08)}
+.tg-edit-btn{
+  width:18px;height:18px;border:0;border-radius:50%;
+  background:transparent;color:#8b9aab;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;flex-shrink:0;padding:0;margin:0;
+}
+.tg-edit-btn:hover{color:#e4e6eb}
+.tg-edit-box textarea{
+  width:100%;resize:none;min-height:38px;border-radius:8px;border:1px solid rgba(255,255,255,.15);
+  background:rgba(0,0,0,.2);color:#e4e6eb;font-family:inherit;font-size:14px;padding:6px 8px;outline:none;
+}
+.tg-edit-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+.tg-edit-actions button{
+  border:0;border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.tg-edit-save{background:#2aabee;color:#fff}
+.tg-edit-cancel{background:rgba(255,255,255,.1);color:#e4e6eb}
+@media(max-width:640px){
+  .tg-app-card{height:min(85vh,100%);border-radius:12px;min-height:420px}
+  .tg-bubble{max-width:88%}
+}
+
+.tg-serial-banner{padding:7px 14px;background:#17212b;color:#9fb0bb;font-size:12px;border-bottom:1px solid rgba(255,255,255,.05);text-align:center}.tg-serial-banner strong{color:#e4e6eb;margin-right:5px}.tg-react-btn{border:0;background:transparent;color:#8ea6bd;cursor:pointer;font-size:17px;padding:0 3px}.tg-react-btn:hover{color:#fff}.tg-reactions{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.tg-reaction{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e4e6eb;border-radius:999px;padding:1px 6px;font-size:11px;cursor:pointer}
+.tg-input-wrap{flex:1 1 auto;min-width:0;display:flex;align-items:center;}
+.tg-emoji-btn{
+  width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
+  background:#242f3d;color:#9fb2c6;font-size:19px;display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background .15s ease,color .15s ease;
+}
+.tg-emoji-btn:hover{background:#2c3b4d;color:#fff}
+.tg-emoji-btn.active{color:#2aabee;background:rgba(42,171,238,.14)}
+.tg-emoji-panel{display:none;flex-shrink:0;width:100%;height:260px;overflow-y:auto;padding:8px;background:#17212b;border-top:1px solid rgba(255,255,255,.06);grid-template-columns:repeat(8,1fr);gap:2px;align-content:flex-start;box-sizing:border-box;}
+.tg-emoji-panel.open{display:grid}
+.tg-emoji-item{border:0;background:transparent;color:#fff;font-size:22px;padding:6px;border-radius:8px;cursor:pointer}
+.tg-emoji-item:hover{background:rgba(255,255,255,.08)}
+.tg-composer{position:relative;flex-wrap:wrap}
+
+/* اسکرول مینیمال */
+.tg-messages,.tg-composer textarea{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,.35) transparent;
+}
+.tg-messages::-webkit-scrollbar,
+.tg-composer textarea::-webkit-scrollbar{width:4px;height:4px}
+.tg-messages::-webkit-scrollbar-thumb,
+.tg-composer textarea::-webkit-scrollbar-thumb{background:rgba(148,163,184,.35);border-radius:99px}
+.tg-messages::-webkit-scrollbar-track,
+.tg-composer textarea::-webkit-scrollbar-track{background:transparent}
+.tg-composer textarea{
+  min-height:36px !important;
+  max-height:calc(1.4em * 5 + 20px) !important; /* حداکثر ۵ خط */
+  line-height:1.4 !important;
+  padding:8px 14px !important;
+  font-size:14px !important;
+  overflow-y:auto !important;
+}
+.tg-reply-preview{
+  display:none;align-items:center;gap:8px;justify-content:space-between;
+  margin:0 10px;padding:6px 10px;border-radius:10px;
+  background:rgba(42,171,238,.12);border-right:3px solid #2aabee;
+  color:#c5d4e3;font-size:12px;
+}
+.tg-reply-preview.is-on{display:flex}
+.tg-reply-preview b{color:#2aabee;font-size:11px}
+.tg-reply-preview .tg-reply-x{border:0;background:transparent;color:#8b9aab;cursor:pointer;font-size:16px;line-height:1}
+.tg-reply-quote{
+  border-right:3px solid #2aabee;background:rgba(0,0,0,.18);
+  padding:4px 8px;margin:0 0 6px;border-radius:6px;font-size:12px;color:#9ab0c7;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
+.tg-reply-btn{
+  border:0;background:transparent;color:#8b9aab;cursor:pointer;font-size:11px;padding:0 4px;
+}
+.tg-reply-btn:hover{color:#2aabee}
+.tg-quick-wrap{position:static;display:flex;align-items:center}.tg-quick-btn{width:40px;height:40px;border-radius:50%;border:0;background:#242f3d;color:#9fb2c6;cursor:pointer;font-weight:800}.tg-quick-btn:hover{background:#2c3b4d;color:#fff}.tg-quick-panel{display:none;position:absolute;bottom:50px;right:0;width:min(360px,78vw);max-height:330px;overflow:auto;background:#17212b;border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);padding:7px;z-index:20}.tg-quick-panel.open{display:block}.tg-quick-item{display:block;width:100%;text-align:right;border:0;background:transparent;color:#e4e6eb;padding:9px 10px;border-radius:10px;cursor:pointer;font-family:inherit}.tg-quick-item:hover{background:rgba(42,171,238,.12)}.tg-quick-title{font-weight:800;font-size:12px}.tg-quick-body{display:block;font-size:11px;color:#8fa1b3;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tg-pinned-note{border-right:3px solid #f5b942;background:rgba(245,185,66,.08);padding:4px 8px;margin-bottom:6px;font-size:11px;color:#cbd5e1}
+
+
+/* Chat V3.0.1 - refined reply/quick-reply UX */
+.tg-icon-btn.tg-exit-btn{width:46px;height:46px;font-size:0}
+.tg-icon-btn.tg-exit-btn svg{width:24px;height:24px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tg-reply-btn{font-size:0!important;width:26px;height:26px;padding:0!important;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.tg-reply-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tg-reply-quote{display:flex;align-items:center;gap:5px}
+.tg-reply-quote .tg-reply-icon{font-size:15px;flex:0 0 auto}
+.tg-reply-quote .tg-reply-snippet{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl}
+.tg-reply-preview{margin:0!important;border-radius:10px 10px 0 0!important;border-right:0!important;border-left:3px solid #2aabee;padding:7px 10px!important;background:rgba(42,171,238,.10)!important}
+.tg-reply-preview b{display:none}
+.tg-reply-preview .tg-reply-preview-icon{font-size:17px;color:#2aabee}
+.tg-reply-preview .tg-reply-preview-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.tg-composer .tg-reply-preview{flex:0 0 100%;order:-2}
+.tg-composer .tg-quick-panel{right:8px!important;left:8px!important;width:auto!important;bottom:52px!important;max-height:280px!important;border-radius:14px!important}
+.tg-quick-panel::-webkit-scrollbar{width:4px}
+.tg-quick-panel::-webkit-scrollbar-thumb{background:rgba(148,163,184,.35);border-radius:99px}
+.tg-quick-panel{scrollbar-width:thin;scrollbar-color:rgba(148,163,184,.35) transparent}
+
+/* Chat V3.0.2 - desktop RTL layout: customer identity on the top-right, exit on the chat-side (left). */
+.tg-top{direction:rtl;min-height:66px;}
+.tg-peer{order:1;justify-content:flex-start;text-align:right;}
+.tg-peer-av{width:46px;height:46px;font-size:17px;}
+.tg-top-actions{order:2;}
+.tg-exit-btn{order:3;width:48px!important;height:48px!important;margin-inline-start:2px;}
+.tg-exit-btn svg{width:27px!important;height:27px!important;stroke-width:2.2!important;}
+@media(max-width:640px){
+  .tg-top{padding:9px 10px;}
+  .tg-peer-av{width:44px;height:44px;}
+  .tg-exit-btn{width:46px!important;height:46px!important;}
+  .tg-exit-btn svg{width:25px!important;height:25px!important;}
+}
+
+</style>
+
+<style id="sazgan-chat-light-theme-v2">
+/* SAZGAN Chat V3.0.13 — force the internal chat to use the same light theme as the main application.
+   The original theme override targeted legacy class names; these are the actual classes used by
+   _tg_chat_panel.html. */
+.tg-app-card {
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border-color:#e2e8f0 !important;
+}
+.tg-top {
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border-bottom:1px solid #e2e8f0 !important;
+}
+.tg-peer-name { color:#0f172a !important; }
+.tg-peer-status { color:#64748b !important; }
+.tg-peer-status a { color:#047857 !important; }
+.tg-chip {
+  background:#f8fafc !important;
+  color:#475569 !important;
+  border:1px solid #e2e8f0 !important;
+}
+.tg-chip.danger {
+  background:#fef2f2 !important;
+  color:#b91c1c !important;
+}
+.tg-icon-btn,
+.tg-emoji-btn,
+.tg-quick-btn {
+  background:#f8fafc !important;
+  color:#475569 !important;
+  border:1px solid #e2e8f0 !important;
+}
+.tg-icon-btn:hover,
+.tg-emoji-btn:hover,
+.tg-quick-btn:hover {
+  background:#f1f5f9 !important;
+  color:#0f172a !important;
+}
+.tg-stream {
+  background-color:#f1f5f9 !important;
+  background-image:radial-gradient(rgba(71,85,105,.07) 1px,transparent 1px) !important;
+}
+.tg-bubble {
+  color:#0f172a !important;
+}
+.tg-row.mine .tg-bubble {
+  background:#e8eef6 !important;
+  color:#0f172a !important;
+}
+.tg-row.theirs .tg-bubble {
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+}
+.tg-from { color:#374151 !important; }
+.tg-time,
+.tg-edited-flag { color:#94a3b8 !important; }
+.tg-row.theirs .tg-time { color:#475569 !important; }
+.tg-file {
+  background:#f8fafc !important;
+  color:#334155 !important;
+  border:1px solid #e2e8f0 !important;
+}
+.tg-closed,
+.tg-hint,
+.tg-serial-banner {
+  background:#ffffff !important;
+  color:#64748b !important;
+  border-color:#e2e8f0 !important;
+}
+.tg-serial-banner strong { color:#0f172a !important; }
+.tg-composer {
+  background:#ffffff !important;
+  border-top:1px solid #e2e8f0 !important;
+}
+.tg-composer textarea {
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #e2e8f0 !important;
+}
+.tg-composer textarea::placeholder { color:#94a3b8 !important; }
+.tg-send {
+  background:#374151 !important;
+  color:#ffffff !important;
+}
+.tg-emoji-panel,
+.tg-quick-panel {
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:0 10px 30px rgba(15,23,42,.10) !important;
+}
+.tg-emoji-item { color:#0f172a !important; }
+.tg-emoji-item:hover,
+.tg-quick-item:hover { background:#f3f4f6 !important; }
+.tg-quick-item,
+.tg-quick-title { color:#0f172a !important; }
+.tg-quick-body { color:#64748b !important; }
+.tg-reply-preview {
+  background:#f1f5f9 !important;
+  color:#334155 !important;
+  border-left-color:#374151 !important;
+}
+.tg-reply-quote {
+  background:#f8fafc !important;
+  color:#334155 !important;
+  border-right-color:#374151 !important;
+}
+.tg-reply-snippet { color:#1e293b !important; }
+.tg-reply-btn { color:#64748b !important; }
+.tg-reply-btn:hover {
+  color:#374151 !important;
+  background:#f3f4f6 !important;
+}
+.tg-edit-btn { color:#64748b !important; }
+.tg-edit-btn:hover { color:#374151 !important; }
+.tg-edit-box textarea {
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border-color:#e2e8f0 !important;
+}
+.tg-edit-cancel {
+  background:#f8fafc !important;
+  color:#475569 !important;
+}
+.tg-reaction {
+  background:#f8fafc !important;
+  color:#334155 !important;
+  border-color:#e2e8f0 !important;
+}
+.tg-react-btn { color:#64748b !important; }
+.tg-react-btn:hover { color:#374151 !important; }
+</style>
+
+<style id="sazgan-chat-light-theme">
+/* SAZGAN Chat V3 — Light theme aligned with the main application. */
+.tg-chat-shell, .tg-chat-shell * { box-sizing: border-box; }
+.tg-chat-shell { background: var(--ds-surface, #ffffff) !important; color: var(--ds-text, #0f172a) !important; }
+.tg-header { background: var(--ds-surface, #ffffff) !important; border-bottom: 1px solid var(--ds-border, #e2e8f0) !important; color: var(--ds-text, #0f172a) !important; }
+.tg-peer-name { color: var(--ds-text, #0f172a) !important; }
+.tg-peer-status { color: var(--ds-text-muted, #94a3b8) !important; }
+.tg-peer-status a, .tg-peer-status .on { color: #047857 !important; }
+.tg-dot { background: #94a3b8 !important; }
+.tg-dot.on { background: #10b981 !important; }
+.tg-icon-btn, .tg-emoji-btn, .tg-quick-btn { background: var(--ds-surface-2, #f8fafc) !important; color: var(--ds-text-secondary, #475569) !important; border: 1px solid var(--ds-border, #e2e8f0) !important; }
+.tg-icon-btn:hover, .tg-emoji-btn:hover, .tg-quick-btn:hover { background: var(--ds-primary-soft, #f3f4f6) !important; color: var(--ds-text, #0f172a) !important; }
+.tg-emoji-btn.active { color: var(--ds-primary, #374151) !important; background: var(--ds-primary-soft, #f3f4f6) !important; }
+.tg-messages { background-color: var(--ds-bg, #f1f5f9) !important; background-image: radial-gradient(rgba(71,85,105,.08) 1px, transparent 1px) !important; }
+.tg-bubble { color: var(--ds-text, #0f172a) !important; }
+.tg-row.mine .tg-bubble { background: #e8eef6 !important; color: #0f172a !important; }
+.tg-row.theirs .tg-bubble { background: #ffffff !important; color: #0f172a !important; border: 1px solid var(--ds-border, #e2e8f0) !important; }
+.tg-from { color: var(--ds-primary, #374151) !important; }
+.tg-time, .tg-edited-flag { color: var(--ds-text-muted, #94a3b8) !important; }
+.tg-row.theirs .tg-time { color: var(--ds-text-secondary, #475569) !important; }
+.tg-ticks.sent, .tg-ticks.delivered { color: #64748b !important; }
+.tg-ticks.read { color: #0ea5e9 !important; }
+.tg-file { background: #f1f5f9 !important; color: #334155 !important; border: 1px solid var(--ds-border, #e2e8f0) !important; }
+.tg-closed, .tg-hint, .tg-serial-banner { background: #ffffff !important; color: var(--ds-text-muted, #64748b) !important; border-color: var(--ds-border, #e2e8f0) !important; }
+.tg-serial-banner strong, .tg-serial-banner b { color: var(--ds-text, #0f172a) !important; }
+.tg-composer { background: #ffffff !important; border-top: 1px solid var(--ds-border, #e2e8f0) !important; }
+.tg-composer textarea { background: #ffffff !important; color: var(--ds-text, #0f172a) !important; border: 1px solid var(--ds-border, #e2e8f0) !important; }
+.tg-composer textarea::placeholder { color: #94a3b8 !important; }
+.tg-send-btn { background: #374151 !important; color: #ffffff !important; }
+.tg-emoji-panel, .tg-quick-panel { background: #ffffff !important; border: 1px solid var(--ds-border, #e2e8f0) !important; box-shadow: 0 10px 30px rgba(15,23,42,.10) !important; }
+.tg-emoji-item { color: #0f172a !important; }
+.tg-emoji-item:hover, .tg-quick-item:hover { background: #f3f4f6 !important; }
+.tg-quick-item { color: #0f172a !important; }
+.tg-quick-body { color: #64748b !important; }
+.tg-quick-title { color: #0f172a !important; }
+.tg-reply-preview { background: #f1f5f9 !important; color: #334155 !important; border-left-color: #374151 !important; }
+.tg-reply-preview .tg-reply-preview-icon, .tg-reply-icon { color: #374151 !important; }
+.tg-reply-quote { background: #f8fafc !important; border-right-color: #374151 !important; color: #334155 !important; }
+.tg-reply-snippet { color: #1e293b !important; }
+.tg-reply-quote:hover { background: #f1f5f9 !important; }
+.tg-reply-quote.is-target { background: #e2e8f0 !important; }
+.tg-row.reply-target-highlight .tg-bubble { box-shadow: 0 0 0 2px rgba(55,65,81,.35), 0 0 14px rgba(15,23,42,.08) !important; }
+.tg-reply-btn { color: #64748b !important; }
+.tg-reply-btn:hover { color: #374151 !important; background: #f3f4f6 !important; }
+.tg-edit-btn { color: #64748b !important; }
+.tg-edit-btn:hover { color: #374151 !important; }
+.tg-edit-input, .tg-edit-save, .tg-edit-cancel { border-color: var(--ds-border, #e2e8f0) !important; }
+.tg-edit-input { background: #ffffff !important; color: #0f172a !important; }
+.tg-edit-save { background: #374151 !important; color: #ffffff !important; }
+.tg-edit-cancel { background: #f8fafc !important; color: #475569 !important; }
+.tg-pinned-note { background: #fffbeb !important; color: #92400e !important; border-right-color: #f59e0b !important; }
+.tg-reaction { background: #f8fafc !important; border-color: #e2e8f0 !important; color: #334155 !important; }
+.tg-react-btn { color: #64748b !important; }
+.tg-messages, .tg-composer textarea, .tg-quick-panel, .tg-emoji-panel { scrollbar-color: #cbd5e1 transparent !important; }
+.tg-messages::-webkit-scrollbar-thumb, .tg-composer textarea::-webkit-scrollbar-thumb, .tg-quick-panel::-webkit-scrollbar-thumb { background: #cbd5e1 !important; }
+/* V4.9.3 — Ready phrases behave like the emoji picker: same round button, panel opens BELOW the chat composer. */
+.tg-quick-wrap{display:flex;align-items:center;flex:0 0 auto;position:relative;}
+.tg-quick-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--ds-border,#e2e8f0);background:var(--ds-surface-2,#f8fafc);color:var(--ds-text-secondary,#475569);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;}
+.tg-quick-btn:hover,.tg-quick-btn.active{background:var(--ds-primary-soft,#f3f4f6);color:var(--ds-text,#0f172a);}
+.tg-quick-panel{display:none;position:absolute!important;right:8px!important;left:8px!important;bottom:58px!important;width:auto!important;max-height:260px;overflow-y:auto;box-sizing:border-box;padding:8px;background:#fff;border:1px solid var(--ds-border,#e2e8f0)!important;border-radius:14px;box-shadow:0 10px 30px rgba(15,23,42,.12);z-index:100;order:10;}
+.tg-quick-panel.open{display:block;}
+.tg-quick-item{display:block;width:100%;text-align:right;border:0;background:transparent;color:#0f172a;padding:9px 10px;border-radius:8px;cursor:pointer;font-family:inherit;}
+.tg-quick-item:hover{background:#f3f4f6;}
+.tg-quick-title{display:block;font-weight:800;font-size:12px;color:#0f172a;}
+.tg-quick-body{display:block;font-size:11px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tg-quick-empty{padding:12px;color:#64748b;font-size:12px;text-align:center;}
+.tg-quick-panel::-webkit-scrollbar{width:4px;}
+.tg-quick-panel::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px;}
+.tg-quick-panel::-webkit-scrollbar-track{background:transparent;}
+@media(max-width:640px){.tg-quick-panel{max-height:220px;bottom:58px!important;right:8px!important;left:8px!important;}}
+
+/* V4.9.5 — mobile chat tools menu + textarea scrollbar threshold */
+.tg-mobile-tools{display:none;position:relative;flex:0 0 auto;order:20}
+.tg-mobile-tools-btn{
+  width:40px;height:40px;border-radius:50%;border:1px solid var(--ds-border,#e2e8f0);
+  background:var(--ds-surface-2,#f8fafc);color:var(--ds-text-secondary,#475569);
+  font-size:24px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+}
+.tg-mobile-tools-menu{
+  display:none;position:absolute;left:0;bottom:48px;z-index:100;
+  width:190px;padding:6px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;
+  box-shadow:0 12px 30px rgba(15,23,42,.16);
+}
+.tg-mobile-tools-menu.open{display:block}
+.tg-mobile-tool-item{
+  width:100%;min-height:42px;border:0;background:transparent;color:#334155;
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;
+  font-family:inherit;font-size:13px;cursor:pointer;text-align:right;
+}
+.tg-mobile-tool-item:hover{background:#f1f5f9}
+.tg-mobile-tool-item.attach input{display:none}
+.tg-mobile-tool-item svg{flex:0 0 auto}
+.tg-desktop-attach-proxy{display:block;width:1px;height:1px}
+
+.tg-composer textarea{overflow-y:hidden !important;}
+.tg-composer textarea.tg-has-overflow{overflow-y:auto !important;}
+
+@media(max-width:640px){
+  .tg-composer{
+    display:flex;
+    align-items:flex-end;
+    flex-wrap:nowrap;
+    gap:7px;
+    padding:8px 9px 10px;
+  }
+  .tg-mobile-tools{display:block;}
+  .tg-desktop-tool{display:none !important;}
+  .tg-input-wrap{order:10;flex:1 1 auto;min-width:0;}
+  .tg-send{order:30;}
+  .tg-mobile-tools{order:1;}
+  .tg-input-wrap{order:2;}
+  .tg-send{order:3;}
+  .tg-mobile-tools-menu{left:0;right:auto;}
+}
+
+</style>
+
+<div class="tg-app-card">
+    <header class="tg-top">
+      <a href="/support/inbox" class="tg-icon-btn tg-exit-btn" id="tg-exit-chat" title="خروج از چت" aria-label="خروج از چت"><svg viewBox="0 0 24 24"><path d="M14 5h5v14h-5"/><path d="M13 12H3"/><path d="m7 8-4 4 4 4"/></svg></a>
+      <div class="tg-peer">
+        <div class="tg-peer-av">{{ (thread.opened_by_name or 'م')[:1] }}</div>
+        <div class="tg-peer-meta">
+          <div class="tg-peer-name">{{ thread.opened_by_name or 'مشتری' }}</div>
+          <div class="tg-peer-status"><span class="tg-dot {% if thread.status=='باز' %}on{% endif %}"></span> {{ thread.status }}</div>
+        </div>
+      </div>
+      <div class="tg-top-actions">
+        {% if thread.status != 'بسته' %}
+        <form method="POST" action="/support/thread/{{ thread.id }}{{ '/embed' if is_embed else '' }}" onsubmit="return confirm('گفتگو بسته و به بایگانی منتقل شود؟');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token or session.get('csrf_token','') }}">
+          <input type="hidden" name="action" value="close">
+          <button type="submit" class="tg-chip danger">بستن</button>
+        </form>
+        {% else %}
+        <form method="POST" action="/support/thread/{{ thread.id }}{{ '/embed' if is_embed else '' }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token or session.get('csrf_token','') }}">
+          <input type="hidden" name="action" value="reopen">
+          <button type="submit" class="tg-chip">بازگشایی</button>
+        </form>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if serial_number %}<div class="tg-serial-banner">سریال دستگاه: <strong dir="ltr">{{ serial_number }}</strong></div>{% endif %}
+    <div id="chat-box" class="tg-stream">
+      {% for m in messages %}
+      {% set mine = (m.sender_type == 'support') %}
+      <div class="tg-row {% if mine %}mine{% else %}theirs{% endif %}" data-id="{{ m.id }}">
+        <div class="tg-bubble" data-msg-id="{{ m.id }}" style="display:inline-block;width:max-content;max-width:min(82%,340px);height:auto;">
+          {% if m.attachment_filename %}
+            {% set ext = m.attachment_filename.rsplit('.',1)[-1]|lower %}
+            {% if ext in ['png','jpg','jpeg','gif','webp'] %}
+            <a href="/static/uploads/support/{{ m.attachment_filename }}" target="_blank" rel="noopener">
+              <img class="tg-img" src="/static/uploads/support/{{ m.attachment_filename }}" alt="">
+            </a>
+            {% else %}
+            <a class="tg-file" href="/static/uploads/support/{{ m.attachment_filename }}" target="_blank" rel="noopener">📎 {{ m.attachment_original or m.attachment_filename }}</a>
+            {% endif %}
+          {% endif %}
+          {% if m.reply_to_id %}
+          <div class="tg-reply-quote" data-reply-id="{{ m.reply_to_id }}" title="پاسخ"><span class="tg-reply-icon">↶</span><span class="tg-reply-snippet">در حال بارگذاری...</span></div>
+          {% endif %}
+          {% if m.body and m.body != '📎 فایل پیوست' %}<div class="tg-text" data-text-for="{{ m.id }}">{{ m.body }}</div>{% endif %}
+          <div class="tg-reactions" data-reactions-for="{{ m.id }}">
+            {% for r in (reaction_map.get(m.id, []) if reaction_map else []) %}<button type="button" class="tg-reaction" data-reaction-emoji="{{ r.emoji }}">{{ r.emoji }} {{ r.count }}</button>{% endfor %}
+          </div>
+          <div class="tg-foot">
+            {% if m.is_edited is defined and m.is_edited %}<span class="tg-edited-flag" data-edited-for="{{ m.id }}">ویرایش شده</span>{% else %}<span class="tg-edited-flag" data-edited-for="{{ m.id }}" hidden>ویرایش شده</span>{% endif %}
+            <span class="tg-time">{{ m.created_at.split(' ')[-1] if m.created_at else '' }}</span>
+            {% if mine %}
+            {% set ds = m.delivery_status if m.delivery_status is defined and m.delivery_status else ('read' if m.is_read else 'sent') %}
+            <span class="tg-ticks {{ ds }}" data-ticks-for="{{ m.id }}">
+              {% if ds == 'sent' %}
+              <svg viewBox="0 0 16 11"><path fill="currentColor" d="M5.5 9.5L1 5l1.2-1.2L5.5 7.1 13.3.3 14.5 1.5z"/></svg>
+              {% else %}
+              <svg viewBox="0 0 18 11"><path fill="currentColor" d="M6.5 9.5L2 5l1.2-1.2L6.5 7.1 14.3.3 15.5 1.5z"/><path fill="currentColor" d="M10.5 9.5L9.3 8.3 12.6 5l1.2 1.2z" transform="translate(2,0)"/></svg>
+              {% endif %}
+            </span>
+            {% endif %}
+            <button type="button" class="tg-reply-btn" title="پاسخ" aria-label="پاسخ" onclick="setReplyTo({{ m.id }}, this)"><svg viewBox="0 0 24 24"><path d="M9 15 4 10l5-5"/><path d="M4 10h9a7 7 0 0 1 7 7v2"/></svg></button>
+            {% if mine %}
+            <button type="button" class="tg-edit-btn" data-edit-btn-for="{{ m.id }}" title="ویرایش پیام">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1-1 4Z"/></svg>
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if thread.status == 'بسته' %}
+    <div class="tg-closed">گفتگو بسته است.</div>
+    {% else %}
+    <div class="tg-hint" id="file-hint" hidden></div>
+    <form class="tg-composer" id="chat-form" enctype="multipart/form-data">
+      <div class="tg-reply-preview" id="reply-preview"><span class="tg-reply-preview-icon">↶</span><span class="tg-reply-preview-text" id="reply-preview-text"></span><button type="button" class="tg-reply-x" onclick="clearReply()" title="لغو پاسخ">×</button></div>
+      <div class="tg-mobile-tools" id="mobile-tools">
+        <button type="button" class="tg-mobile-tools-btn" id="mobile-tools-toggle" title="ابزارهای چت" aria-label="ابزارهای چت" aria-expanded="false">⋮</button>
+        <div class="tg-mobile-tools-menu" id="mobile-tools-menu" role="menu">
+          <label class="tg-mobile-tool-item attach" title="پیوست" role="menuitem">
+            <input type="file" name="attachment" id="chat-file" accept="image/*,.pdf,.doc,.docx,.zip,.txt">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            <span>پیوست</span>
+          </label>
+          <button type="button" class="tg-mobile-tool-item" id="mobile-quick-toggle" role="menuitem">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v11H8l-3 3z"/><path d="M8 9h8M8 12h6"/></svg>
+            <span>جملات آماده</span>
+          </button>
+          <button type="button" class="tg-mobile-tool-item" id="mobile-emoji-toggle" role="menuitem">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.5 2 3.5 2 3.5-2 3.5-2"/><line x1="9" y1="9.5" x2="9.01" y2="9.5"/><line x1="15" y1="9.5" x2="15.01" y2="9.5"/></svg>
+            <span>ایموجی</span>
+          </button>
+        </div>
+      </div>
+
+      <label class="tg-icon-btn attach tg-desktop-tool" title="پیوست">
+        <span class="tg-desktop-attach-proxy" aria-hidden="true"></span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+      </label>
+      <div class="tg-quick-wrap tg-desktop-tool">
+        <button type="button" class="tg-quick-btn" id="quick-toggle" title="جملات آماده" aria-label="جملات آماده">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14v11H8l-3 3z"/><path d="M8 9h8M8 12h6"/></svg>
+        </button>
+      </div>
+      <button type="button" class="tg-emoji-btn tg-desktop-tool" id="emoji-toggle" title="ایموجی">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.5 2 3.5 2 3.5-2 3.5-2"/><line x1="9" y1="9.5" x2="9.01" y2="9.5"/><line x1="15" y1="9.5" x2="15.01" y2="9.5"/></svg>
+      </button>
+      <div class="tg-input-wrap">
+        <input type="hidden" name="reply_to_id" id="reply_to_id" value="">
+        <textarea name="body" id="chat-body" rows="1" placeholder="پیام خود را بنویسید..." maxlength="4000"></textarea>
+      </div>
+      <button type="submit" class="tg-send" id="send-btn" title="ارسال">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4l17.45-7.48c.81-.35.81-1.49 0-1.84L3.4 3.6c-.7-.3-1.4.3-1.2 1.02L4.5 11l12 1-12 1-2.3 6.38c-.2.72.5 1.32 1.2 1.02z"/></svg>
+      </button>
+    </form>
+    <div class="tg-quick-panel" id="quick-panel">
+      {% if quick_replies %}{% for q in quick_replies %}<button type="button" class="tg-quick-item" data-quick-body="{{ q.body|e }}"><span class="tg-quick-title">{{ q.title }}</span><span class="tg-quick-body">{{ q.body }}</span></button>{% endfor %}{% else %}<div class="tg-quick-empty">جمله آماده‌ای تعریف نشده است.</div>{% endif %}
+    </div>
+    <div class="tg-emoji-panel" id="emoji-panel">{% for e in chat_emojis %}<button type="button" class="tg-emoji-item" data-emoji="{{ e }}">{{ e }}</button>{% endfor %}</div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+(function(){
+  var threadId = {{ thread.id }};
+  var box = document.getElementById('chat-box');
+  var form = document.getElementById('chat-form');
+  var bodyEl = document.getElementById('chat-body');
+  var fileEl = document.getElementById('chat-file');
+  var fileHint = document.getElementById('file-hint');
+  var sendBtn = document.getElementById('send-btn');
+  var seen = {};
+  var lastId = 0;
+
+  var mobileToolsToggle = document.getElementById('mobile-tools-toggle');
+  var mobileToolsMenu = document.getElementById('mobile-tools-menu');
+  var mobileQuickToggle = document.getElementById('mobile-quick-toggle');
+  var mobileEmojiToggle = document.getElementById('mobile-emoji-toggle');
+
+  function updateBodyScrollbar(){
+    if (!bodyEl) return;
+    var maxH = parseFloat(getComputedStyle(bodyEl).maxHeight) || 0;
+    var tooTall = maxH > 0 && bodyEl.scrollHeight > maxH + 2;
+    bodyEl.classList.toggle('tg-has-overflow', tooTall);
+  }
+
+  if (bodyEl) {
+    ['input','change','keyup'].forEach(function(ev){
+      bodyEl.addEventListener(ev, function(){
+        bodyEl.classList.remove('tg-has-overflow');
+        requestAnimationFrame(updateBodyScrollbar);
+      });
+    });
+    bodyEl.addEventListener('focus', updateBodyScrollbar);
+    window.addEventListener('resize', updateBodyScrollbar);
+  }
+
+  function closeMobileTools(){
+    if (mobileToolsMenu) mobileToolsMenu.classList.remove('open');
+    if (mobileToolsToggle) mobileToolsToggle.setAttribute('aria-expanded','false');
+  }
+
+  if (mobileToolsToggle) {
+    mobileToolsToggle.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = mobileToolsMenu && mobileToolsMenu.classList.toggle('open');
+      mobileToolsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+
+  if (mobileQuickToggle) {
+    mobileQuickToggle.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var q = document.getElementById('quick-toggle');
+      if (q && typeof q._openQuickReplies === 'function') q._openQuickReplies();
+      closeMobileTools();
+    });
+  }
+
+  if (mobileEmojiToggle) {
+    mobileEmojiToggle.addEventListener('click', function(){
+      var e = document.getElementById('emoji-toggle');
+      if (e) e.click();
+      closeMobileTools();
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    if (mobileToolsMenu && !e.target.closest('#mobile-tools')) closeMobileTools();
+  });
+
+
+  document.querySelectorAll('.tg-desktop-tool.attach').forEach(function(el){
+    el.addEventListener('click', function(){
+      var f = document.getElementById('chat-file');
+      if (f) f.click();
+    });
+  });
+
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.id === 'chat-file') closeMobileTools();
+  });
+
+
+  function csrfToken(){
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? (meta.getAttribute('content') || '') : '';
+  }
+
+  document.querySelectorAll('#chat-box [data-id]').forEach(function(el){
+    var id = parseInt(el.getAttribute('data-id'), 10);
+    seen[id] = true;
+    if (id > lastId) lastId = id;
+  });
+  if (box) box.scrollTop = box.scrollHeight;
+  updateBodyScrollbar();
+
+  function esc(s){
+    return String(s||'').replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+  function timePart(ts){
+    if (!ts) return '';
+    var p = String(ts).split(' ');
+    return p[p.length-1] || ts;
+  }
+  function isImage(name){ return /\.(png|jpe?g|gif|webp)$/i.test(name||''); }
+  function ticks(st){
+    st = st || 'sent';
+    var cls = st === 'read' ? 'read' : (st === 'delivered' ? 'delivered' : 'sent');
+    var svg = (st === 'sent')
+      ? '<svg viewBox="0 0 16 11"><path fill="currentColor" d="M5.5 9.5L1 5l1.2-1.2L5.5 7.1 13.3.3 14.5 1.5z"/></svg>'
+      : '<svg viewBox="0 0 18 11"><path fill="currentColor" d="M6.5 9.5L2 5l1.2-1.2L6.5 7.1 14.3.3 15.5 1.5z"/><path fill="currentColor" d="M10.5 9.5L9.3 8.3 12.6 5l1.2 1.2z" transform="translate(2,0)"/></svg>';
+    return '<span class="tg-ticks '+cls+'" data-ticks-for="__ID__">'+svg+'</span>';
+  }
+
+  function appendMsg(m){
+    if (!m || !m.id || seen[m.id]) return;
+    seen[m.id] = true;
+    if (m.id > lastId) lastId = m.id;
+    var mine = m.sender_type === 'support';
+    var div = document.createElement('div');
+    div.className = 'tg-row ' + (mine ? 'mine' : 'theirs');
+    div.setAttribute('data-id', m.id);
+    var attach = '';
+    if (m.attachment_filename) {
+      var url = '/static/uploads/support/' + encodeURIComponent(m.attachment_filename);
+      if (isImage(m.attachment_filename)) {
+        attach = '<a href="'+url+'" target="_blank" rel="noopener"><img class="tg-img" src="'+url+'" alt=""></a>';
+      } else {
+        attach = '<a class="tg-file" href="'+url+'" target="_blank" rel="noopener">📎 '+esc(m.attachment_original||m.attachment_filename)+'</a>';
+      }
+    }
+    var quote = m.reply_to_id ? '<div class="tg-reply-quote" data-reply-id="'+esc(m.reply_to_id)+'"><span class="tg-reply-icon">↶</span><span class="tg-reply-snippet">در حال بارگذاری...</span></div>' : '';
+    var text = (m.body && m.body !== '📎 فایل پیوست') ? '<div class="tg-text" data-text-for="'+m.id+'">'+esc(m.body)+'</div>' : '';
+    var tk = mine ? ticks(m.delivery_status||'sent').replace('__ID__', m.id) : '';
+    var reactionBox = '<div class="tg-reactions" data-reactions-for="'+m.id+'"></div>';
+    var editedFlag = '<span class="tg-edited-flag" data-edited-for="'+m.id+'"'+(m.is_edited?'':' hidden')+'>ویرایش شده</span>';
+    var editBtn = mine ? '<button type="button" class="tg-edit-btn" data-edit-btn-for="'+m.id+'" title="ویرایش پیام"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>' : '';
+    div.innerHTML = '<div class="tg-bubble" data-msg-id="'+m.id+'" style="display:inline-block;width:max-content;max-width:min(82%,340px);height:auto;">'+attach+quote+text+
+      reactionBox+'<div class="tg-foot">'+editedFlag+'<span class="tg-time">'+esc(timePart(m.created_at))+'</span>'+tk+'<button type="button" class="tg-reply-btn" title="پاسخ" aria-label="پاسخ" onclick="setReplyTo('+m.id+', this)"><svg viewBox="0 0 24 24"><path d="M9 15 4 10l5-5"/><path d="M4 10h9a7 7 0 0 1 7 7v2"/></svg></button>'+editBtn+'</div></div>';
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    wireEditButton(m.id); renderReactions(m.id,m.reactions||[]); fillReplySnippets(); wireReplyQuotes();
+  }
+
+  // ---- ویرایش پیام ارسال‌شده ----
+  function wireEditButton(id){
+    var btn = document.querySelector('[data-edit-btn-for="'+id+'"]');
+    if (!btn || btn._wired) return;
+    btn._wired = true;
+    btn.addEventListener('click', function(){ startEditMessage(id); });
+  }
+  document.querySelectorAll('[data-edit-btn-for]').forEach(function(btn){
+    wireEditButton(btn.getAttribute('data-edit-btn-for'));
+  });
+
+  function startEditMessage(id){
+    var textEl = document.querySelector('[data-text-for="'+id+'"]');
+    if (!textEl || !bodyEl) return;
+    var original = textEl.textContent || '';
+    bodyEl.value = original;
+    bodyEl.dataset.editingId = id;
+    bodyEl.focus();
+    bodyEl.setSelectionRange(bodyEl.value.length, bodyEl.value.length);
+    if (sendBtn) sendBtn.classList.add('editing');
+    var cancel = document.getElementById('edit-cancel-inline');
+    if (!cancel) {
+      cancel = document.createElement('button'); cancel.id='edit-cancel-inline'; cancel.type='button'; cancel.className='tg-chip'; cancel.textContent='لغو ویرایش';
+      form.insertBefore(cancel, form.firstChild);
+      cancel.addEventListener('click', function(){ bodyEl.value=''; delete bodyEl.dataset.editingId; sendBtn.classList.remove('editing'); cancel.remove(); bodyEl.focus(); });
+    }
+  }
+
+  function updateStatuses(statuses){
+    (statuses||[]).forEach(function(s){
+      var el = document.querySelector('[data-ticks-for="'+s.id+'"]');
+      if (!el) return;
+      var st = s.delivery_status || (s.is_read ? 'read' : 'sent');
+      var tmp = document.createElement('div');
+      tmp.innerHTML = ticks(st).replace('__ID__', s.id);
+      var neu = tmp.firstChild;
+      el.replaceWith(neu);
+    });
+  }
+
+  function applyEdits(edits){
+    (edits||[]).forEach(function(e){
+      var bubble = document.querySelector('[data-id="'+e.id+'"] .tg-bubble');
+      if (bubble && bubble.querySelector('.tg-edit-box')) return; // در حال ویرایش — دست نزن
+      var textEl = document.querySelector('[data-text-for="'+e.id+'"]');
+      if (textEl && textEl.textContent !== e.body) textEl.textContent = e.body;
+      var flag = document.querySelector('[data-edited-for="'+e.id+'"]');
+      if (flag && e.is_edited) flag.hidden = false;
+    });
+  }
+
+  function renderReactions(id, reactions){ var boxr=document.querySelector('[data-reactions-for="'+id+'"]'); if(!boxr)return; boxr.innerHTML=''; (reactions||[]).forEach(function(r){var b=document.createElement('button');b.className='tg-reaction';b.textContent=r.emoji+' '+r.count;b.onclick=function(){reactMessage(id,r.emoji)};boxr.appendChild(b);}); }
+  function reactMessage(id,emoji){var fd=new FormData();fd.append('emoji',emoji);fetch('/api/support/thread/'+threadId+'/message/'+id+'/reaction',{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json()}).then(function(d){if(d.ok)renderReactions(id,d.reactions);});}
+  document.querySelectorAll('[data-react-for]').forEach(function(b){b.addEventListener('click',function(){var id=this.getAttribute('data-react-for');var em=prompt('ایموجی واکنش را وارد کنید');if(em)reactMessage(id,em.trim());});});
+  document.querySelectorAll('[data-reaction-emoji]').forEach(function(b){b.addEventListener('click',function(){var row=this.closest('[data-id]');if(row)reactMessage(row.getAttribute('data-id'),this.getAttribute('data-reaction-emoji'));});});
+  function wireQuickReplies(){
+    var t=document.getElementById('quick-toggle'), p=document.getElementById('quick-panel');
+    if(!t||!p) return;
+
+    function renderQuickItems(items){
+      if(!Array.isArray(items) || !items.length){
+        p.innerHTML='<div class="tg-quick-empty">جمله آماده‌ای تعریف نشده است.</div>';
+        return;
+      }
+      p.innerHTML=items.map(function(q){
+        var title=esc(q.title||'پیام آماده');
+        var body=esc(q.body||'');
+        return '<button type="button" class="tg-quick-item" data-quick-body="'+body+'"><span class="tg-quick-title">'+title+'</span><span class="tg-quick-body">'+body+'</span></button>';
+      }).join('');
+      p.querySelectorAll('[data-quick-body]').forEach(function(b){
+        b.addEventListener('click',function(){
+          if(bodyEl){
+            bodyEl.value=b.getAttribute('data-quick-body')||'';
+            bodyEl.dispatchEvent(new Event('input',{bubbles:true}));
+            bodyEl.focus();
+          }
+          p.classList.remove('open');
+          t.classList.remove('active');
+        });
+      });
+    }
+
+    function loadQuickReplies(){
+      return fetch('/api/support/quick-replies',{credentials:'same-origin',cache:'no-store'})
+        .then(function(r){
+          if(!r.ok) throw new Error('quick replies request failed');
+          return r.json();
+        })
+        .then(function(d){
+          if(!d || !d.ok) throw new Error('quick replies unavailable');
+          renderQuickItems(d.items||[]);
+          return d.items||[];
+        })
+        .catch(function(){
+          // اگر API موقتاً در دسترس نبود، از آیتم‌های رندرشده سمت سرور استفاده کن.
+          if(!p.querySelector('[data-quick-body]') && !p.querySelector('.tg-quick-empty')){
+            p.innerHTML='<div class="tg-quick-empty">امکان بارگذاری جملات آماده وجود ندارد.</div>';
+          }
+          return [];
+        });
+    }
+
+    function closeQuick(){
+      p.classList.remove('open');
+      t.classList.remove('active');
+    }
+
+    function openQuick(){
+      var ep=document.getElementById('emoji-panel'), et=document.getElementById('emoji-toggle');
+      if(ep){ep.classList.remove('open');if(et)et.classList.remove('active');}
+      p.classList.add('open');
+      t.classList.add('active');
+      loadQuickReplies();
+    }
+
+    t._openQuickReplies=function(){
+      if(p.classList.contains('open')) closeQuick();
+      else openQuick();
+    };
+    t.onclick=function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      t._openQuickReplies();
+    };
+
+    // آیتم‌های اولیه رندرشده در HTML نیز فوراً قابل استفاده باشند.
+    p.querySelectorAll('[data-quick-body]').forEach(function(b){
+      b.addEventListener('click',function(){
+        if(bodyEl){bodyEl.value=b.getAttribute('data-quick-body')||'';bodyEl.dispatchEvent(new Event('input',{bubbles:true}));bodyEl.focus();}
+        closeQuick();
+      });
+    });
+
+    document.addEventListener('click',function(e){
+      if(!p.contains(e.target) && e.target!==t) closeQuick();
+    });
+  }
+  wireQuickReplies();
+
+  function wireEmojiPicker(){
+    var t = document.getElementById('emoji-toggle'), p = document.getElementById('emoji-panel');
+    if (!t || !p) return;
+    t.onclick = function(){
+      var willOpen = !p.classList.contains('open');
+      if (willOpen) {
+        var qp=document.getElementById('quick-panel'), qt=document.getElementById('quick-toggle');
+        if(qp){qp.classList.remove('open');if(qt)qt.classList.remove('active');}
+        if (bodyEl) bodyEl.blur();
+        p.classList.add('open');
+        t.classList.add('active');
+        if (box) box.scrollTop = box.scrollHeight;
+      } else {
+        p.classList.remove('open');
+        t.classList.remove('active');
+      }
+    };
+    p.querySelectorAll('[data-emoji]').forEach(function(b){
+      b.onclick = function(){
+        bodyEl.value += (b.getAttribute('data-emoji') || '');
+        bodyEl.dispatchEvent(new Event('input'));
+      };
+    });
+    if (bodyEl) bodyEl.addEventListener('focus', function(){ p.classList.remove('open'); t.classList.remove('active'); var qp=document.getElementById('quick-panel'), qt=document.getElementById('quick-toggle'); if(qp){qp.classList.remove('open');if(qt)qt.classList.remove('active');} });
+  }
+  wireEmojiPicker();
+  document.querySelectorAll('[data-id]').forEach(function(el){renderReactions(el.getAttribute('data-id'),[]);});
+
+  // ---- اعلام آنلاین بودن به سرور تا مشتری وضعیت «آنلاین» را ببیند ----
+  function pingPresence(){
+    var tok = csrfToken();
+    fetch('/api/support/presence/ping', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: tok ? {'X-CSRF-Token': tok} : {}
+    }).catch(function(){});
+  }
+  pingPresence();
+  setInterval(pingPresence, 20000);
+
+  function poll(){
+    fetch('/api/support/thread/'+threadId+'/messages?after='+lastId, {credentials:'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (!d || !d.ok) return;
+        (d.messages||[]).forEach(appendMsg);
+        if (d.statuses) updateStatuses(d.statuses);
+        if (d.edits) applyEdits(d.edits);
+      }).catch(function(){});
+  }
+  setInterval(poll, 2500);
+
+  if (fileEl && fileHint) {
+    fileEl.addEventListener('change', function(){
+      if (fileEl.files && fileEl.files[0]) {
+        fileHint.hidden = false;
+        fileHint.textContent = 'پیوست: ' + fileEl.files[0].name;
+      } else { fileHint.hidden = true; fileHint.textContent = ''; }
+    });
+  }
+  if (bodyEl) {
+    bodyEl.addEventListener('input', function(){
+      bodyEl.style.height = 'auto';
+      bodyEl.style.height = Math.min(130, bodyEl.scrollHeight) + 'px';
+    });
+    bodyEl.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (form) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit',{cancelable:true}));
+      }
+    });
+  }
+  if (form) {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var body = (bodyEl && bodyEl.value || '').trim();
+      var editingId = bodyEl && bodyEl.dataset.editingId;
+      if (editingId) {
+        var fdEdit = new FormData(); fdEdit.append('body', body);
+        var tokEdit = csrfToken(); if (tokEdit) fdEdit.append('csrf_token', tokEdit);
+        sendBtn.disabled=true;
+        fetch('/api/support/thread/'+threadId+'/message/'+editingId+'/edit',{method:'POST',body:fdEdit,credentials:'same-origin',headers:tokEdit?{'X-CSRF-Token':tokEdit}:{}}).then(function(r){return r.json()}).then(function(d){
+          sendBtn.disabled=false; if(!d.ok){alert('ویرایش ناموفق بود');return;}
+          var te=document.querySelector('[data-text-for="'+editingId+'"]'); if(te) te.textContent=d.message.body;
+          var fl=document.querySelector('[data-edited-for="'+editingId+'"]'); if(fl) fl.hidden=false;
+          bodyEl.value=''; delete bodyEl.dataset.editingId; var c=document.getElementById('edit-cancel-inline'); if(c)c.remove();
+        }).catch(function(){sendBtn.disabled=false;alert('ویرایش ناموفق بود');});
+        return;
+      }
+      var hasFile = fileEl && fileEl.files && fileEl.files[0];
+      if (!body && !hasFile) return;
+      if (sendBtn) sendBtn.disabled = true;
+      var fd = new FormData(form);
+      var tok = csrfToken();
+      if (tok) fd.append('csrf_token', tok);
+      if(typeof clearReply==='function'){/* keep until ok */}
+      fetch('/api/support/thread/'+threadId+'/send', {
+        method:'POST',
+        body: fd,
+        credentials:'same-origin',
+        headers: tok ? {'X-CSRF-Token': tok} : {}
+      }).then(function(r){
+        return r.json().then(function(d){ return {status:r.status, data:d}; });
+      }).then(function(res){
+        if (sendBtn) sendBtn.disabled = false;
+        if (!res.data || !res.data.ok || !res.data.message) {
+          var err = (res.data && res.data.error) ? res.data.error : ('HTTP '+res.status);
+          alert('ارسال ناموفق بود' + (err ? ' ('+err+')' : ''));
+          return;
+        }
+        if (bodyEl) { bodyEl.value=''; bodyEl.style.height='auto'; }
+        if (fileEl) fileEl.value='';
+        if (fileHint) { fileHint.hidden=true; fileHint.textContent=''; }
+        if (typeof clearReply === 'function') clearReply();
+        appendMsg(res.data.message);
+      }).catch(function(){
+        if (sendBtn) sendBtn.disabled = false;
+        alert('ارسال ناموفق بود (ارتباط)');
+      });
+    });
+  }
+
+  // اگر داخل iframe نمای دوستونی هستیم، بعد از تغییر وضعیت (بستن/بازگشایی)
+  // به صفحه‌ی والد خبر بده تا فهرست کنار بلافاصله به‌روزرسانی شود
+  (function(){
+    var exitBtn = document.getElementById('tg-exit-chat');
+    if (!exitBtn) return;
+    exitBtn.addEventListener('click', function(e){
+      if (window.parent && window.parent !== window) {
+        e.preventDefault();
+        try { window.parent.postMessage({type:'sazgan-chat-exit', id:threadId}, '*'); } catch (_) {}
+      }
+    });
+  })();
+
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.dispatchEvent(new Event('sazgan:support-unread'));
+    }
+  } catch (e) {}
+})();
+</script>
+
+
+<script>
+function replySnippet(text){
+  text = String(text || '').replace(/\s+/g,' ').trim();
+  if (!text) return 'پیام پیوست‌شده';
+  var words = text.split(' ');
+  var out = words.slice(0,6).join(' ');
+  return out + (words.length > 6 ? '…' : '');
+}
+function fillReplySnippets(){
+  document.querySelectorAll('.tg-reply-quote[data-reply-id]').forEach(function(q){
+    var id=q.getAttribute('data-reply-id');
+    var source=document.querySelector('.tg-row[data-id="'+id+'"] .tg-text');
+    var target=q.querySelector('.tg-reply-snippet');
+    if(target) target.textContent=replySnippet(source ? source.textContent : 'پیام #'+id);
+  });
+}
+function scrollToReplyTarget(id){
+  id=String(id||'').trim();
+  if(!id) return;
+  var row=null;
+  document.querySelectorAll('.tg-row[data-id]').forEach(function(r){
+    if(String(r.getAttribute('data-id'))===id) row=r;
+  });
+  if(!row) return;
+
+  var bubble=row.querySelector('.tg-bubble') || row;
+  var container=row.closest('.tg-stream') || document.getElementById('chat-box') || document.querySelector('.tg-stream');
+
+  if(container && container.contains(row)){
+    var cr=container.getBoundingClientRect();
+    var rr=row.getBoundingClientRect();
+    var target=container.scrollTop + (rr.top-cr.top) - Math.max(20,(container.clientHeight-row.offsetHeight)/2);
+    container.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+  }else{
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  row.classList.remove('reply-target-highlight');
+  bubble.classList.remove('reply-target-highlight-bubble');
+  void row.offsetWidth;
+  row.classList.add('reply-target-highlight');
+  bubble.classList.add('reply-target-highlight-bubble');
+
+  setTimeout(function(){
+    row.classList.remove('reply-target-highlight');
+    bubble.classList.remove('reply-target-highlight-bubble');
+  },1800);
+}
+function wireReplyQuotes(){
+  document.querySelectorAll('.tg-reply-quote[data-reply-id]').forEach(function(q){
+    if(q._wired) return;
+    q._wired=true;
+    q.addEventListener('click',function(e){
+      e.preventDefault(); e.stopPropagation();
+      scrollToReplyTarget(q.getAttribute('data-reply-id'));
+    });
+  });
+}
+function setReplyTo(id, btn){
+  var hid = document.getElementById('reply_to_id');
+  var prev = document.getElementById('reply-preview');
+  var txt = document.getElementById('reply-preview-text');
+  if (!hid || !prev) return;
+  hid.value = id;
+  var row = btn && btn.closest ? btn.closest('.tg-row') : null;
+  var body = row ? (row.querySelector('.tg-text') || row.querySelector('.tg-bubble')) : null;
+  if (txt) txt.textContent = replySnippet(body ? body.textContent : ('پیام #'+id));
+  prev.classList.add('is-on');
+  var ta = document.getElementById('chat-body');
+  if (ta) ta.focus();
+}
+function clearReply(){
+  var hid = document.getElementById('reply_to_id');
+  var prev = document.getElementById('reply-preview');
+  if (hid) hid.value = '';
+  if (prev) prev.classList.remove('is-on');
+}
+(function(){
+  var ta = document.getElementById('chat-body');
+  if (!ta) return;
+  var maxH = (parseFloat(getComputedStyle(ta).lineHeight) || 20) * 5 + 20;
+  function fit(){
+    ta.style.height = '36px';
+    var h = Math.min(maxH, Math.max(36, ta.scrollHeight));
+    ta.style.height = h + 'px';
+  }
+  ta.addEventListener('input', fit);
+  fit();
+  fillReplySnippets();
+})();
+</script>
+
+<style id="reply-target-fix">
+.tg-row.reply-target-highlight .tg-bubble,.tg-bubble.reply-target-highlight-bubble{box-shadow:0 0 0 3px rgba(42,171,238,.75),0 0 22px rgba(42,171,238,.28)!important;transition:box-shadow .15s ease,background-color .15s ease!important}
+</style>
+
+<style id="reply-jump-v3010">
+.tg-row.reply-target-highlight .tg-bubble,
+.tg-bubble.reply-target-highlight-bubble{
+  box-shadow:0 0 0 3px rgba(55,65,81,.55),0 0 24px rgba(55,65,81,.20)!important;
+  outline:2px solid rgba(55,65,81,.22)!important;
+  transition:box-shadow .15s ease,outline .15s ease,background-color .15s ease!important;
+}
+</style>

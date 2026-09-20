@@ -1,0 +1,183 @@
+{# هدر مدرن جزئیات درخواست — stepper + کارت‌ها + تب‌ها
+   نیاز: req, statuses, stage_map (اختیاری), can_edit, kind ('external'|'internal'|'install'|'visit')
+   اختیاری: recent_requests, tech_user
+#}
+{% set kind = kind if kind is defined else 'external' %}
+{% set st = (req.status or '') %}
+
+<div class="rd-page no-print">
+  {# عنوان + اکشن‌ها #}
+  <div class="rd-topbar">
+    <div class="rd-topbar-main">
+      <h1 class="rd-title">جزئیات درخواست خدمات</h1>
+      <div class="rd-sub">
+        <span class="rd-code">#{{ req.id }}</span>
+        <span class="rd-status-pill">{{ req.status or '—' }}</span>
+      </div>
+    </div>
+    <div class="rd-topbar-actions">
+      {% if kind == 'external' %}
+        <a href="/service/external-repair/print/{{ req.id }}" class="btn-export" target="_blank">چاپ</a>
+        
+      {% elif kind == 'internal' %}
+        <a href="/service/internal-repair/print/{{ req.id }}" class="btn-export" target="_blank">چاپ</a>
+        
+      {% endif %}
+      <a href="/support/open/{{ req.id }}" class="btn">گفتگوی مشتری</a>
+    </div>
+  </div>
+
+  <div class="rd-layout">
+    <div class="rd-main">
+      {# سه کارت خلاصه — آکاردئونی (بخش اول باز، بقیه بسته) تا صفحه طولانی نشود #}
+      {% import '_rq_section_macro.html' as rq %}
+      {% set rd_ns = namespace(n=0) %}
+      <div class="rq-acc rd-cards-acc">
+        {% call rq.section(rd_ns, 'اطلاعات مشتری', icon='👤') %}
+            <div class="rd-kv"><span>نام</span><strong>{{ req.customer_name or '—' }}</strong></div>
+            <div class="rd-kv"><span>استان</span><strong>{{ req.province or '—' }}{% if req.county %} / {{ req.county }}{% endif %}{% if req.city %} / {{ req.city }}{% endif %}</strong></div>
+            <div class="rd-kv"><span>آدرس</span><strong>{{ req.customer_address or '—' }}</strong></div>
+            <div class="rd-kv"><span>تماس</span><strong dir="ltr">{{ req.customer_phone or req.contact_phone or '—' }}</strong></div>
+            {% if req.equipment_manager_name %}
+            <div class="rd-kv"><span>مسئول تجهیزات</span><strong>{{ req.equipment_manager_name }}{% if req.equipment_manager_mobile %} — {{ req.equipment_manager_mobile }}{% endif %}</strong></div>
+            {% endif %}
+        {% endcall %}
+        {% call rq.section(rd_ns, 'اطلاعات دستگاه', icon='🖥️') %}
+            {% if device_photo is defined and device_photo %}
+            <img src="/static/uploads/devices/{{ device_photo }}" alt="" style="width:100%;max-height:120px;object-fit:contain;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;background:var(--bg)">
+            {% endif %}
+            <div class="rd-kv"><span>نوع</span><strong>{{ req.device_type or '—' }}</strong></div>
+            <div class="rd-kv"><span>مدل</span><strong>{{ req.device_model or '—' }}</strong></div>
+            <div class="rd-kv"><span>سریال</span><strong dir="ltr">{{ req.serial_number or '—' }}</strong></div>
+            <div class="rd-kv"><span>تاریخ نصب</span><strong>{{ req.installation_date or '—' }}</strong></div>
+            <div class="rd-kv"><span>اتمام گارانتی</span><strong>{{ req.warranty_end_date or '—' }}</strong></div>
+        {% endcall %}
+        {% call rq.section(rd_ns, 'اطلاعات درخواست', icon='📋') %}
+            <div class="rd-kv"><span>نوع</span><strong>{{ req.service_type or '—' }}{% if req.request_category %} — {{ req.request_category }}{% endif %}</strong></div>
+            <div class="rd-kv"><span>تاریخ ثبت</span><strong>{{ req.reception_date or '—' }}</strong></div>
+            <div class="rd-kv"><span>وضعیت</span><strong>{{ req.status or '—' }}</strong></div>
+            <div class="rd-kv"><span>شرح</span><strong class="rd-clamp">{{ req.problem_desc or req.hospital_request_desc or '—' }}</strong></div>
+        {% endcall %}
+      </div>
+
+      {# تب‌ها — اگر visible_panels از روت پاس داده شده باشد (نقش‌های محدود مثل QC/تکنسین/مالی)، فقط تب‌های مجاز نمایش داده می‌شود؛ در غیر این صورت (پذیرش/مدیر یا سایر انواع درخواست) همه‌ی تب‌ها مثل قبل نمایش داده می‌شوند. #}
+      <div class="rd-tabs" id="rd-tabs" role="tablist" aria-label="بخش‌های پرونده">
+        {# ترتیب تب‌ها همسو با گردش کار واقعی پرونده: ثبت/پذیرش → پیش‌فاکتور → حواله → قطعات → گزارش اقدام → وضعیت کلی → پیوست‌ها → تاریخچه #}
+        <button type="button" class="rd-tab is-active" data-rd-tab="overview">خلاصه</button>
+        {% if not visible_panels or 'reception' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="reception">پذیرش و دستگاه</button>{% endif %}
+        {% if not visible_panels or 'finance' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="finance">مالی و پیش‌فاکتور</button>{% endif %}
+        {% if not visible_panels or 'voucher' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="voucher">صدور حواله</button>{% endif %}
+        {% if not visible_panels or 'parts' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="parts">قطعات</button>{% endif %}
+        {% if not visible_panels or 'reports' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="reports">گزارش‌ها و اقدامات</button>{% endif %}
+        {% if not visible_panels or 'status' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="status">وضعیت و گردش</button>{% endif %}
+        {% if not visible_panels or 'files' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="files">پیوست‌ها</button>{% endif %}
+        {% if not visible_panels or 'history' in visible_panels %}<button type="button" class="rd-tab" data-rd-tab="history">تاریخچه</button>{% endif %}
+      </div>
+    </div>
+
+    <aside class="rd-side">
+      <div class="rd-side-card">
+        <div class="rd-side-title">وضعیت درخواست</div>
+        <ol class="rd-vsteps">
+          {% for s in statuses or [] %}
+          {% set is_cur = (s == st) %}
+          {% set is_done = false %}
+          {% if stage_map is defined and stage_map.get(s) and stage_map[s].stage_date %}
+            {% set is_done = true %}
+          {% endif %}
+          <li class="{% if is_cur %}is-current{% elif is_done %}is-done{% endif %}">
+            <span class="rd-vdot"></span>
+            <div>
+              <div class="rd-vlabel">{{ s }}</div>
+              {% if stage_map is defined and stage_map.get(s) and stage_map[s].stage_date %}
+              <div class="rd-vdate">{{ stage_map[s].stage_date }}</div>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <div class="rd-side-card">
+        <div class="rd-side-title">تکنسین مسئول</div>
+        <div class="rd-tech">
+          <div class="rd-tech-avatar">{{ (req.assigned_technician or '؟')[:1] }}</div>
+          <div>
+            <div class="rd-tech-name">{{ req.assigned_technician or 'تخصیص نشده' }}</div>
+            {% if tech_user is defined and tech_user %}
+            <div class="rd-tech-meta">{{ tech_user.province or '' }}{% if tech_user.phone %} · {{ tech_user.phone }}{% endif %}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% if recent_requests is defined and recent_requests %}
+      <div class="rd-side-card">
+        <div class="rd-side-title">درخواست‌های اخیر مشتری</div>
+        <ul class="rd-recent">
+          {% for r in recent_requests %}
+          <li>
+            <a href="{% if r.service_type == 'کارخانه' %}/service/internal-repair/view/{{ r.id }}{% else %}/service/external-repair/view/{{ r.id }}{% endif %}">
+              <strong>#{{ r.id }}</strong>
+              <span>{{ r.status or '' }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // نکته مهم: این اسکریپت همین‌جا (بلافاصله بعد از استپر/تب‌ها) چاپ می‌شود،
+  // اما پنل‌های data-rd-panel در ادامه‌ی صفحه (در تمپلیت‌های دیگر) بعد از این
+  // بلاک رندر می‌شوند. اگر کد بلافاصله اجرا شود، querySelectorAll('[data-rd-panel]')
+  // چیزی پیدا نمی‌کند (چون هنوز پارس نشده‌اند)، در نتیجه هیچ پنلی مخفی نمی‌شود و
+  // همه‌ی فرم‌های تمام تب‌ها زیر هم و زیر «خلاصه» نمایش داده می‌شوند. برای همین باید
+  // تا آماده‌شدن کامل DOM صبر کنیم.
+  function init(){
+    var tabs = document.querySelectorAll('#rd-tabs .rd-tab');
+    var panels = document.querySelectorAll('[data-rd-panel]');
+    if(!tabs.length || !panels.length) return;
+
+    function activate(name){
+      var exists = false;
+      panels.forEach(function(p){ if(p.getAttribute('data-rd-panel')===name) exists = true; });
+      if(!exists) name = tabs[0].getAttribute('data-rd-tab');
+
+      tabs.forEach(function(t){ t.classList.toggle('is-active', t.getAttribute('data-rd-tab')===name); });
+      panels.forEach(function(p){
+        p.style.display = (p.getAttribute('data-rd-panel')===name) ? '' : 'none';
+      });
+      try{ localStorage.setItem('rd-tab-'+location.pathname, name); }catch(e){}
+      // برگرداندن اسکرول به بالای بخش تب‌ها به‌جای پرش به انتهای صفحه
+      var tabsEl = document.getElementById('rd-tabs');
+      if(tabsEl && tabsEl.scrollIntoView){ tabsEl.scrollIntoView({block:'start'}); }
+    }
+
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){ activate(t.getAttribute('data-rd-tab')); });
+    });
+
+    var saved = null;
+    try{ saved = localStorage.getItem('rd-tab-'+location.pathname); }catch(e){}
+    activate(saved || tabs[0].getAttribute('data-rd-tab'));
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  }else{
+    init();
+  }
+})();
+
+/** باز/بسته‌کردن هر بخش از کارت‌های آکاردئونی خلاصه‌ی پرونده (rd-cards-acc) */
+function rqAccToggle(btn) {
+    var item = btn.closest('.acc-item');
+    if (!item) return;
+    item.classList.toggle('open');
+}
+</script>

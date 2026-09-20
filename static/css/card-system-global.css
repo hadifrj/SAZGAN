@@ -1,0 +1,177 @@
+/* SAZGAN unified card system — Web + mobile/WebView
+   Theme owns surfaces; modules own only the accent color. */
+:root {
+  --sg-card-radius: 14px;
+  --sg-card-gap: 12px;
+  --sg-card-pad: 14px;
+  --sg-card-min-h: 132px;
+  --sg-module-accent: var(--accent, #374151);
+  --sg-module-soft: color-mix(in srgb, var(--sg-module-accent) 12%, transparent);
+  --sg-module-line: color-mix(in srgb, var(--sg-module-accent) 42%, var(--border));
+}
+
+/* Reusable module identities */
+[data-module="customer"] { --sg-module-accent:#2563eb; }
+[data-module="warehouse"] { --sg-module-accent:#f97316; }
+[data-module="finance"] { --sg-module-accent:#16a34a; }
+[data-module="reports"] { --sg-module-accent:#7c3aed; }
+[data-module="settings"] { --sg-module-accent:#64748b; }
+[data-module="system"] { --sg-module-accent:#ef4444; }
+[data-module="support"] { --sg-module-accent:#0891b2; }
+
+/* Shared hub grid: desktop 4, laptop 3, tablet 2, phone 1. */
+.sys-tile-grid {
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:var(--sg-card-gap) !important;
+  align-items:stretch !important;
+  width:100% !important;
+}
+@media (max-width:1180px){ .sys-tile-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;} }
+@media (max-width:860px){ .sys-tile-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;} }
+@media (max-width:560px){
+  :root{--sg-card-pad:11px;--sg-card-gap:10px;--sg-card-min-h:124px;}
+  .sys-tile-grid{grid-template-columns:1fr !important;}
+}
+
+/* Main module cards */
+a.sys-tile, .sys-tile {
+  position:relative !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  gap:7px !important;
+  min-height:var(--sg-card-min-h) !important;
+  padding:var(--sg-card-pad) !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+  border:1px solid var(--sg-module-line) !important;
+  border-radius:var(--sg-card-radius) !important;
+  background:var(--card,#fff) !important;
+  color:var(--text) !important;
+  text-decoration:none !important;
+  box-shadow:0 2px 5px rgba(15,23,42,.035) !important;
+  transition:transform .18s cubic-bezier(.22,1,.36,1),box-shadow .18s ease,border-color .18s ease !important;
+}
+a.sys-tile::before,.sys-tile::before{
+  content:"";
+  position:absolute;
+  inset-inline-start:0;
+  top:14px; bottom:14px;
+  width:3px;
+  border-radius:0 4px 4px 0;
+  background:var(--sg-module-accent);
+  opacity:.95;
+}
+a.sys-tile:hover,.sys-tile:hover{
+  transform:translateY(-3px) !important;
+  border-color:var(--sg-module-accent) !important;
+  box-shadow:0 12px 28px color-mix(in srgb,var(--sg-module-accent) 15%,transparent) !important;
+}
+a.sys-tile:focus-visible,.sys-tile:focus-visible{outline:3px solid var(--sg-module-soft);outline-offset:2px;}
+a.sys-tile .sys-tile-icon,.sys-tile-icon{
+  width:36px !important;height:36px !important;
+  display:inline-flex !important;align-items:center !important;justify-content:center !important;
+  border-radius:10px !important;
+  background:var(--sg-module-soft) !important;
+  color:var(--sg-module-accent) !important;
+  font-size:18px !important;
+  flex:none !important;
+}
+a.sys-tile .sys-tile-icon svg,.sys-tile-icon svg{width:20px !important;height:20px !important;}
+a.sys-tile .sys-tile-title,.sys-tile-title{font-size:13.5px !important;font-weight:800 !important;line-height:1.45 !important;color:var(--text) !important;}
+a.sys-tile .sys-tile-desc,.sys-tile-desc{font-size:12px !important;line-height:1.55 !important;color:var(--text-muted) !important;}
+/* Hub cards are intentionally label-free: the whole card is the action. */
+a.sys-tile::after,.sys-tile::after{content:none !important;display:none !important;}
+
+/* Generic content cards: unified geometry without forcing a module color. */
+.main-content .card:not(.modal .card) {
+  border-radius:var(--sg-card-radius) !important;
+  background:var(--card,#fff) !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.045) !important;
+}
+.main-content .card > .card-header{padding:15px 18px !important;}
+.main-content .card > .card-body{padding:18px !important;}
+
+/* Settings cards keep their category color and get the same action rhythm. */
+.stg-acc-item[data-color="blue"]{--sg-module-accent:#2563eb;}
+.stg-acc-item[data-color="violet"]{--sg-module-accent:#7c3aed;}
+.stg-acc-item[data-color="teal"]{--sg-module-accent:#0891b2;}
+.stg-acc-item[data-color="green"]{--sg-module-accent:#16a34a;}
+.stg-acc-item[data-color="orange"]{--sg-module-accent:#f97316;}
+.stg-acc-item[data-color="red"]{--sg-module-accent:#ef4444;}
+.stg-acc-item[data-color] .stg-card{
+  position:relative;min-height:86px;display:flex;flex-direction:column;align-items:flex-start;
+  padding:10px 11px;border-radius:var(--sg-card-radius);
+  border:1px solid color-mix(in srgb,var(--sg-module-accent) 35%,var(--border));
+  background:var(--card);box-shadow:0 2px 6px rgba(15,23,42,.035);overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.stg-acc-item[data-color] .stg-card::before{content:"";position:absolute;inset-inline-start:0;top:12px;bottom:12px;width:3px;background:var(--sg-module-accent);border-radius:0 4px 4px 0;}
+.stg-acc-item[data-color] .stg-card .stg-card-ic{background:var(--sg-module-soft);color:var(--sg-module-accent);}
+.stg-acc-item[data-color] .stg-card::after{content:none !important;display:none !important;}
+.stg-acc-item[data-color] .stg-card:hover{transform:translateY(-2px);border-color:var(--sg-module-accent);box-shadow:0 10px 24px color-mix(in srgb,var(--sg-module-accent) 12%,transparent);}
+
+/* Touch/WebView: remove hover dependency and keep comfortable hit areas. */
+@media (hover:none),(pointer:coarse){
+  a.sys-tile:active,.sys-tile:active,.stg-card:active{transform:scale(.985) !important;}
+}
+@media (max-width:560px){
+  a.sys-tile,.sys-tile{min-height:122px !important;}
+  .main-content .card > .card-header{padding:13px 14px !important;}
+  .main-content .card > .card-body{padding:14px !important;}
+  .stg-acc-item[data-color] .stg-card{min-height:82px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms !important;scroll-behavior:auto !important;}
+}
+
+
+/* Minimal Premium: hub/module cards are intentionally monochrome.
+   This is kept in the base card stylesheet as a no-JS fallback; display-boot
+   also applies the same rule at runtime for instant theme switching. */
+html[data-card-theme="mono"] a.sys-tile,
+html[data-card-theme="mono"] .sys-tile {
+  --sg-module-accent: var(--text) !important;
+  --sg-module-soft: transparent !important;
+  --sg-module-line: var(--border) !important;
+  border-color: var(--border) !important;
+  background: var(--card) !important;
+  box-shadow: none !important;
+}
+html[data-card-theme="mono"] a.sys-tile::before,
+html[data-card-theme="mono"] .sys-tile::before { display:none !important; }
+html[data-card-theme="mono"] a.sys-tile::after,
+html[data-card-theme="mono"] .sys-tile::after {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+html[data-card-theme="mono"] a.sys-tile .sys-tile-icon,
+html[data-card-theme="mono"] .sys-tile-icon {
+  color: var(--text) !important;
+  background: transparent !important;
+}
+html[data-card-theme="mono"] a.sys-tile:hover,
+html[data-card-theme="mono"] .sys-tile:hover {
+  border-color: var(--text) !important;
+  box-shadow: 0 6px 18px rgba(15,23,42,.06) !important;
+}
+
+
+/* Minimal Premium also neutralizes the compact cards inside Settings. */
+html[data-card-theme="mono"] .stg-acc-item[data-color] .stg-card{
+  --sg-module-accent:var(--text) !important;
+  --sg-module-soft:transparent !important;
+  border-color:var(--border) !important;
+  border-inline-start:1px solid var(--border) !important;
+  background:var(--card) !important;
+  box-shadow:none !important;
+}
+html[data-card-theme="mono"] .stg-acc-item[data-color] .stg-card::before,
+html[data-card-theme="mono"] .stg-acc-item[data-color] .stg-card::after{display:none !important;content:none !important;}
+html[data-card-theme="mono"] .stg-acc-item[data-color] .stg-card .stg-card-ic{
+  color:var(--text) !important;background:transparent !important;
+}
+html[data-card-theme="mono"] .stg-acc-item[data-color] .stg-card:hover{
+  border-color:var(--text) !important;background:var(--card) !important;
+}

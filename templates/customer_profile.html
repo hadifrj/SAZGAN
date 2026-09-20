@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}سازگان | پروفایل مشتری — {{ customer.name }}{% endblock %}
+{% block content %}
+
+{% set parties_active = 'customers' %}
+{% include '_settings_parties_tabs.html' %}
+
+<div class="cp-page">
+  <div class="cp-topbar">
+    <div>
+      <h1 class="cp-title">
+        {{ customer.name }}
+        {% if customer.is_archived %}<span class="rd-status-pill" style="background:#fee2e2;color:#b91c1c">آرشیو</span>
+        {% else %}<span class="rd-status-pill" style="background:#dcfce7;color:#15803d">فعال</span>{% endif %}
+      </h1>
+      <div class="cp-sub">کد طرف‌حساب: <strong>#{{ customer.id }}</strong>
+        {% if customer.province %} · {{ customer.province }}{% if customer.county %} / {{ customer.county }}{% endif %}{% if customer.city %} / {{ customer.city }}{% endif %}{% endif %}
+      </div>
+    </div>
+    <div class="cp-actions">
+      <a class="btn-edit" href="/settings/customers/edit/{{ customer.id }}">ویرایش</a>
+      <a class="btn" href="/service/external-repair/new" onclick="if(typeof openQuickNew==='function'){openQuickNew('/service/external-repair/new','درخواست جدید');return false;}">+ درخواست جدید</a>
+      
+    </div>
+  </div>
+
+  <div class="cp-cards">
+    <div class="rd-card">
+      <div class="rd-card-head">اطلاعات مشتری</div>
+      <div class="rd-card-body">
+        <div class="rd-kv"><span>نوع</span><strong>{{ customer.person_type if customer.person_type is defined and customer.person_type else 'حقیقی' }}</strong></div>
+        <div class="rd-kv"><span>نام</span><strong>{{ customer.name }}</strong></div>
+        <div class="rd-kv"><span>تلفن</span><strong dir="ltr">{{ customer.phone or '—' }}</strong></div>
+        <div class="rd-kv"><span>مسئول تجهیزات</span><strong>{{ customer.equipment_manager_name or '—' }}{% if customer.equipment_manager_mobile %} — <span dir="ltr">{{ customer.equipment_manager_mobile }}</span>{% endif %}</strong></div>
+        <div class="rd-kv"><span>{% if customer.person_type is defined and customer.person_type == 'حقوقی' %}شناسه ملی{% else %}کد ملی{% endif %}</span><strong>{{ customer.national_id or '—' }}</strong></div>
+        <div class="rd-kv"><span>کد اقتصادی</span><strong>{{ customer.economic_code or '—' }}</strong></div>
+        <div class="rd-kv"><span>آدرس</span><strong>{{ customer.address or '—' }}</strong></div>
+        <div class="rd-kv"><span>کد پستی</span><strong>{{ customer.postal_code or '—' }}</strong></div>
+      </div>
+    </div>
+
+    <div class="rd-card">
+      <div class="rd-card-head">آمار و وضعیت</div>
+      <div class="rd-card-body">
+        <div class="cp-stats">
+          <div class="cp-stat"><div class="cp-stat-n">{{ stats.devices }}</div><div class="cp-stat-l">دستگاه</div></div>
+          <div class="cp-stat"><div class="cp-stat-n">{{ stats.open }}</div><div class="cp-stat-l">درخواست باز</div></div>
+          <div class="cp-stat"><div class="cp-stat-n">{{ stats.closed }}</div><div class="cp-stat-l">بسته / پایان</div></div>
+          <div class="cp-stat"><div class="cp-stat-n">{{ stats.total }}</div><div class="cp-stat-l">کل درخواست‌ها</div></div>
+        </div>
+        {% if chart_labels %}
+        <div style="margin-top:12px;height:140px">
+          <canvas id="cp-chart" height="140"></canvas>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="rd-card">
+      <div class="rd-card-head">دستگاه شاخص</div>
+      <div class="rd-card-body">
+        {% if customer_devices %}
+          {% set d0 = customer_devices[0] %}
+          <div class="cp-device-feature">
+            {% if d0.photo_filename %}
+            <img src="/static/uploads/devices/{{ d0.photo_filename }}" alt="" class="cp-device-img">
+            {% else %}
+            <div class="cp-device-placeholder">بدون تصویر</div>
+            {% endif %}
+            <div>
+              <div class="rd-kv"><span>نوع</span><strong>{{ d0.device_type or '—' }}</strong></div>
+              <div class="rd-kv"><span>مدل</span><strong>{{ d0.device_model or '—' }}</strong></div>
+              <div class="rd-kv"><span>سریال</span><strong dir="ltr">{{ d0.serial_number or '—' }}</strong></div>
+              <div class="rd-kv"><span>آخرین وضعیت</span><strong>{{ d0.last_status or '—' }}</strong></div>
+            </div>
+          </div>
+        {% else %}
+          <p style="color:var(--text-muted);font-size:13px;margin:0">هنوز دستگاهی از درخواست‌ها استخراج نشده.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="rd-tabs" id="cp-tabs">
+    <button type="button" class="rd-tab is-active" data-cp-tab="devices">دستگاه‌ها ({{ customer_devices|length }})</button>
+    <button type="button" class="rd-tab" data-cp-tab="requests">درخواست‌ها ({{ requests_rows|length }})</button>
+    <button type="button" class="rd-tab" data-cp-tab="warranty">گارانتی ({{ warranties|length }})</button>
+  </div>
+
+  <div data-cp-panel="devices" class="card">
+    <div class="card-body">
+      {% if not customer_devices %}
+      <div class="empty-state">دستگاهی ثبت نشده است.</div>
+      {% else %}
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>تصویر</th><th>دستگاه</th><th>مدل</th><th>سریال</th><th>آخرین سرویس</th><th>وضعیت</th><th></th>
+          </tr>
+          {% for d in customer_devices %}
+          <tr>
+            <td>
+              {% if d.photo_filename %}
+              <img src="/static/uploads/devices/{{ d.photo_filename }}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+              {% else %}—{% endif %}
+            </td>
+            <td>{{ d.device_type or '—' }}</td>
+            <td>{{ d.device_model or '—' }}</td>
+            <td dir="ltr">{{ d.serial_number or '—' }}</td>
+            <td>{{ d.last_date or '—' }}</td>
+            <td>{{ d.last_status or '—' }}</td>
+            <td>
+              {% if d.last_request_id %}
+              <a class="btn-edit" href="{% if d.service_type == 'کارخانه' %}/service/internal-repair/view/{{ d.last_request_id }}{% else %}/service/external-repair/view/{{ d.last_request_id }}{% endif %}">پرونده</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div data-cp-panel="requests" class="card" style="display:none">
+    <div class="card-body">
+      {% if not requests_rows %}
+      <div class="empty-state">درخواستی یافت نشد.</div>
+      {% else %}
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>#</th><th>تاریخ</th><th>نوع</th><th>دستگاه</th><th>سریال</th><th>وضعیت</th><th></th>
+          </tr>
+          {% for r in requests_rows %}
+          <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.service_type or '' }} {% if r.request_category %}— {{ r.request_category }}{% endif %}</td>
+            <td>{{ r.device_type or '—' }}{% if r.device_model is defined and r.device_model %} / {{ r.device_model }}{% endif %}</td>
+            <td dir="ltr">{{ r.serial_number or '—' }}</td>
+            <td>{{ r.status or '—' }}</td>
+            <td>
+              <a class="btn-edit" href="{% if r.service_type == 'کارخانه' %}/service/internal-repair/view/{{ r.id }}{% else %}/service/external-repair/view/{{ r.id }}{% endif %}">مشاهده</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div data-cp-panel="warranty" class="card" style="display:none">
+    <div class="card-body">
+      {% if not warranties %}
+      <div class="empty-state">کارت گارانتی مرتبطی نیست.</div>
+      {% else %}
+      <div class="table-wrap">
+        <table>
+          <tr><th>#</th><th>سریال</th><th>نوع / مدل</th><th>وضعیت</th><th>تاریخ</th></tr>
+          {% for w in warranties %}
+          <tr>
+            <td>{{ w.id }}</td>
+            <td dir="ltr">{{ w.serial_number or '—' }}</td>
+            <td>{{ w.device_type or '—' }}{% if w.model %} / {{ w.model }}{% endif %}</td>
+            <td>{{ w.warranty_status or '—' }}</td>
+            <td>{{ w.production_date or w.activation_date or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.cp-page{margin-top:8px}
+.cp-topbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}
+.cp-title{margin:0;font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cp-sub{color:var(--text-muted);font-size:13px;margin-top:4px}
+.cp-actions{display:flex;flex-wrap:wrap;gap:8px}
+.cp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:900px){.cp-cards{grid-template-columns:1fr}}
+.cp-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cp-stat{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.cp-stat-n{font-size:22px;font-weight:800;color:var(--accent)}
+.cp-stat-l{font-size:11.5px;color:var(--text-muted);margin-top:2px}
+.cp-device-feature{display:flex;gap:12px;align-items:flex-start}
+.cp-device-img{width:88px;height:88px;object-fit:cover;border-radius:10px;border:1px solid var(--border);flex-shrink:0}
+.cp-device-placeholder{width:88px;height:88px;border-radius:10px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted);flex-shrink:0}
+</style>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll('#cp-tabs .rd-tab');
+  function act(name){
+    tabs.forEach(function(t){t.classList.toggle('is-active', t.getAttribute('data-cp-tab')===name);});
+    document.querySelectorAll('[data-cp-panel]').forEach(function(p){
+      p.style.display = (p.getAttribute('data-cp-panel')===name) ? '' : 'none';
+    });
+  }
+  tabs.forEach(function(t){ t.addEventListener('click', function(){ act(t.getAttribute('data-cp-tab')); }); });
+})();
+</script>
+{% if chart_labels %}
+<script src="/static/js/vendor/chart.umd.min.js"></script>
+<script>
+(function(){
+  var el=document.getElementById('cp-chart');
+  if(!el || typeof Chart==='undefined') return;
+  new Chart(el, {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels|tojson }},
+      datasets: [{
+        label: 'تعداد درخواست',
+        data: {{ chart_values|tojson }},
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#0284c7',
+        backgroundColor: 'transparent',
+        tension: 0.3,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { size: 10 } } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } }
+      }
+    }
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

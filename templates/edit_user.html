@@ -1,0 +1,129 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | ویرایش کاربر{% endblock %}
+{% block content %}
+{% set parties_active = 'accounts' %}
+{% include '_settings_parties_tabs.html' %}
+
+<div class="card" style="max-width:720px;">
+    <div class="card-header list-header-row">
+        <span>ویرایش کاربر #{{ user.id }}</span>
+        {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+        {% set back_url = '/settings' %}
+        {% include '_page_nav_icons.html' %}
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if error %}<div class="login-error" style="margin-bottom:14px;">{{ error }}</div>{% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="field-full" style="display:flex;align-items:center;gap:16px;">
+                    {% if user.photo_filename %}
+                    <img src="/static/uploads/users/{{ user.photo_filename }}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:1px solid var(--border);">
+                    {% else %}
+                    <span style="display:inline-flex;width:72px;height:72px;border-radius:50%;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;color:var(--text-muted);">بدون عکس</span>
+                    {% endif %}
+                    <div style="flex:1;">
+                        <label class="list-header-row " style="display:flex;">
+                          <span>عکس کاربر</span>
+</label>
+                        <input type="file" name="photo" accept="image/png,image/jpeg,image/jpg">
+                    </div>
+                </div>
+                <div>
+                    <label>نام و نام خانوادگی</label>
+                    <input type="text" name="full_name" value="{{ user.full_name or '' }}" required>
+                </div>
+                <div>
+                    <label>نام کاربری</label>
+                    <input type="text" name="username" value="{{ user.username or '' }}" required>
+                </div>
+                <div>
+                    <label>نقش</label>
+                    <select name="role" class="field-select" id="role-select" onchange="toggleRoleFields()">
+                        {% for r in roles %}
+                        <option value="{{ r }}" {% if user.role == r %}selected{% endif %}>{% if r == 'تکنسین استانی' %}نماینده{% else %}{{ r }}{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="fullname-note" style="display:none;"></div>
+                <div id="representative-field" {% if user.role != 'تکنسین استانی' %}style="display:none;"{% endif %}>
+                    <label>نماینده</label>
+                    <select name="representative_id" class="field-select">
+                        <option value="">— انتخاب کنید —</option>
+                        {% for r in representatives %}
+                        <option value="{{ r.id }}" {% if user.representative_id == r.id %}selected{% endif %}>
+                            {% if r.rep_type == 'حقوقی' and r.company_name %}{{ r.company_name }}{% else %}{{ r.first_name }} {{ r.last_name }}{% endif %} — {{ r.province }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>استان</label>
+                    <select name="province" id="province" class="field-select geo-province"
+                        onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                        <option value="">—</option>
+                        {% for p in provinces %}
+                        <option value="{{ p }}" {% if user.province == p %}selected{% endif %}>{{ p }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>شهرستان</label>
+                    <select name="county" id="county" class="field-select geo-county"
+                        onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)"
+                        data-selected="{{ user.county if user.county is defined and user.county else '' }}">
+                        <option value="">—</option>
+                    </select>
+                </div>
+                <div>
+                    <label>شهر</label>
+                    <select name="city" id="city" class="field-select geo-city"
+                        data-selected="{{ user.city if user.city is defined and user.city else '' }}">
+                        <option value="">—</option>
+                    </select>
+                    <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px" placeholder="یا نام شهر را بنویسید">
+                
+                </div>
+                <div id="bank-fields" class="field-full" {% if user.role != 'تکنسین استانی' %}style="display:none;"{% endif %}>
+                    <p style="font-weight:700;margin:0 0 8px;">اطلاعات مالی (نماینده)</p>
+                    <label>شماره کارت</label>
+                    <input type="text" name="bank_card" value="{{ user.bank_card or '' }}" maxlength="19" dir="ltr" style="text-align:left;">
+                    <label style="margin-top:10px;">شماره شبا</label>
+                    <input type="text" name="bank_sheba" value="{{ user.bank_sheba or '' }}" maxlength="26" dir="ltr" style="text-align:left;">
+                    <label style="margin-top:10px;">نام صاحب حساب</label>
+                    <input type="text" name="bank_owner" value="{{ user.bank_owner or '' }}">
+                </div>
+                <div class="field-full">
+                    <label>رمز عبور جدید (اختیاری — خالی بگذارید تا تغییر نکند)</label>
+                    <input type="password" name="password" minlength="6" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر">
+                </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="submit" class="btn">ذخیره تغییرات</button>
+                {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+                {% set back_url = '/settings' %}
+                {% include '_page_nav_icons.html' %}
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function toggleRoleFields() {
+    var bf = document.getElementById('bank-fields');
+    if (bf) {
+      var role = document.getElementById('role-select');
+      var r = role ? role.value : '';
+      bf.style.display = (r === 'تکنسین استانی') ? '' : 'none';
+    }
+
+    var role = document.getElementById('role-select').value;
+    var repField = document.getElementById('representative-field');
+    if (role === 'تکنسین استانی') {
+        repField.style.display = '';
+    } else {
+        repField.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

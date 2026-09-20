@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}سازگان | گزارش مراحل تأخیر{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">گزارش مراحل تأخیر</div>
+  <div class="card-body">
+    {% if rows is defined and rows|length > 0 %}
+    <div class="table-wrap">
+    <table>
+      <tr>
+        <th>ردیف</th>
+        <th>شماره پذیرش</th>
+        <th>تاریخ پذیرش</th>
+        <th>نام مشتری</th>
+        <th>نوع خدمت</th>
+        <th>نوع دستگاه</th>
+        <th>مدل دستگاه</th>
+        <th>مرحله فعلی</th>
+        <th>تعداد روز توقف</th>
+        <th>مسئول مرحله</th>
+        <th>علت تأخیر</th>
+        <th>وضعیت پرونده</th>
+        <th>عملیات</th>
+      </tr>
+      {% for r in rows %}
+      <tr class="{% if r.is_delayed %}row-delayed{% endif %}">
+        <td>{{ loop.index }}</td>
+        <td>{{ r.reception_no or r.id }}</td>
+        <td>{{ r.reception_date or '—' }}</td>
+        <td>{{ r.customer_name or '—' }}</td>
+        <td>{{ r.request_category or r.service_type or '—' }}</td>
+        <td>{{ r.device_type or '—' }}</td>
+        <td>{{ r.device_model or r.model or '—' }}</td>
+        <td>{{ r.stage or r.status or '—' }}</td>
+        <td><strong {% if r.is_delayed %}style="color:var(--danger-text)"{% endif %}>{{ r.days_in_status or r.days or '—' }}</strong></td>
+        <td>{{ r.assigned_technician or r.stage_owner or '—' }}</td>
+        <td>{{ r.delay_reason or r.notes or '—' }}</td>
+        <td><span class="badge">{{ r.status or '—' }}</span></td>
+        <td>{% if r.detail_url %}<a href="{{ r.detail_url }}" class="btn-edit">مشاهده</a>{% else %}<a href="/service/internal-repair/view/{{ r.id }}" class="btn-edit">مشاهده</a>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    </div>
+    {% elif stages is defined %}
+    {# سازگاری با خروجی قبلی stage list #}
+    <div class="table-wrap">
+    <table>
+      <tr><th>ردیف</th><th>مرحله</th><th>تاریخ</th><th>یادداشت</th></tr>
+      {% for s in stages %}
+      <tr><td>{{ loop.index }}</td><td>{{ s.stage }}</td><td>{{ s.stage_date }}</td><td>{{ s.notes or '—' }}</td></tr>
+      {% endfor %}
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state">داده‌ای برای نمایش نیست.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

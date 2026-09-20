@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>چاپ ثبت نصب #{{ req.id }}</title>
+<style>
+body{font-family:Tahoma,sans-serif;margin:24px;font-size:13px;color:#1a2433}
+h1{font-size:16px;margin:0 0 8px}
+.row{margin:6px 0}.row strong{color:#64748b;min-width:140px;display:inline-block}
+@media print{.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="no-print" style="margin-bottom:12px">
+<button onclick="window.print()">چاپ</button>
+<button onclick="window.close()">بستن</button>
+</div>
+{% set page_title = 'گواهی / ثبت نصب دستگاه' %}
+{% include '_print_company_header.html' %}
+<p>شماره ثبت: <strong>{{ req.id }}</strong></p>
+<div class="row"><strong>مشتری:</strong> {{ req.customer_name }}</div>
+<div class="row"><strong>استان/شهر:</strong> {{ req.province }}{% if req.city %} / {{ req.city }}{% endif %}</div>
+<div class="row"><strong>آدرس:</strong> {{ req.customer_address or '—' }}</div>
+<div class="row"><strong>کارشناس تجهیزات:</strong> {{ req.equipment_manager_name or '—' }} — {{ req.equipment_manager_mobile or '' }}</div>
+<div class="row"><strong>سریال دستگاه:</strong> {{ req.serial_number or '—' }}</div>
+<div class="row"><strong>نوع دستگاه:</strong> {{ req.device_type }}</div>
+<div class="row"><strong>بخش / واحد:</strong> {{ req.install_unit or '—' }}</div>
+<div class="row"><strong>تاریخ ثبت نصب:</strong> {{ req.reception_date or '—' }}</div>
+<div class="row"><strong>تکنسین انجام‌دهنده:</strong> {{ req.assigned_technician or '—' }}</div>
+<div class="row"><strong>توضیحات:</strong> {{ req.install_notes or '—' }}</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}سازگان | {{ cfg.archive_label if cfg is defined else 'آرشیو خدمات' }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header list-header-row">
+  <span>{{ cfg.archive_label if cfg is defined else 'آرشیو خدمات' }}</span>
+  <div class="list-header-actions">
+    
+  </div>
+</div>
+  <div class="card-body">
+    {% if requests|length == 0 %}
+    <div class="empty-state">موردی ثبت نشده است.</div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>شماره پذیرش</th>
+          <th>تاریخ پذیرش</th>
+          <th>تاریخ خاتمه</th>
+          <th>نام مشتری</th>
+          <th>سریال</th>
+          <th>نوع دستگاه</th>
+          <th>مدل دستگاه</th>
+          <th>نوع خدمت</th>
+          <th>تکنسین / نماینده</th>
+          <th>شماره فاکتور</th>
+          <th>وضعیت گارانتی</th>
+          <th>وضعیت پرونده</th>
+          <th>عملیات</th>
+        </tr>
+        {% for r in requests %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.reception_no or r.id }}</td>
+          <td>{{ r.reception_date or '—' }}</td>
+          <td>{{ r.closed_date or r.completion_date or '—' }}</td>
+          <td>{{ r.customer_name }}</td>
+          <td>{{ r.serial_number or '—' }}</td>
+          <td>{{ r.device_type or '—' }}</td>
+          <td>{{ r.device_model or r.model or '—' }}</td>
+          <td>{{ r.request_category or r.service_type or '—' }}</td>
+          <td>{{ r.assigned_technician or '—' }}</td>
+          <td>{{ r.invoice_number or '—' }}</td>
+          <td>{{ r.warranty_status or r.warranty_end_date or '—' }}</td>
+          <td><span class="badge">{{ r.status }}</span></td>
+          <td>
+            {% if r.service_type == 'کارخانه' %}
+            <a href="/service/internal-repair/view/{{ r.id }}" class="btn-edit">مشاهده</a>
+            {% elif r.request_category == 'نصب و آموزش' %}
+            <a href="/service/installation/request-view/{{ r.id }}" class="btn-edit">مشاهده</a>
+            {% elif r.request_category == 'بررسی و بازدید' %}
+            <a href="/service/inspection/view/{{ r.id }}" class="btn-edit">مشاهده</a>
+            {% else %}
+            <a href="/service/external-repair/view/{{ r.id }}" class="btn-edit">مشاهده</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% include '_pagination.html' %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% block title %}سازگان | {{ 'بایگانی خدمات' if archive_mode else 'گزارش عملکرد خدمات' }}{% endblock %}
+{% block content %}
+<div class="card no-print">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>{{ 'بایگانی خدمات' if archive_mode else 'گزارش عملکرد خدمات' }}</span>
+      <div class="list-header-actions">
+        <button type="button" class="btn-cancel" onclick="window.print()"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="9" width="16" height="7" rx="1"/><path d="M6 9V4h12v5"/><rect x="7" y="13" width="10" height="6"/></svg> چاپ</button>
+        <button type="button" class="btn-cancel" onclick="window.print()">چاپ</button>
+        <a class="btn-export" href="{{ export_url }}">خروجی Excel</a>
+        <a class="btn-export" href="{{ export_url.replace('export=1', 'export=pdf') if export_url else '?export=pdf' }}">خروجی PDF</a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <form method="GET" class="filter-bar" style="align-items:end;">
+      <div class="filter-field" style="min-width:220px;">
+        <label>جستجو (کد، مشتری، سریال، دستگاه، تکنسین)</label>
+        <input type="text" name="q" value="{{ q or '' }}" placeholder="جستجو در همه پرونده‌ها...">
+      </div>
+      <div class="filter-field">
+        <label>از تاریخ</label>
+        <input type="text" name="date_from" value="{{ date_from or '' }}" placeholder="۱۴۰۵/۰۱/۰۱" class="jalali-date" dir="ltr" autocomplete="off">
+      </div>
+      <div class="filter-field">
+        <label>تا تاریخ</label>
+        <input type="text" name="date_to" value="{{ date_to or '' }}" placeholder="۱۴۰۵/۱۲/۲۹" class="jalali-date" dir="ltr" autocomplete="off">
+      </div>
+      <div class="filter-field">
+        <label>نوع سرویس</label>
+        <select name="service_kind" class="field-select">
+          <option value="">همه</option>
+          <option value="internal" {% if service_kind=='internal' %}selected{% endif %}>تعمیر داخلی</option>
+          <option value="external" {% if service_kind=='external' %}selected{% endif %}>تعمیر خارجی</option>
+          <option value="installation" {% if service_kind=='installation' %}selected{% endif %}>نصب و آموزش</option>
+          <option value="inspection" {% if service_kind=='inspection' %}selected{% endif %}>بررسی و بازدید</option>
+          <option value="demo" {% if service_kind=='demo' %}selected{% endif %}>دمو / امانی</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label>استان</label>
+            <select name="province" class="field-select geo-province" onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                <option value="">همه</option>
+                {% for p in provinces or [] %}
+                <option value="{{ p }}" {% if province == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>شهرستان</label>
+            <select name="county" class="field-select geo-county" onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div>
+            <label>شهر</label>
+            <select name="city" class="field-select geo-city">
+                <option value="">همه</option>
+            </select>
+        </div>
+      <div class="filter-field">
+        <label>وضعیت</label>
+        <select name="status" class="field-select">
+          <option value="">همه</option>
+          <option value="open" {% if status=='open' %}selected{% endif %}>باز</option>
+          <option value="closed" {% if status=='closed' %}selected{% endif %}>بسته</option>
+          {% for s in status_options %}
+          <option value="{{ s }}" {% if status==s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label>سریال</label>
+        <input type="text" name="serial" value="{{ serial or '' }}" placeholder="سریال دستگاه">
+      </div>
+      <div class="filter-field">
+        <label>مشتری</label>
+        <input type="text" name="customer" value="{{ customer or '' }}" placeholder="نام مشتری">
+      </div>
+      <div class="filter-field">
+        <label>تکنسین</label>
+        <input type="text" name="technician" value="{{ technician or '' }}" placeholder="نام تکنسین">
+      </div>
+      <div class="filter-field" style="display:flex;gap:8px;align-items:center;">
+        <button type="submit" class="btn">اعمال فیلتر</button>
+        <a href="/reports/service-performance" class="btn-cancel">پاک کردن</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="stats-row no-print" style="margin-bottom:16px;">
+  <div class="stat-card"><div class="stat-label">تعداد کل</div><div class="stat-value">{{ summary.total }}</div></div>
+  <div class="stat-card"><div class="stat-label">باز</div><div class="stat-value">{{ summary.open }}</div></div>
+  <div class="stat-card"><div class="stat-label">بسته</div><div class="stat-value">{{ summary.closed }}</div></div>
+  <div class="stat-card"><div class="stat-label">تأخیری</div><div class="stat-value">{{ summary.delayed }}</div></div>
+</div>
+
+<div class="card" id="report-print-area">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>نتایج ({{ total_rows }}) — صفحه {{ page }} از {{ total_pages }}</span>
+      <span style="font-size:12px;color:var(--text-muted);font-weight:500;">
+        {% if date_from or date_to %}بازه: {{ date_from or '—' }} تا {{ date_to or '—' }} · {% endif %}
+        چاپ: سامانه سازگان
+      </span>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if rows|length == 0 %}
+    <div class="empty-state" style="padding:24px;">موردی با فیلترهای انتخاب‌شده یافت نشد.</div>
+    {% else %}
+        <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ردیف</th>
+            <th>شماره پذیرش</th>
+            {% if service_kind == 'internal' %}
+            <th>تاریخ پذیرش</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>استان</th>
+            <th>شهر</th>
+            <th>تکنسین</th>
+            <th>وضعیت</th>
+            <th>روز</th>
+            <th>شماره فاکتور</th>
+            <th>نام باربری</th>
+            <th>تاریخ تحویل به باربری</th>
+            <th>شماره پیگیری باربری</th>
+            {% elif service_kind == 'external' %}
+            <th>تاریخ پذیرش</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>استان</th>
+            <th>شهر</th>
+            <th>نماینده</th>
+            <th>وضعیت</th>
+            <th>روز</th>
+            <th>شماره فاکتور</th>
+            {% elif service_kind == 'installation' %}
+            <th>تاریخ درخواست</th>
+            <th>تاریخ نصب</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>استان</th>
+            <th>شهر</th>
+            <th>نماینده</th>
+            <th>وضعیت</th>
+            <th>شماره فاکتور</th>
+            {% elif service_kind == 'inspection' %}
+            <th>تاریخ درخواست</th>
+            <th>تاریخ بازدید</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>استان</th>
+            <th>شهر</th>
+            <th>نماینده</th>
+            <th>وضعیت</th>
+            <th>شماره فاکتور</th>
+            {% elif archive_mode %}
+            <th>تاریخ پذیرش</th>
+            <th>تاریخ خاتمه</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>نوع خدمت</th>
+            <th>تکنسین / نماینده</th>
+            <th>شماره فاکتور</th>
+            <th>وضعیت گارانتی</th>
+            <th>وضعیت پرونده</th>
+            {% else %}
+            <th>تاریخ خدمت</th>
+            <th>نوع خدمت</th>
+            <th>نام مشتری</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>مجری خدمت</th>
+            <th>وضعیت</th>
+            <th>شماره فاکتور</th>
+            {% endif %}
+            <th class="no-print">عملیات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr class="{% if r.is_delayed %}row-delayed{% endif %}">
+            <td>{{ loop.index + ((page or 1) - 1) * 50 }}</td>
+            <td>{{ r.reception_no or r.id }}</td>
+            {% if service_kind == 'internal' %}
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.province or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span>{% if r.is_delayed %} <span class="delay-badge">تأخیر</span>{% endif %}</td>
+            <td><strong {% if r.is_delayed %}style="color:var(--danger-text)"{% endif %}>{{ r.days_in_status if r.days_in_status is defined else '—' }}</strong></td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            <td>{{ r.carrier_name or r.shipping_method or '—' }}</td>
+            <td>{{ r.carrier_delivery_date or '—' }}</td>
+            <td>{{ r.tracking_number or '—' }}</td>
+            {% elif service_kind == 'external' %}
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.province or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span>{% if r.is_delayed %} <span class="delay-badge">تأخیر</span>{% endif %}</td>
+            <td>{{ r.days_in_status if r.days_in_status is defined else '—' }}</td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            {% elif service_kind == 'installation' %}
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.installation_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.province or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span></td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            {% elif service_kind == 'inspection' %}
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.visit_date or r.installation_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or r.visit_device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.province or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span></td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            {% elif archive_mode %}
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.closed_date or r.completion_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.request_category or r.service_type or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            <td>{{ r.warranty_status or r.warranty_end_date or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span></td>
+            {% else %}
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.request_category or r.service_type or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span>{% if r.is_delayed %} <span class="delay-badge">تأخیر</span>{% endif %}</td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            {% endif %}
+            <td class="no-print">
+              {% if r.detail_url %}
+              <a href="{{ r.detail_url }}" class="btn-edit">مشاهده</a>
+              {% elif r.service_type == 'کارخانه' %}
+              <a href="/service/internal-repair/view/{{ r.id }}" class="btn-edit">مشاهده</a>
+              {% elif r.request_category == 'نصب و آموزش' %}
+              <a href="/service/installation/request-view/{{ r.id }}" class="btn-edit">مشاهده</a>
+              {% elif r.request_category == 'بررسی و بازدید' %}
+              <a href="/service/inspection/view/{{ r.id }}" class="btn-edit">مشاهده</a>
+              {% else %}
+              <a href="/service/external-repair/view/{{ r.id }}" class="btn-edit">مشاهده</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="20" class="empty-state">موردی یافت نشد.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+
+{% include '_pagination.html' %}
+
+    {% endif %}
+  </div>
+</div>
+
+<style>
+@media print {
+  body * { visibility: hidden; }
+  #report-print-area, #report-print-area * { visibility: visible; }
+  #report-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+  .no-print { display: none !important; }
+}
+</style>
+{% endblock %}

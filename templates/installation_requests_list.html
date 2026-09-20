@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}سازگان | درخواست‌های نصب{% endblock %}
+{% block content %}
+{% include "_ca_section_tabs.html" %}
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>{{ list_title or "درخواست‌های نصب" }} ({{ requests|length }})</span>
+            <div class="list-header-actions">
+                
+                <a href="/service/installation/export" class="btn-export">خروجی اکسل</a>
+                <a href="/service/installation/registers" class="btn-export">نصب انجام‌شده</a>
+                <a href="/service/installation/request-new" class="btn btn-quick-new">درخواست جدید</a>
+            </div>
+        </div>
+    </div>
+    {% if requests|length == 0 %}
+    <div class="empty-state">موردی ثبت نشده است.</div>
+    {% else %}
+    <div class="table-wrap"><table>
+        <tr>
+            <th>شماره درخواست</th>
+            <th>تاریخ درخواست</th>
+            <th>نام مشتری</th>
+            <th>استان</th><th>شهرستان</th><th>شهر</th>
+            <th>شهر</th>
+            <th>شرح درخواست</th>
+            <th>نماینده</th>
+            <th>وضعیت</th>
+            <th>عملیات</th>
+        </tr>
+        {% for r in requests %}
+        <tr>
+            <td>{{ r.reception_no or r.id }}</td>
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.install_notes or r.hospital_request_desc or r.problem_desc or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td><span class="badge">{{ r.status }}</span></td>
+            <td>
+                <div class="row-actions">
+                    <button type="button" class="row-actions-toggle">عملیات ▾</button>
+                    <div class="row-actions-menu" hidden>
+                        <a href="/service/installation/request-view/{{ r.id }}">مشاهده / ویرایش</a>
+                        <a href="/service/installation/request-print/{{ r.id }}" target="_blank">چاپ</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table></div>
+{% include '_pagination.html' %}
+
+    {% endif %}
+</div>
+{% endblock %}

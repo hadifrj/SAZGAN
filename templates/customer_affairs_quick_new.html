@@ -1,0 +1,172 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | ثبت سریع{% endblock %}
+{% block content %}
+
+<div class="card ca-quick-new-card">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>ثبت سریع — امور مشتریان</span>
+      {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+      {% set back_url = request.args.get('back') or '/customer-affairs/new-request' %}
+      {% include '_page_nav_icons.html' %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="card-body">
+    {% if request.args.get('error') == 'customer_required' %}
+    <div class="alert alert-danger" style="margin-bottom:14px;">انتخاب مشتری الزامی است.</div>
+    {% endif %}
+    <form method="POST" action="/customer-affairs/new-request/quick" class="ca-quick-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-grid">
+        <div>
+          <label>تاریخ ثبت (شمسی)</label>
+          <input type="text" name="recep_date" class="jalali-date" value="{{ today_year }}/{{ '%02d'|format(today_month) }}/{{ '%02d'|format(today_day) }}" placeholder="۱۴۰۵/۰۱/۰۱" autocomplete="off" dir="ltr" style="max-width:160px;">
+        </div>
+        <div>
+          <label>نوع درخواست</label>
+          <select name="request_slug" class="field-select" required>
+            <option value="internal-repair">تعمیرات داخلی</option>
+            <option value="external-repair">تعمیرات خارجی</option>
+            <option value="installation">نصب و آموزش</option>
+            <option value="inspection">بررسی و بازدید</option>
+            <option value="demo">دمو و امانی</option>
+          </select>
+        </div>
+        <div class="customer-field-block">
+          <label>نام مشتری</label>
+          <select name="customer_id" id="ca_customer_id" class="cp-source" onchange="fillCaCustomer()" tabindex="-1" aria-hidden="true">
+            <option value="">—</option>
+            {% for c in customers or [] %}
+            <option value="{{ c.id }}" data-name="{{ c.name }}" data-province="{{ c.province or '' }}" data-county="{{ c.county or '' }}" data-city="{{ c.city or '' }}">{{ c.name }}{% if c.province %} — {{ c.province }}{% endif %}{% if c.city %} / {{ c.city }}{% endif %}</option>
+            {% endfor %}
+          </select>
+          <input type="text" name="customer_name" id="ca_customer_name" class="cp-name" required readonly placeholder="از دکمه نام مشتری انتخاب کنید" autocomplete="off">
+        </div>
+        <div>
+          <label>نام</label>
+          <input type="text" name="contact_name" placeholder="نام شخص تماس">
+        </div>
+        <div>
+          <label>استان</label>
+          <select name="province" id="province" class="field-select geo-province" required
+            onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+            <option value="">— انتخاب استان —</option>
+            {% for p in provinces %}
+            <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>شهرستان</label>
+          <select name="county" id="county" class="field-select geo-county"
+            onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+            <option value="">— انتخاب شهرستان —</option>
+          </select>
+        </div>
+        <div>
+          <label>شهر</label>
+          <select name="city" id="city" class="field-select geo-city">
+            <option value="">— انتخاب شهر —</option>
+          </select>
+          <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px" placeholder="یا نام شهر را بنویسید">
+        </div>
+        <div>
+          <label>شماره تماس</label>
+          <input type="text" name="customer_phone" inputmode="tel" placeholder="۰۹۱۲…">
+        </div>
+        <div>
+          <label>آدرس</label>
+          <input type="text" name="customer_address" placeholder="خیابان، پلاک…">
+        </div>
+        <div>
+          <label>نوع دستگاه</label>
+          <input type="text" name="device_type" required placeholder="مدل دستگاه">
+        </div>
+        <div>
+          <label>سریال دستگاه</label>
+          <input type="text" name="serial_number" id="serial_number" onblur="lookupWarranty()" placeholder="شماره سریال">
+        </div>
+        <div>
+          <label>تاریخ نصب</label>
+          <input type="text" name="installation_date" id="installation_date" readonly placeholder="خودکار پس از سریال">
+        </div>
+        <div>
+          <label>تکنسین (اختیاری)</label>
+          <select name="assigned_technician" class="field-select">
+            <option value="">— بدون تکنسین —</option>
+            {% for t in technicians %}
+            <option value="{{ t.id }}">{{ t.full_name }} ({{ t.role }}{% if t.province %} - {{ t.province }}{% endif %})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field-full">
+          {% set target_id = 'problem_desc_ta' %}
+          {% set presets = ready_texts_problem if ready_texts_problem is defined else [] %}
+          {% set label = 'شرح کار / مشکل' %}
+          {% set codes_field = 'problem_desc_codes' %}
+          {% include '_ready_text_picker.html' %}
+          <textarea name="problem_desc" id="problem_desc_ta" rows="3" required placeholder="توضیح کوتاه"></textarea>
+        </div>
+      </div>
+      <div class="ca-quick-actions">
+        <button type="submit" class="btn">ثبت درخواست</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function fillCaCustomer() {
+  var sel = document.getElementById('ca_customer_id');
+  if (!sel || !sel.value) return;
+  var o = sel.options[sel.selectedIndex];
+  var n = document.getElementById('ca_customer_name');
+  if (n) n.value = (o && (o.getAttribute('data-name') || o.text)) || '';
+  fetch('/api/customer/' + sel.value)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (!data || !data.found) return;
+      var set = function(name, val) {
+        var el = document.querySelector('[name="' + name + '"]');
+        if (el) el.value = val || '';
+      };
+      if (n && data.name) n.value = data.name;
+      set('province', data.province);
+      set('city', data.city);
+      set('customer_address', data.address);
+      set('customer_phone', data.phone);
+      set('county', data.county);
+      var provEl = document.getElementById('province') || document.querySelector('[name="province"]');
+      if (provEl && typeof window.onGeoProvinceChange === 'function') {
+        var countyEl = document.getElementById('county');
+        var cityEl = document.getElementById('city');
+        if (countyEl && data.county) countyEl.setAttribute('data-selected', data.county);
+        if (cityEl && data.city) cityEl.setAttribute('data-selected', data.city);
+        try { window.onGeoProvinceChange(provEl); } catch (e) {}
+      }
+    }).catch(function(){});
+}
+function lookupWarranty() {
+  var serial = document.getElementById('serial_number');
+  var inst = document.getElementById('installation_date');
+  if (!serial || !serial.value) return;
+  fetch('/api/lookup_warranty/' + encodeURIComponent(serial.value.trim()))
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data && data.found && data.installation_date && inst) inst.value = data.installation_date;
+    }).catch(function(){});
+}
+</script>
+
+<style>
+/* رفع عدم اسکرول: .card به‌صورت سراسری overflow:hidden دارد؛ روی این کارتِ بلند
+   باید فقط لبه‌ها گرد بمانند و ارتفاع/اسکرول آزاد باشد. */
+.ca-quick-new-card,
+.ca-quick-new-card .card-body {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+</style>
+{% endblock %}

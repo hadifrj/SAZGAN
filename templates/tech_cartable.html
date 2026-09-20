@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}سازگان | کارتابل تکنسین{% endblock %}
+{% block content %}
+{% if lazy_cartable %}
+<div id="cartable-lazy-root" data-lazy-url="/api/cartable/lazy">
+    <div class="stats-row" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card" style="opacity:.55;"><div class="stat-label">کل پرونده‌های کارتابل</div><div class="stat-value">—</div></div>
+        <div class="stat-card" style="opacity:.55;"><div class="stat-label">تأخیری</div><div class="stat-value">—</div></div>
+        <div class="stat-card" style="opacity:.55;"><div class="stat-label">بسته / پایان</div><div class="stat-value">—</div></div>
+    </div>
+    <div class="card"><div class="card-body" style="text-align:center;padding:32px;color:var(--text-muted);">در حال بارگذاری کارتابل…</div></div>
+</div>
+<script>
+(function(){
+    var root = document.getElementById('cartable-lazy-root');
+    fetch(root.getAttribute('data-lazy-url'), {credentials:'same-origin'})
+        .then(function(r){ return r.text(); })
+        .then(function(html){ root.outerHTML = html; })
+        .catch(function(){ root.innerHTML = '<div class="card"><div class="card-body">خطا در بارگذاری کارتابل — <a href="/">تلاش دوباره</a></div></div>'; });
+})();
+</script>
+{% else %}
+{% include '_tech_cartable_body.html' %}
+{% endif %}
+{% endblock %}

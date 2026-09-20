@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}پشتیبان‌گیری — MY SAZGAN{% endblock %}
+{% block content %}
+<div class="sg-subtabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+  <a href="/security/backups" class="btn-cancel sg-subtab is-active">پشتیبان</a>
+  <a href="/security/audit-filter" class="btn-cancel sg-subtab">لاگ ممیزی</a>
+</div>
+
+{% set system_active = 'backups' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card">
+  <div class="card-header list-header-row">
+    <span style="display:inline-flex;align-items:center;gap:8px;">
+      پشتیبان‌گیری
+</span>
+    <div class="list-header-actions">
+    </div>
+  </div>
+  <div class="card-body">
+    {% if request.args.get('restored') %}
+    <div class="import-success">بازیابی انجام شد. یک‌بار از برنامه خارج و دوباره وارد شوید.</div>
+    {% endif %}
+    {% if path_saved %}
+    <div class="import-success">تنظیمات پشتیبان ذخیره شد.</div>
+    {% endif %}
+    {% if request.args.get('backup') %}
+    <div class="import-success">بکاپ با موفقیت ساخته شد.</div>
+    {% endif %}
+
+    <form method="POST" action="/security/backups/save" id="backup-unified-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <label class="list-header-row " style="display:flex;">
+        <span>مسیر بکاپ (پوشه محلی یا شبکه)</span>
+</label>
+      <input name="backup_network_path" value="{{ backup_network_path or '' }}" dir="ltr" style="text-align:left;max-width:100%"
+             placeholder="D:\Backup   یا   \\server\share\sazgan-backup">
+
+      <details class="backup-advanced" style="margin-bottom:16px;border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--bg,#f8fafc)">
+        <summary style="cursor:pointer;font-weight:700;font-size:14px;user-select:none">تنظیمات پیشرفته بکاپ</summary>
+        <div style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 16px">
+          <div>
+            <label>حداکثر تعداد نسخه</label>
+            <input type="number" name="backup_max_keep" min="3" max="100" value="{{ backup_max_keep }}" dir="ltr" style="text-align:left">
+            <p style="font-size:11px;color:var(--text-muted);margin:4px 0 0">پیش‌فرض ۲۰ — قدیمی‌ترها پاک می‌شوند</p>
+          </div>
+          <div>
+            <label>حداکثر عمر نسخه (روز)</label>
+            <input type="number" name="backup_max_days" min="7" max="365" value="{{ backup_max_days }}" dir="ltr" style="text-align:left">
+            <p style="font-size:11px;color:var(--text-muted);margin:4px 0 0">پیش‌فرض ۳۰ روز</p>
+          </div>
+          <div>
+            <label>بکاپ خودکار روزانه</label>
+            <select name="backup_auto_enabled" class="field-select">
+              <option value="1" {% if backup_auto_enabled %}selected{% endif %}>فعال</option>
+              <option value="0" {% if not backup_auto_enabled %}selected{% endif %}>غیرفعال</option>
+            </select>
+            <p style="font-size:11px;color:var(--text-muted);margin:4px 0 0">اولین اجرا حدود ۱ ساعت پس از روشن شدن برنامه</p>
+          </div>
+        </div>
+      </details>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button type="submit" name="action" value="save" class="btn-cancel">ذخیره تنظیمات</button>
+        <button type="submit" name="action" value="backup" class="btn">ذخیره و بکاپ الان</button>
+      </div>
+    </form>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:22px 0 14px">
+
+    <p style="font-size:14px;font-weight:700;margin:0 0 10px">فهرست نسخه‌های پشتیبان</p>
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>نام</th><th>زمان</th><th>حجم</th><th>ZIP</th><th>عملیات</th>
+        </tr>
+        {% for it in items %}
+        <tr>
+          <td><code>{{ it.name }}</code></td>
+          <td>{{ it.mtime or '—' }}</td>
+          <td>{{ it.size_kb }} KB</td>
+          <td>{% if it.has_zip %}<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9 17.5 20 6.5"/></svg>{% else %}—{% endif %}</td>
+          <td style="white-space:nowrap;text-align:left">
+            <div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:flex-start">
+              {% if it.has_zip %}
+              <a class="btn-edit" href="/security/backup/download/{{ it.zip_name or (it.name + '.zip') }}">دانلود ZIP</a>
+              {% endif %}
+              <form method="POST" action="/security/backup/restore" onsubmit="return confirm('بازیابی این بکاپ دیتابیس فعلی را جایگزین می‌کند. ادامه؟');" style="display:inline;margin:0">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="name" value="{{ it.name }}">
+                <button type="submit" class="btn-delete">بازیابی</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">هنوز بکاپی نیست.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

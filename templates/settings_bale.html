@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}تنظیمات بله | سازگان{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">ربات بله — اعلان و اتصال حساب</div>
+  <div class="card-body">
+    {% if msg %}<div class="login-error" style="background:var(--success-bg);color:var(--success-text);">{{ msg }}</div>{% endif %}
+    {% if err %}<div class="login-error">{{ err }}</div>{% endif %}
+
+    <form method="POST">
+      <input type="hidden" name="action" value="save">
+      <div class="form-grid">
+        <div>
+          <label>فعال‌سازی بله</label>
+          <select name="enabled" class="field-select">
+            <option value="0" {% if not conf.enabled %}selected{% endif %}>خاموش</option>
+            <option value="1" {% if conf.enabled %}selected{% endif %}>روشن</option>
+          </select>
+        </div>
+        <div>
+          <label>نام کاربری ربات (بدون @)</label>
+          <input name="username" value="{{ conf.username or '' }}" placeholder="SazganBot">
+        </div>
+        <div class="field-full">
+          <label>Bot Token</label>
+          <input name="token" value="{{ conf.token or '' }}" placeholder="از پنل بله کپی کنید" dir="ltr">
+        </div>
+      </div>
+      <button class="btn" type="submit">ذخیره</button>
+    </form>
+
+    <hr style="margin:24px 0;border:none;border-top:1px solid var(--border);">
+
+    <h3 style="font-size:14px;margin-bottom:10px;">اتصال حساب من به بله</h3>
+    <p style="font-size:13px;color:var(--text-muted);">chat_id فعلی: <strong dir="ltr">{{ my_chat or 'متصل نیست' }}</strong></p>
+    <form method="POST" style="margin-top:10px;">
+      <input type="hidden" name="action" value="link_me">
+      <button class="btn-complete" type="submit">دریافت کد اتصال</button>
+    </form>
+    {% if link_code %}
+    <p style="margin-top:12px;">کد شما: <strong dir="ltr">{{ link_code }}</strong><br>
+    در بله به ربات پیام دهید: <code dir="ltr">/start {{ link_code }}</code></p>
+    {% endif %}
+
+    <hr style="margin:24px 0;border:none;border-top:1px solid var(--border);">
+
+    <h3 class="list-header-row " style="font-size:14px;margin-bottom:10px;display:flex;">
+      <span>ارسال پیام آزمایشی</span>
+</h3>
+    <form method="POST">
+      <input type="hidden" name="action" value="test">
+      <div class="form-grid">
+        <div>
+          <label>chat_id مقصد (خالی = حساب خودم)</label>
+          <input name="test_chat_id" value="{{ my_chat or '' }}" dir="ltr">
+        </div>
+      </div>
+      <button class="btn" type="submit">ارسال تست</button>
+    </form>
+
+    <p style="margin-top:18px;font-size:12.5px;color:var(--text-muted);">
+      Webhook (اختیاری): <code dir="ltr">https://YOUR-DOMAIN/api/bale/webhook</code>
+    </p>
+  </div>
+</div>
+{% endblock %}

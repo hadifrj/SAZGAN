@@ -1,0 +1,20 @@
+{
+  "name": "SAZGAN Offline Server Bundle",
+  "version": "3.0.18",
+  "platform": "Windows x64",
+  "python": "CPython 3.11 x64",
+  "dependency_source": "offline_packages",
+  "install_command": "python -m pip install --no-index --find-links offline_packages -r requirements.txt",
+  "internet_required_during_dependency_install": false,
+  "python_runtime_bundled": false,
+  "note": "Python 3.11 x64 Offline Installer must be supplied separately until the Server Setup EXE bundles the runtime.",
+  "install_modes": [
+    "automatic",
+    "online",
+    "offline"
+  ],
+  "online_mode": {
+    "dependency_source": "PyPI",
+    "internet_required_during_dependency_install": true
+  }
+}

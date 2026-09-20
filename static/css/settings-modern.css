@@ -1,0 +1,505 @@
+/**
+ * سازگان — Settings UI, modern edition
+ * سایدبار تودرتوی تنظیمات + کارت‌های سبک "Windows Settings"
+ * این فایل بعد از style.css و design-system.css بارگذاری می‌شود تا override امن باشد.
+ */
+
+/* ============ 1) سایدبار جداگانهٔ تنظیمات (drill-down) ============ */
+
+.stg-sidebar-panel { animation: stg-panel-in .16s ease; }
+@keyframes stg-panel-in {
+  from { opacity: 0; transform: translateX(6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+[dir="ltr"] .stg-sidebar-panel, .ltr .stg-sidebar-panel { animation-name: stg-panel-in-ltr; }
+@keyframes stg-panel-in-ltr {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.stg-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border, rgba(255,255,255,.14));
+  background: color-mix(in srgb, var(--sidebar-text, #fff) 8%, transparent);
+  color: var(--sidebar-text, #fff);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background .12s ease;
+}
+.stg-home-btn:hover { background: color-mix(in srgb, var(--sidebar-text, #fff) 16%, transparent); }
+.stg-home-btn svg { flex: none; }
+
+/* دسکتاپ: وقتی سایدبار جمع‌شده (فقط آیکن)، متن دکمهٔ بازگشت هم مخفی و آیکن وسط‌چین شود */
+.sidebar.collapsed .stg-home-btn {
+  justify-content: center;
+  padding: 10px 0;
+  gap: 0;
+}
+.sidebar.collapsed .stg-home-btn span {
+  display: none;
+}
+
+.stg-sidebar-title {
+  padding: 4px 10px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--sidebar-muted, rgba(255,255,255,.45));
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+.stg-nav-chevron {
+  margin-right: auto;
+  opacity: .55;
+  font-size: 13px;
+}
+
+/* ============ 2) کارت‌های میان‌بر (sys-tile) — نسخهٔ مدرن ============ */
+
+.sys-tile-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+@media (max-width: 1100px) {
+  .sys-tile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 720px) {
+  .sys-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+}
+@media (max-width: 360px) {
+  .sys-tile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+}
+a.sys-tile, .sys-tile {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  padding: 16px !important;
+  min-height: 108px !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--border, #e2e8f0) !important;
+  background: var(--card, #fff) !important;
+  text-decoration: none !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,.04) !important;
+  transition: transform .15s cubic-bezier(.22,1,.36,1), box-shadow .15s ease, border-color .15s ease !important;
+}
+a.sys-tile:hover, .sys-tile:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 26px rgba(15,23,42,.09) !important;
+  border-color: var(--accent, #475569) !important;
+}
+a.sys-tile .sys-tile-icon, .sys-tile-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 11px !important;
+  background: var(--accent-soft, rgba(2,132,199,.12)) !important;
+  color: var(--accent, #475569) !important;
+  font-size: 18px !important;
+  flex: none !important;
+}
+a.sys-tile .sys-tile-icon svg, .sys-tile-icon svg { width: 20px; height: 20px; }
+a.sys-tile .sys-tile-title, .sys-tile-title {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+}
+a.sys-tile .sys-tile-desc, .sys-tile-desc {
+  font-size: 11.5px !important;
+  color: var(--text-muted) !important;
+  line-height: 1.5 !important;
+}
+
+/* ============ 3) هدر صفحهٔ تنظیمات (سبک Windows Settings) ============ */
+
+.stg-page-head { margin: 2px 0 16px; }
+.stg-page-title { margin: 0 0 4px; font-size: 22px; font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+.stg-page-sub { margin: 0; font-size: 13px; color: var(--text-muted); }
+
+/* ============ 4) کارت‌های گروهی با ردیف (سبک "Scale & layout") ============ */
+
+.stg-card {
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15,23,42,.04);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.stg-card-title {
+  padding: 14px 18px 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.stg-card-sub {
+  padding: 0 18px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.stg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+.stg-row:first-of-type { border-top: none; }
+.stg-row-label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stg-row-label b { font-size: 13px; font-weight: 700; color: var(--text); }
+.stg-row-label span { font-size: 11.5px; color: var(--text-muted); }
+.stg-row-control { flex: none; display: flex; align-items: center; gap: 8px; }
+
+/* ============ 5) حالت نمایش: کارت‌های Light / Dark با پیش‌نمایش ============ */
+
+.stg-appearance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 14px 18px 18px;
+}
+.stg-mode-card {
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  font-family: inherit;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.stg-mode-thumb {
+  width: 100%;
+  aspect-ratio: 16/11;
+  border-radius: 11px;
+  border: 1px solid var(--border, #e2e8f0);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(15,23,42,.06);
+}
+.stg-mode-card[data-theme="light"] .stg-mode-thumb {
+  background: linear-gradient(180deg,#fff 0%,#f1f5f9 100%);
+}
+.stg-mode-card[data-theme="light"] .stg-mode-thumb::before,
+.stg-mode-card[data-theme="light"] .stg-mode-thumb::after { background: #e2e8f0; }
+.stg-mode-card[data-theme="dark"] .stg-mode-thumb {
+  background: linear-gradient(180deg,#1e293b 0%,#0f172a 100%);
+}
+.stg-mode-card[data-theme="dark"] .stg-mode-thumb::before,
+.stg-mode-card[data-theme="dark"] .stg-mode-thumb::after { background: #334155; }
+.stg-mode-thumb::before {
+  content: '';
+  position: absolute; top: 14%; right: 12%; left: 12%;
+  height: 16%; border-radius: 4px;
+}
+.stg-mode-thumb::after {
+  content: '';
+  position: absolute; top: 40%; right: 12%; left: 40%;
+  height: 12%; border-radius: 4px;
+}
+.stg-mode-thumb-dot {
+  position: absolute; bottom: 12%; left: 14%;
+  width: 22%; height: 18%; border-radius: 5px;
+  background: var(--accent, #475569);
+}
+.stg-mode-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.stg-mode-radio {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border, #cbd5e1);
+  position: relative; flex: none;
+}
+.stg-mode-card.active .stg-mode-thumb { box-shadow: 0 0 0 2px var(--accent, #475569), 0 4px 14px rgba(15,23,42,.12); }
+.stg-mode-card.active .stg-mode-radio { border-color: var(--accent, #475569); }
+.stg-mode-card.active .stg-mode-radio::after {
+  content: '';
+  position: absolute; inset: 2.5px; border-radius: 50%;
+  background: var(--accent, #475569);
+}
+.stg-mode-card.active .stg-mode-label { color: var(--accent, #475569); }
+
+/* ============ 6) ردیف رنگ‌های تندرو (accent swatches) ============ */
+
+.stg-swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 4px 18px 16px;
+}
+.stg-swatch-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,.08);
+  flex: none;
+}
+.stg-swatch-btn.active { border-color: var(--text); }
+.stg-swatch-btn.active::after {
+  content: '✓';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 13px; font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+.stg-swatch-add {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1.5px dashed var(--border, #cbd5e1);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex: none;
+}
+
+/* ============ 7) اسلایدر سبک برد (اندازه متن و ...) ============ */
+
+.stg-slider-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 340px; }
+.stg-slider-track {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border, #e2e8f0);
+  outline: none;
+}
+.stg-slider-track::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--accent, #475569);
+  border: 3px solid var(--card, #fff);
+  box-shadow: 0 1px 4px rgba(15,23,42,.3);
+  cursor: pointer;
+}
+.stg-slider-track::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--accent, #475569);
+  border: 3px solid var(--card, #fff);
+  box-shadow: 0 1px 4px rgba(15,23,42,.3);
+  cursor: pointer;
+}
+
+/* ============ 8) چیپ‌های انتخابی — نسخهٔ segmented ============ */
+
+.stg-seg {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--bg, #f1f5f9);
+  border-radius: 11px;
+  flex-wrap: wrap;
+}
+.stg-seg button {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease, box-shadow .12s ease;
+}
+.stg-seg button.active {
+  background: var(--card, #fff);
+  color: var(--accent, #475569);
+  box-shadow: 0 1px 3px rgba(15,23,42,.12);
+}
+
+/* ============ 9) دو ستونه: محتوا + پیش‌نمایش زنده ============ */
+
+.stg-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 320px);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .stg-layout { grid-template-columns: 1fr; }
+  .stg-preview-col { order: -1; }
+}
+.stg-preview-sticky { position: sticky; top: 16px; }
+
+@media (max-width: 640px) {
+  .stg-appearance-grid { grid-template-columns: repeat(2, 1fr); }
+  .stg-row { flex-wrap: wrap; }
+}
+
+
+/* ================================================================
+   Sazgan 2.10.10 Modern Hardened — Light Blue / Fluent-M3 polish
+   ================================================================ */
+:root {
+  --modern-blue: #374151;
+  --modern-blue-hover: #1f2937;
+  --modern-blue-soft: rgba(55, 65, 81, .10);
+  --modern-surface: #ffffff;
+  --modern-page: #f6f9fc;
+  --modern-line: #e2e8f0;
+}
+
+/* صفحه و شِل اصلی: روشن، آرام و با کنتراست کنترل‌شده */
+body {
+  background: var(--modern-page);
+}
+.app-shell { background: var(--modern-page); }
+.main-content { background: var(--modern-page); }
+
+/* سایدبار باریک‌تر و مینیمال‌تر — رنگ‌ها از متغیرهای تم (همان تم دسکتاپ در موبایل هم اعمال می‌شود) */
+.sidebar {
+  width: 232px;
+  background: var(--sidebar-bg, #fff);
+  border-left: 1px solid var(--border, #e5edf6);
+  box-shadow: 1px 0 0 rgba(15,23,42,.015), 0 12px 32px rgba(15,23,42,.035);
+}
+.sidebar.collapsed { width: 68px; min-width:68px; max-width:68px; }
+.sidebar-brand {
+  padding: 16px 14px;
+  border-bottom-color: var(--border, #edf2f7);
+}
+.brand-mark {
+  width: 32px; height:32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#4b5563,#374151);
+  box-shadow: 0 5px 14px rgba(55, 65, 81, .20);
+}
+.sidebar-nav { padding: 12px 10px; gap: 3px; }
+.sidebar-link {
+  min-height: 42px;
+  padding: 8px 11px;
+  border-radius: 11px;
+  color: var(--sidebar-text, #334155);
+  transition: background .16s ease, color .16s ease, transform .16s ease;
+}
+.sidebar-link:hover {
+  background: var(--sidebar-hover, rgba(55, 65, 81, .055));
+  color: var(--text, #1f2937);
+}
+.sidebar-link.active {
+  background: var(--sidebar-active, rgba(55, 65, 81, .095));
+  color: var(--text, #1f2937);
+  font-weight: 700;
+  box-shadow: inset -3px 0 0 var(--accent, #374151);
+}
+.sidebar-sublink.active { background: var(--sidebar-active, rgba(55, 65, 81, .07)); color: var(--text, #1f2937); }
+.sidebar-footer { border-top-color: var(--border, #edf2f7); }
+
+/* Topbar سبک و شناور */
+.topbar {
+  padding: 11px 24px;
+  background: rgba(255,255,255,.92);
+  border-bottom: 1px solid #e7edf5;
+  backdrop-filter: blur(12px);
+}
+.topbar-clock {
+  background:#f7faff;
+  border-color:#e1eaf5;
+  border-radius: 10px;
+}
+
+/* کارت‌های عمومی: سایه ظریف، بدون حس سنگینی */
+.card, .stg-card, .panel, .box {
+  border-color: #e3eaf3;
+  box-shadow: 0 2px 8px rgba(15,23,42,.035);
+}
+
+/* کنترل‌ها */
+.btn, button.btn, .btn-primary {
+  border-radius: 10px;
+  transition: transform .14s ease, box-shadow .14s ease, background .14s ease;
+}
+.btn:hover, button.btn:hover, .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(55, 65, 81, .15);
+}
+
+/* صفحه تنظیمات: سلسله‌مراتب واضح‌تر */
+.stg-page-head { margin-bottom: 18px; }
+.stg-page-title { font-size: 24px; letter-spacing:-.025em; }
+.stg-page-sub { max-width: 720px; line-height:1.8; }
+.stg-card {
+  border-radius: 18px;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 10px rgba(15,23,42,.035);
+}
+.stg-card-title { font-size:14.5px; }
+.stg-row { padding: 15px 18px; }
+.stg-mode-card { transition: transform .16s ease; }
+.stg-mode-card:hover { transform: translateY(-2px); }
+.stg-mode-card.active .stg-mode-thumb {
+  box-shadow: 0 0 0 2px var(--modern-blue), 0 8px 20px rgba(55, 65, 81, .12);
+}
+.stg-swatch-btn { width:32px; height:32px; }
+.stg-seg { border:1px solid #e2e8f0; background:#f7faff; padding:3px; }
+.stg-seg button.active { color:#1f2937; box-shadow:0 2px 6px rgba(15,23,42,.08); }
+
+/* پیش‌نمایش زنده برجسته‌تر اما سبک */
+.stg-preview-sticky {
+  top: 12px;
+  border-color:#dbe7f5;
+  background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);
+}
+.ds-preview-frame {
+  border:1px solid #dfe8f2 !important;
+  box-shadow:0 12px 30px rgba(55, 65, 81, .07) !important;
+  border-radius:16px !important;
+}
+
+/* فوکوس دسترسی‌پذیر و یکدست */
+:where(button,a,input,select,textarea):focus-visible {
+  outline: 3px solid rgba(55, 65, 81, .22);
+  outline-offset: 2px;
+}
+
+/* موبایل: صفحه خلوت‌تر و لمس راحت‌تر */
+@media (max-width: 760px) {
+  .topbar { padding:10px 14px; }
+  .stg-layout { gap:10px; }
+  .stg-card { border-radius:15px; }
+  .stg-page-title { font-size:21px; }
+  .stg-row { align-items:flex-start; }
+  .stg-row-control { width:100%; overflow-x:auto; padding-bottom:2px; }
+  .stg-seg { flex-wrap:nowrap; width:max-content; }
+  .stg-seg button { min-height:38px; }
+}
+
+/* Dark mode: سرمه‌ای نرم، نه مشکی کامل */
+[data-theme="dark"] body,
+[data-theme="dark"] .app-shell,
+[data-theme="dark"] .main-content { background:#111827; }
+[data-theme="dark"] .sidebar { background: var(--sidebar-bg, #172033); border-color:#263247; box-shadow:2px 0 18px rgba(0,0,0,.16); }
+[data-theme="dark"] .sidebar-brand { border-color:#263247; }
+[data-theme="dark"] .sidebar-link { color: var(--sidebar-text, #f3f4f6); }
+[data-theme="dark"] .sidebar-link:hover { background: var(--sidebar-hover, rgba(209,213,219,.08)); color: var(--sidebar-text, #f3f4f6); }
+[data-theme="dark"] .sidebar-link.active { background: var(--sidebar-active, rgba(209,213,219,.12)); color: var(--sidebar-text, #f3f4f6); box-shadow:inset -3px 0 0 #6b7280; }
+[data-theme="dark"] .topbar { background:rgba(17,24,39,.92); border-color:#263247; }
+[data-theme="dark"] .stg-card { border-color:#2b394e; box-shadow:0 4px 18px rgba(0,0,0,.14); }
+[data-theme="dark"] .stg-seg { background: var(--sidebar-bg, #172033); border-color:#2b394e; }
+
+/* Prevent transient unstyled settings layout during sidebar navigation. */
+html:not(.display-ready) .settings-page,
+html:not(.display-ready) .settings-shell{visibility:hidden;}
+html.display-ready .settings-page,
+html.display-ready .settings-shell{visibility:visible;}

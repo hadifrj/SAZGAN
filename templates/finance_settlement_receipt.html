@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}رسید تسویه {{ settlement.receipt_no }}{% endblock %}
+{% block content %}
+<div class="card" id="receipt-card">
+  <div class="card-header">رسید تسویه دستمزد نماینده</div>
+  <div class="card-body">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:12px;color:var(--text-muted);">شماره رسید</div>
+        <div style="font-weight:800;font-size:18px;" dir="ltr">{{ settlement.receipt_no }}</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text-muted);">وضعیت</div>
+        <div style="font-weight:700;color:#059669;">{% if settlement.status == 'paid' %}پرداخت‌شده{% else %}{{ settlement.status }}{% endif %}</div>
+      </div>
+    </div>
+
+    <table style="margin-bottom:14px;">
+      <tr><th>نماینده</th><td>{{ settlement.representative_name }}</td></tr>
+      <tr><th>دوره</th><td>{{ month_label }} {{ settlement.year }}</td></tr>
+      <tr><th>مبلغ کل</th><td style="font-weight:700;">{{ '{:,}'.format(settlement.total_amount) }} ریال</td></tr>
+      <tr><th>مبلغ پرداخت‌شده</th><td style="font-weight:700;color:#059669;">{{ '{:,}'.format(settlement.paid_amount) }} ریال</td></tr>
+      <tr><th>تاریخ پرداخت</th><td>{{ settlement.paid_at or '—' }}</td></tr>
+      <tr><th>ثبت‌کننده</th><td>{{ settlement.paid_by or '—' }}</td></tr>
+      <tr><th>شبا</th><td dir="ltr">{{ settlement.bank_sheba or '—' }}</td></tr>
+      <tr><th>کارت</th><td dir="ltr">{{ settlement.bank_card or '—' }}</td></tr>
+      <tr><th>صاحب حساب</th><td>{{ settlement.bank_owner or '—' }}</td></tr>
+      {% if settlement.notes %}<tr><th>یادداشت</th><td>{{ settlement.notes }}</td></tr>{% endif %}
+    </table>
+
+    <h3 style="font-size:14px;margin:0 0 8px;">جزئیات ردیف‌ها</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>#</th><th>شرح</th><th>مبلغ</th><th>تاریخ</th><th>مشتری</th></tr>
+        {% for r in lines %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.work_description }}</td>
+          <td style="white-space:nowrap;">{{ '{:,}'.format(r.amount) }}</td>
+          <td>{{ r.calc_date or '—' }}</td>
+          <td>{{ r.customer_name if r.customer_name is defined and r.customer_name else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">ردیفی ثبت نشده</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;" class="no-print">
+      <button type="button" class="btn" onclick="window.print()">چاپ رسید</button>
+      <a class="btn-cancel" href="/finance/settlement/{{ settlement.representative_id }}?year={{ settlement.year }}&month={{ settlement.month }}">بازگشت</a>
+      <a class="btn-cancel" href="/my-wages?year={{ settlement.year }}&month={{ settlement.month }}">دستمزد من</a>
+    </div>
+  </div>
+</div>
+<style>
+@media print {
+  .sidebar, .topbar, .mobile-bottom-nav, .sidebar-overlay, .no-print { display: none !important; }
+  .app-shell, .main-content, .container { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+  #receipt-card { box-shadow: none !important; border: 0 !important; }
+}
+</style>
+{% endblock %}

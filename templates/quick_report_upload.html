@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}سازگان | آپلود سریع گزارش نماینده{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header list-header-row ">
+    <span>آپلود سریع گزارش نماینده</span>
+</div>
+  <div class="card-body">
+
+    {% if error %}
+    <div class="alert alert-danger" style="margin-bottom:14px;">{{ error }}</div>
+    {% endif %}
+    {% if result %}
+    <div class="alert alert-success" style="margin-bottom:14px;">
+      گزارش با موفقیت روی پذیرش <b>#{{ result.reception_no }}</b> ({{ result.customer_name }}) ذخیره شد.
+    </div>
+    {% endif %}
+
+    <form method="POST" id="quick-report-form">
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+        <div>
+          <label>شماره پذیرش</label>
+          <input type="text" name="reception_no" inputmode="numeric" required autocomplete="off" placeholder="مثلاً 1042">
+        </div>
+        <div>
+          <label>شماره سریال (اختیاری)</label>
+          <input type="text" name="serial_number" autocomplete="off" placeholder="در صورت وجود">
+        </div>
+      </div>
+
+      <input type="hidden" name="cropped_image" id="cropped-image-field">
+
+      <div id="capture-zone" style="margin-top:6px;">
+        <label style="display:block;margin-bottom:8px;">عکس گزارش</label>
+        <button type="button" class="btn-cancel" id="open-file-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:1px dashed var(--border) !important;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          انتخاب فایل
+        </button>
+        <input type="file" accept="image/*" id="camera-input" data-fp="off" style="display:none;">
+        <p style="font-size:12px;color:var(--text-muted);margin:8px 2px 0;">با انتخاب فایل، گوشی خودش گزینهٔ «دوربین» یا «گالری/فایل‌ها» رو نشون می‌ده.</p>
+      </div>
+
+      <div id="crop-zone" style="display:none;margin-top:14px;">
+        <div id="crop-wrap" style="position:relative;max-width:100%;touch-action:none;user-select:none;border-radius:10px;overflow:hidden;background:#111;">
+          <img id="crop-img" style="display:block;width:100%;height:auto;">
+          <div id="dim-mask" style="position:absolute;inset:0;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.55);"></div>
+          <div id="crop-box" style="position:absolute;border:2px solid #22c55e;box-sizing:border-box;">
+            <div class="crop-handle" data-handle="tl" style="position:absolute;top:-14px;right:-14px;width:28px;height:28px;border-radius:50%;background:#22c55e;border:3px solid #fff;touch-action:none;"></div>
+            <div class="crop-handle" data-handle="br" style="position:absolute;bottom:-14px;left:-14px;width:28px;height:28px;border-radius:50%;background:#22c55e;border:3px solid #fff;touch-action:none;"></div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin:8px 2px;">
+          کادر به‌صورت خودکار روی برگه تنظیم شد؛ گوشه‌های سبز رو بکش تا دقیق‌تر بشه، بعد تایید کن.
+        </p>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn" id="confirm-crop-btn" style="flex:1;">تایید برش</button>
+          <button type="button" class="btn-cancel" id="retake-btn" style="flex:1;">عکس مجدد</button>
+        </div>
+      </div>
+
+      <div id="preview-zone" style="display:none;margin-top:14px;">
+        <label style="display:block;margin-bottom:8px;">پیش‌نمایش نهایی</label>
+        <img id="final-preview" style="max-width:100%;border-radius:10px;border:1px solid var(--border);">
+        <div style="margin-top:10px;">
+          <button type="button" class="btn-cancel" id="redo-btn">اصلاح دوباره</button>
+        </div>
+      </div>
+
+      <div style="margin-top:18px;">
+        <button type="submit" class="btn" id="submit-btn" disabled style="width:100%;">ثبت گزارش</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  var cameraInput = document.getElementById('camera-input');
+  var cropZone = document.getElementById('crop-zone');
+  var captureZone = document.getElementById('capture-zone');
+  var previewZone = document.getElementById('preview-zone');
+  var cropImg = document.getElementById('crop-img');
+  var cropWrap = document.getElementById('crop-wrap');
+  var cropBox = document.getElementById('crop-box');
+  var finalPreview = document.getElementById('final-preview');
+  var hiddenField = document.getElementById('cropped-image-field');
+  var submitBtn = document.getElementById('submit-btn');
+  var srcImage = null; // full-res Image()
+  var rect = {x:0.1, y:0.1, w:0.8, h:0.8}; // normalized fractions of displayed image
+
+  var openBtn = document.getElementById('open-file-btn');
+
+  function loadImageDataUrl(dataUrl){
+    srcImage = new Image();
+    srcImage.onload = function(){
+      rect = autoDetectBounds(srcImage);
+      cropImg.src = dataUrl;
+      captureZone.style.display = 'none';
+      cropZone.style.display = 'block';
+      previewZone.style.display = 'none';
+      submitBtn.disabled = true;
+      requestAnimationFrame(paintCropBox);
+    };
+    srcImage.src = dataUrl;
+  }
+
+  if (openBtn) openBtn.addEventListener('click', function(){ cameraInput.click(); });
+
+  cameraInput.addEventListener('change', function(){
+    var f = cameraInput.files && cameraInput.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function(e){ loadImageDataUrl(e.target.result); };
+    reader.readAsDataURL(f);
+  });
+
+  function autoDetectBounds(img){
+    try{
+      var maxDim = 260;
+      var scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+      var w = Math.max(20, Math.round(img.naturalWidth * scale));
+      var h = Math.max(20, Math.round(img.naturalHeight * scale));
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+      var data = ctx.getImageData(0, 0, w, h).data;
+      function lum(x, y){ var i = (y * w + x) * 4; return 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2]; }
+      function patchAvg(x0, y0){ var s=0,n=0; for(var y=y0;y<y0+8 && y<h;y++) for(var x=x0;x<x0+8 && x<w;x++){ s+=lum(x,y); n++; } return n? s/n : 128; }
+      var bg = (patchAvg(0,0)+patchAvg(w-8,0)+patchAvg(0,h-8)+patchAvg(w-8,h-8))/4;
+      var thresh = 26;
+      function rowDiff(y){ var s=0; for(var x=0;x<w;x++) s+=Math.abs(lum(x,y)-bg); return s/w; }
+      function colDiff(x){ var s=0; for(var y=0;y<h;y++) s+=Math.abs(lum(x,y)-bg); return s/h; }
+      var top=0, bottom=h-1, left=0, right=w-1, found=false;
+      for(var y=0;y<h;y++){ if(rowDiff(y)>thresh){ top=y; found=true; break; } }
+      for(var y2=h-1;y2>=0;y2--){ if(rowDiff(y2)>thresh){ bottom=y2; break; } }
+      for(var x=0;x<w;x++){ if(colDiff(x)>thresh){ left=x; break; } }
+      for(var x2=w-1;x2>=0;x2--){ if(colDiff(x2)>thresh){ right=x2; break; } }
+      if(!found || (right-left) < w*0.25 || (bottom-top) < h*0.25){
+        return {x:0.04, y:0.04, w:0.92, h:0.92};
+      }
+      var padX=(right-left)*0.03, padY=(bottom-top)*0.03;
+      top = Math.max(0, top-padY); bottom = Math.min(h-1, bottom+padY);
+      left = Math.max(0, left-padX); right = Math.min(w-1, right+padX);
+      return { x:left/w, y:top/h, w:(right-left)/w, h:(bottom-top)/h };
+    }catch(e){ return {x:0.06, y:0.06, w:0.88, h:0.88}; }
+  }
+
+  function paintCropBox(){
+    var W = cropWrap.clientWidth, H = cropWrap.clientHeight;
+    cropBox.style.left = (rect.x * W) + 'px';
+    cropBox.style.top = (rect.y * H) + 'px';
+    cropBox.style.width = (rect.w * W) + 'px';
+    cropBox.style.height = (rect.h * H) + 'px';
+  }
+  window.addEventListener('resize', paintCropBox);
+
+  var dragHandle = null;
+  document.querySelectorAll('.crop-handle').forEach(function(h){
+    h.addEventListener('pointerdown', function(ev){
+      dragHandle = h.getAttribute('data-handle');
+      ev.preventDefault();
+      h.setPointerCapture(ev.pointerId);
+    });
+  });
+  cropWrap.addEventListener('pointermove', function(ev){
+    if (!dragHandle) return;
+    var b = cropWrap.getBoundingClientRect();
+    var fx = Math.min(1, Math.max(0, (ev.clientX - b.left) / b.width));
+    var fy = Math.min(1, Math.max(0, (ev.clientY - b.top) / b.height));
+    if (dragHandle === 'tl'){
+      var newX = Math.min(fx, rect.x + rect.w - 0.08);
+      var newY = Math.min(fy, rect.y + rect.h - 0.08);
+      rect.w = rect.x + rect.w - newX;
+      rect.h = rect.y + rect.h - newY;
+      rect.x = newX; rect.y = newY;
+    } else if (dragHandle === 'br'){
+      rect.w = Math.max(0.08, fx - rect.x);
+      rect.h = Math.max(0.08, fy - rect.y);
+    }
+    paintCropBox();
+  });
+  ['pointerup','pointercancel'].forEach(function(evt){
+    cropWrap.addEventListener(evt, function(){ dragHandle = null; });
+  });
+
+  document.getElementById('retake-btn').addEventListener('click', function(){
+    cameraInput.value = '';
+    cropZone.style.display = 'none';
+    captureZone.style.display = 'block';
+  });
+
+  document.getElementById('confirm-crop-btn').addEventListener('click', function(){
+    if (!srcImage) return;
+    var sw = srcImage.naturalWidth, sh = srcImage.naturalHeight;
+    var sx = rect.x * sw, sy = rect.y * sh, cw = rect.w * sw, ch = rect.h * sh;
+    var maxOut = 1600;
+    var outScale = Math.min(1, maxOut / Math.max(cw, ch));
+    var c = document.createElement('canvas');
+    c.width = Math.round(cw * outScale); c.height = Math.round(ch * outScale);
+    var ctx = c.getContext('2d');
+    ctx.drawImage(srcImage, sx, sy, cw, ch, 0, 0, c.width, c.height);
+    var dataUrl = c.toDataURL('image/jpeg', 0.85);
+    hiddenField.value = dataUrl;
+    finalPreview.src = dataUrl;
+    cropZone.style.display = 'none';
+    previewZone.style.display = 'block';
+    submitBtn.disabled = false;
+  });
+
+  document.getElementById('redo-btn').addEventListener('click', function(){
+    previewZone.style.display = 'none';
+    cropZone.style.display = 'block';
+    submitBtn.disabled = true;
+    requestAnimationFrame(paintCropBox);
+  });
+})();
+</script>
+{% endblock %}

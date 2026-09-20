@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}سازگان | درباره / نسخه / فعال‌سازی{% endblock %}
+{% block content %}
+{% set system_active = 'about' %}
+{% include '_settings_system_tabs.html' %}
+
+<div class="card">
+  <div class="card-header">درباره سیستم، تاریخچه نسخه‌ها و فعال‌سازی</div>
+  <div class="card-body">
+    <div class="display-settings-grid" style="margin-bottom:18px;">
+      <div class="ds-section">
+        <h3 class="ds-title">نسخه نرم‌افزار</h3>
+        <p style="font-size:1.35em;font-weight:700;margin:6px 0 0;">{{ app_version_label_full or app_version_label or '—' }}</p>
+      </div>
+      <div class="ds-section">
+        <h3 class="ds-title">تاریخ انتشار</h3>
+        <p style="font-size:1.2em;font-weight:700;margin:6px 0 0;">{{ app_release_jalali or '—' }}</p>
+      </div>
+      <div class="ds-section">
+        <h3 class="ds-title">اطلاعات ساخت</h3>
+        <p style="font-size:0.95em;font-family:monospace;margin:6px 0 0;word-break:break-all;">{{ app_build_info or '—' }}</p>
+      </div>
+    </div>
+    <div class="ds-section">
+      <h3 class="ds-title">مشخصات فنی</h3>
+      <ul style="list-style:none;padding:0;margin:8px 0 0;">
+        <li style="padding:10px 0;border-bottom:1px solid var(--border);"><strong>Python:</strong> 3.8+</li>
+        <li style="padding:10px 0;border-bottom:1px solid var(--border);"><strong>Framework:</strong> Flask 2.0+</li>
+        <li style="padding:10px 0;border-bottom:1px solid var(--border);"><strong>Database:</strong> SQLite3</li>
+        <li style="padding:10px 0;border-bottom:1px solid var(--border);"><strong>WSGI Server:</strong> Waitress</li>
+        <li style="padding:10px 0;"><strong>زبان رابط:</strong> فارسی (RTL)</li>
+      </ul>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);margin-top:16px;">
+      برای تاریخچه نسخه‌ها به «<a href="/settings/changelog">تاریخچه نسخه‌ها</a>» و برای وضعیت لایسنس به «<a href="/settings/activation">فعال‌سازی</a>» مراجعه کنید.
+    </p>
+  </div>
+</div>
+{% endblock %}

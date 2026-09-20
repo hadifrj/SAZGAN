@@ -1,0 +1,71 @@
+
+<div class="card">
+  <div class="card-header">پیگیری ارسال / باربری</div>
+  <div class="card-body form-grid">
+    {% if can_edit %}
+    <form method="POST">
+      <input type="hidden" name="action" value="save_fields">
+      <label>روش ارسال</label>
+      <input name="shipping_method" value="{{ req.shipping_method or '' }}">
+      <label>شماره پیگیری / بارنامه</label>
+      <input name="tracking_number" value="{{ req.tracking_number or '' }}">
+      <button type="submit" class="btn">ذخیره باربری</button>
+    </form>
+    {% else %}
+      <p>روش: {{ req.shipping_method or '—' }} | پیگیری: {{ req.tracking_number or '—' }}</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if can_edit %}
+<div class="card">
+  <div class="card-header">عملیات پرونده</div>
+  <div class="card-body" style="display:flex;gap:8px;flex-wrap:wrap">
+    <form method="POST" action="/service/copy/{{ req.id }}">
+      <button class="btn-cancel" type="submit">کپی پرونده مشابه</button>
+    </form>
+    <form method="POST" action="/service/reopen/{{ req.id }}" onsubmit="return confirm('بازگشایی پرونده؟')">
+      <button class="btn-export" type="submit">بازگشایی (اگر بسته است)</button>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">چک‌لیست تأیید گزارش (قبل از پایان)</div>
+  <div class="card-body">
+    <label><input type="checkbox" id="ck_serial"> مطابقت سریال</label><br>
+    <label><input type="checkbox" id="ck_parts"> مطابقت قطعات</label><br>
+    <label><input type="checkbox" id="ck_photo"> وجود عکس گزارش</label><br>
+    <label><input type="checkbox" id="ck_match"> مطابقت با پرونده</label><br>
+    <button type="button" class="btn" id="ck_btn" style="margin-top:8px">ثبت تأیید چک‌لیست</button>
+    <span id="ck_msg"></span>
+  </div>
+</div>
+<script>
+document.getElementById('ck_btn').onclick=function(){
+  var fd=new FormData();
+  fd.append('serial_ok', document.getElementById('ck_serial').checked?'1':'0');
+  fd.append('parts_ok', document.getElementById('ck_parts').checked?'1':'0');
+  fd.append('photo_ok', document.getElementById('ck_photo').checked?'1':'0');
+  fd.append('match_ok', document.getElementById('ck_match').checked?'1':'0');
+  fetch('/api/save-checklist/{{ req.id }}',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{
+    document.getElementById('ck_msg').textContent=d.ok?'ثبت شد':(d.error||'خطا');
+  });
+};
+</script>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">تاریخچه / تایم‌لاین</div>
+  <div class="card-body"><ul id="timeline_list" style="font-size:13px;line-height:1.8"></ul></div>
+</div>
+<script>
+fetch('/api/timeline/{{ req.id }}').then(r=>r.json()).then(items=>{
+  var ul=document.getElementById('timeline_list');
+  if(!items.length){ul.innerHTML='<li>موردی نیست</li>';return;}
+  items.forEach(function(it){
+    var li=document.createElement('li');
+    li.textContent=(it.date||'')+' — '+(it.title||'')+(it.user?' ('+it.user+')':'')+(it.notes?' | '+it.notes:'');
+    ul.appendChild(li);
+  });
+});
+</script>

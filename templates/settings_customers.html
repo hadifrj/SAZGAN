@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+{% block title %}سازگان | طرف حساب‌ها{% endblock %}
+{% block content %}
+
+{% set parties_active = 'customers' %}
+{% include '_settings_parties_tabs.html' %}
+
+{% set cols = customer_columns if customer_columns is defined and customer_columns else [
+  {'key':'actions','label':'عملیات'},{'key':'id','label':'کد'},{'key':'person_type','label':'نوع'},
+  {'key':'name','label':'نام مشتری'},{'key':'province','label':'استان'},{'key':'county','label':'شهرستان'},
+  {'key':'city','label':'شهر'},{'key':'address','label':'آدرس'},{'key':'postal_code','label':'کد پستی'},
+  {'key':'national_id','label':'کد/شناسه ملی'},{'key':'economic_code','label':'شناسه اقتصادی'},
+  {'key':'phone','label':'تلفن ثابت'},{'key':'equipment_manager_name','label':'مسئول تجهیزات'},
+  {'key':'equipment_manager_mobile','label':'موبایل مسئول'}
+] %}
+
+<style>
+  .cust-toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 4px;
+  }
+  .cust-toolbar-title { font-weight: 700; font-size: 14px; }
+  .cust-toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .cust-search-form { display: flex; gap: 6px; align-items: center; }
+  .cust-search-form input[type="search"] { min-width: 200px; max-width: 300px; height: 34px; font-size: 12.5px; }
+  .cust-table-wrap {
+    width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    border-radius: 0 0 8px 8px; position: relative;
+  }
+  .cust-table-wrap table {
+    width: 100%; min-width: 900px; border-collapse: collapse; table-layout: auto;
+  }
+  .cust-table-wrap th, .cust-table-wrap td {
+    padding: 6px 10px; font-size: 12px; line-height: 1.35; vertical-align: middle;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+  }
+  .cust-table-wrap th {
+    position: sticky; top: 0; background: var(--bg-muted, #f1f5f9); z-index: 2;
+    font-size: 11.5px; font-weight: 700; white-space: nowrap;
+  }
+  .cust-table-wrap td.cust-clamp {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; vertical-align: middle;
+  }
+  .cust-table-wrap td.cust-clamp .cust-clamp-text {
+    display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom;
+  }
+  .cust-table-wrap td.cust-clamp-address {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 340px; vertical-align: middle;
+  }
+  .cust-table-wrap td.cust-clamp-address .cust-clamp-text {
+    display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom;
+  }
+  .cust-table-wrap td.cust-mono {
+    font-variant-numeric: tabular-nums; direction: ltr; text-align: right; white-space: nowrap;
+  }
+  .cust-table-wrap th.cust-actions-col,
+  .cust-table-wrap td.cust-actions-col {
+    position: sticky; right: 0; background: var(--card-bg, #fff); z-index: 3;
+    box-shadow: -4px 0 8px rgba(15, 23, 42, 0.06); white-space: nowrap; text-align: center; width: 118px;
+  }
+  .cust-table-wrap th.cust-actions-col { background: var(--bg-muted, #f1f5f9); z-index: 4; }
+  .cust-actions { display: inline-flex; gap: 4px; align-items: center; justify-content: center; }
+  .cust-actions form { display: inline; margin: 0; }
+  .cust-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border, #e2e8f0);
+    background: #fff; color: var(--text, #334155); cursor: pointer; padding: 0; text-decoration: none;
+  }
+  .cust-icon-btn:hover { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+  .cust-icon-btn.is-danger:hover { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+  .cust-icon-btn svg { width: 15px; height: 15px; display: block; }
+  .cust-cols-panel {
+    display: none; margin: 12px 16px 0; padding: 14px; border: 1px solid var(--border, #e2e8f0);
+    border-radius: 10px; background: var(--bg-muted, #f8fafc);
+  }
+  .cust-cols-panel.is-open { display: block; }
+  .cust-cols-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px 12px; margin: 10px 0 14px;
+  }
+  .cust-cols-grid label {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 6px 8px; border-radius: 6px; background: #fff; border: 1px solid var(--border, #e2e8f0);
+  }
+  .cust-cols-grid label.is-required { opacity: 0.85; background: #f1f5f9; }
+  .cust-cols-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  [data-theme="dark"] .cust-icon-btn { background: #1e293b; border-color: #475569; color: #e2e8f0; }
+  [data-theme="dark"] .cust-table-wrap th.cust-actions-col,
+  [data-theme="dark"] .cust-table-wrap td.cust-actions-col { background: var(--card-bg, #0f172a); }
+  [data-theme="dark"] .cust-cols-grid label { background: #1e293b; }
+</style>
+
+<div class="card">
+  <div class="card-header">
+    <div class="cust-toolbar">
+      <div class="cust-toolbar-title">
+        لیست طرف حساب‌ها
+        {% if total_rows is defined %}
+          <span style="font-weight:500;color:var(--text-muted);font-size:13px;">
+            ({{ from_item }}–{{ to_item }} از {{ total_rows }})
+          </span>
+        {% endif %}
+      </div>
+      <div class="cust-toolbar-actions">
+        <form method="GET" action="/settings/customers" class="cust-search-form">
+          {% if per_page is defined %}
+          <input type="hidden" name="per_page" value="{{ per_page }}">
+          {% endif %}
+          <input type="search" name="q" value="{{ search_q or '' }}" class="search-box"
+                 placeholder="جستجو: نام، تلفن، شهر، استان، کد..." autocomplete="off">
+          <button type="submit" class="btn-cancel" style="height:36px;">جستجو</button>
+          {% if search_q %}
+          <a href="/settings/customers" class="btn-cancel" style="height:36px;line-height:36px;padding:0 10px;">پاک کردن</a>
+          {% endif %}
+        </form>
+        <a href="/settings/customers/export" class="btn-export">خروجی اکسل</a>
+        <button type="button" class="btn" onclick="openModal('add-customer-modal')">+ افزودن طرف حساب</button>
+        {% if can_edit_columns %}
+        <button type="button" class="btn-cancel" id="cust-cols-toggle" onclick="toggleCustColsPanel()">ستون‌ها</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if request.args.get('cols_saved') %}
+  <div class="import-success" style="margin:12px 16px 0;">تنظیمات ستون‌ها ذخیره شد و برای همه کاربران اعمال می‌شود.</div>
+  {% endif %}
+  {% if import_error %}
+  <div class="login-error" style="margin:12px 16px 0;">{{ import_error }}</div>
+  {% endif %}
+
+  {% if can_edit_columns %}
+  <div class="cust-cols-panel" id="cust-cols-panel">
+    <div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">ستون‌های قابل نمایش (سراسری — فقط مدیر)</div>
+    <p style="margin:0 0 8px;font-size:12.5px;color:var(--text-muted);">
+      ستون‌های انتخاب‌شده برای همه کاربران یکسان نمایش داده می‌شود. ستون‌های اجباری همیشه فعال‌اند.
+    </p>
+    <form method="POST" action="/settings/customers/columns" id="cust-cols-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="columns_order" id="cust-cols-order" value="">
+      <div class="cust-cols-grid" id="cust-cols-grid">
+        {% set vis_keys = cols|map(attribute='key')|list %}
+        {% for d in (all_column_defs if all_column_defs is defined else cols) %}
+        <label class="{% if d.required %}is-required{% endif %}" data-key="{{ d.key }}">
+          <input type="checkbox" name="columns" value="{{ d.key }}"
+            {% if d.key in vis_keys or d.required %}checked{% endif %}
+            {% if d.required %}disabled{% endif %}>
+          <span>{{ d.label }}{% if d.required %} <small style="color:var(--text-muted)">(اجباری)</small>{% endif %}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="cust-cols-actions">
+        <button type="submit" class="btn" onclick="return prepareCustColsOrder()">ذخیره ستون‌ها</button>
+        <button type="button" class="btn-cancel" onclick="toggleCustColsPanel()">انصراف</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if not customers or customers|length == 0 %}
+    <div class="empty-state">
+      {% if search_q %}موردی مطابق «{{ search_q }}» یافت نشد.{% else %}هنوز طرف حسابی ثبت نشده است.{% endif %}
+    </div>
+  {% else %}
+  <div class="cust-table-wrap">
+    <table id="customers-table">
+      <thead>
+        <tr>
+          {% for col in cols %}
+            {% if col.key == 'actions' %}
+              <th class="cust-actions-col">{{ col.label }}</th>
+            {% else %}
+              <th>{{ col.label }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in customers %}
+        <tr class="customer-row">
+          {% for col in cols %}
+            {% if col.key == 'actions' %}
+            <td class="cust-actions-col">
+              <div class="cust-actions">
+                <a href="/settings/customers/view/{{ c.get('id') }}" class="cust-icon-btn" title="مشاهده" aria-label="مشاهده">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><line x1="13" y1="10" x2="18" y2="10"/><line x1="13" y1="14" x2="18" y2="14"/>
+                  </svg>
+                </a>
+                <a href="/settings/customers/edit/{{ c.get('id') }}" class="cust-icon-btn" title="ویرایش" aria-label="ویرایش">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                  </svg>
+                </a>
+                <form method="POST" action="/settings/customers/delete/{{ c.get('id') }}" onsubmit="return confirm('آیا از حذف این طرف حساب مطمئن هستید؟');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="cust-icon-btn is-danger" title="حذف" aria-label="حذف">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                  </button>
+                </form>
+              </div>
+            </td>
+            {% elif col.key == 'id' %}
+            <td class="cust-mono">{{ c.get('id') }}</td>
+            {% elif col.key == 'person_type' %}
+            <td>{{ c.get('person_type') or 'حقیقی' }}</td>
+            {% elif col.key == 'name' %}
+            <td class="cust-clamp" title="{{ c.get('name') or '' }}"><span class="cust-clamp-text">{{ c.get('name') or '—' }}</span></td>
+            {% elif col.key == 'province' %}
+            <td class="cust-clamp" title="{{ c.get('province') or '' }}"><span class="cust-clamp-text">{{ c.get('province') or '—' }}</span></td>
+            {% elif col.key == 'county' %}
+            <td class="cust-clamp" title="{{ c.get('county') or '' }}"><span class="cust-clamp-text">{{ c.get('county') or '—' }}</span></td>
+            {% elif col.key == 'city' %}
+            <td class="cust-clamp" title="{{ c.get('city') or '' }}"><span class="cust-clamp-text">{{ c.get('city') or '—' }}</span></td>
+            {% elif col.key == 'address' %}
+            <td class="cust-clamp-address" title="{{ c.get('address') or '' }}"><span class="cust-clamp-text">{{ c.get('address') or '—' }}</span></td>
+            {% elif col.key == 'postal_code' %}
+            <td class="cust-mono">{{ c.get('postal_code') or '—' }}</td>
+            {% elif col.key == 'national_id' %}
+            <td class="cust-mono">{{ c.get('national_id') or '—' }}</td>
+            {% elif col.key == 'economic_code' %}
+            <td class="cust-mono">{{ c.get('economic_code') or '—' }}</td>
+            {% elif col.key == 'phone' %}
+            <td class="cust-mono">{{ c.get('phone') or '—' }}</td>
+            {% elif col.key == 'equipment_manager_name' %}
+            <td class="cust-clamp" title="{{ c.get('equipment_manager_name') or '' }}"><span class="cust-clamp-text">{{ c.get('equipment_manager_name') or '—' }}</span></td>
+            {% elif col.key == 'equipment_manager_mobile' %}
+            <td class="cust-mono">{{ c.get('equipment_manager_mobile') or '—' }}</td>
+            {% else %}
+            <td>{{ c.get(col.key) or '—' }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include '_pagination.html' %}
+  {% endif %}
+</div>
+
+<div class="modal-overlay" id="add-customer-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>افزودن طرف حساب جدید</span>
+      <button type="button" class="modal-close" onclick="closeModal('add-customer-modal')" aria-label="بستن">
+        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/settings/customers">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="form-grid">
+          <div>
+            <label>نوع طرف‌حساب</label>
+            <select name="person_type" id="person_type_add" class="field-select" onchange="toggleNationalLabel('add')">
+              <option value="حقیقی">حقیقی</option>
+              <option value="حقوقی">حقوقی</option>
+            </select>
+          </div>
+          <div>
+            <label>نام مشتری / شرکت</label>
+            <input type="text" name="name" required>
+          </div>
+          <div>
+            <label>استان</label>
+            <select name="province" id="province" class="field-select geo-province" required
+              onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+              <option value="">— انتخاب استان —</option>
+              {% for p in provinces %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>شهرستان</label>
+            <select name="county" id="county" class="field-select geo-county"
+              onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+              <option value="">— انتخاب شهرستان —</option>
+            </select>
+          </div>
+          <div>
+            <label>شهر <span style="color:#b91c1c">*</span></label>
+            <select name="city" id="city" class="field-select geo-city" required>
+              <option value="">— انتخاب شهر —</option>
+            </select>
+            <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px" placeholder="یا نام شهر را بنویسید">
+          </div>
+          <div class="field-full">
+            <label>آدرس</label>
+            <input type="text" name="address">
+          </div>
+          <div>
+            <label>کد پستی</label>
+            <input type="text" name="postal_code" dir="ltr" style="text-align:left" maxlength="10" inputmode="numeric" placeholder="کد پستی ۱۰ رقمی">
+          </div>
+          <div>
+            <label id="national_label_add">کد ملی</label>
+            <input type="text" name="national_id" placeholder="حقیقی: کد ملی — حقوقی: شناسه ملی">
+          </div>
+          <div>
+            <label>کد اقتصادی</label>
+            <input type="text" name="economic_code" placeholder="معمولاً برای حقوقی">
+          </div>
+          <div>
+            <label>تلفن ثابت</label>
+            <input type="text" name="phone">
+          </div>
+          <div>
+            <label>نام مسئول تجهیزات</label>
+            <input type="text" name="equipment_manager_name">
+          </div>
+          <div>
+            <label>شماره موبایل مسئول تجهیزات</label>
+            <input type="text" name="equipment_manager_mobile">
+          </div>
+        </div>
+        <button type="submit" class="btn">افزودن</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleCustColsPanel(){
+  var p = document.getElementById('cust-cols-panel');
+  if(!p) return;
+  p.classList.toggle('is-open');
+}
+function prepareCustColsOrder(){
+  var grid = document.getElementById('cust-cols-grid');
+  var order = document.getElementById('cust-cols-order');
+  if(!grid || !order) return true;
+  var keys = [];
+  grid.querySelectorAll('label[data-key]').forEach(function(lab){
+    var cb = lab.querySelector('input[type=checkbox]');
+    var key = lab.getAttribute('data-key');
+    if(!key) return;
+    // required are disabled but must be included
+    if(cb && (cb.checked || cb.disabled)) keys.push(key);
+  });
+  order.value = keys.join(',');
+  // enable required so they submit if needed
+  grid.querySelectorAll('input[type=checkbox][disabled]').forEach(function(cb){
+    cb.disabled = false;
+    cb.checked = true;
+  });
+  return true;
+}
+</script>
+{% endblock %}

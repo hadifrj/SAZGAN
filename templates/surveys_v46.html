@@ -1,0 +1,63 @@
+<!-- SAZGAN V4.6 Surveys UI foundation -->
+<section class="page surveys-page" data-module="surveys">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">SURVEYS</div>
+      <h1>Customer Surveys</h1>
+      <p class="page-subtitle">Measure customer satisfaction and service quality.</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-secondary" data-action="refresh-surveys">Refresh</button>
+      <button type="button" class="btn btn-primary" data-action="new-survey">New Survey</button>
+    </div>
+  </header>
+
+  <div class="survey-summary">
+    <div class="summary-card"><span>Satisfaction</span><strong id="surveySatisfaction">—</strong></div>
+    <div class="summary-card"><span>Responses</span><strong id="surveyResponses">0</strong></div>
+    <div class="summary-card"><span>Positive</span><strong id="surveyPositive">0</strong></div>
+    <div class="summary-card"><span>Negative</span><strong id="surveyNegative">0</strong></div>
+  </div>
+
+  <nav class="survey-tabs" aria-label="Survey views">
+    <button class="is-active" data-filter="all">All Responses</button>
+    <button data-filter="positive">Positive</button>
+    <button data-filter="neutral">Neutral</button>
+    <button data-filter="negative">Negative</button>
+    <button data-filter="pending">Pending</button>
+  </nav>
+
+  <div class="survey-toolbar">
+    <input id="surveySearch" type="search"
+           placeholder="Search customer, phone, survey..."
+           autocomplete="off">
+    <select id="surveyPeriod" aria-label="Period">
+      <option value="30">Last 30 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="365">Last 12 months</option>
+      <option value="all">All time</option>
+    </select>
+    <select id="surveyType" aria-label="Survey type">
+      <option value="">All survey types</option>
+      <option value="service">Service</option>
+      <option value="support">Support</option>
+      <option value="product">Product</option>
+    </select>
+  </div>
+
+  <div class="survey-content">
+    <div class="survey-list-card">
+      <div class="card-header">
+        <h2>Survey Responses</h2>
+        <span id="surveyCount" class="muted"></span>
+      </div>
+      <div id="surveyList" class="survey-list">
+        <div class="empty-state">No survey responses loaded.</div>
+      </div>
+    </div>
+
+    <aside class="survey-detail-card" id="surveyDetail" aria-live="polite">
+      <div class="empty-state">Select a response to view details.</div>
+    </aside>
+  </div>
+</section>

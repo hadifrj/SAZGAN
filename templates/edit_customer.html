@@ -1,0 +1,86 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | ویرایش طرف حساب{% endblock %}
+{% block content %}
+
+{% set parties_active = 'customers' %}
+{% include '_settings_parties_tabs.html' %}
+
+    <div class="card">
+        <div class="card-header">ویرایش طرف حساب #{{ customer.id }}</div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="form-grid">
+                    <div>
+                        <label>نوع طرف‌حساب</label>
+                        <select name="person_type" id="person_type_edit" class="field-select" onchange="toggleNationalLabelEdit()">
+                            <option value="حقیقی" {% if (customer.person_type if customer.person_type is defined else 'حقیقی') != 'حقوقی' %}selected{% endif %}>حقیقی</option>
+                            <option value="حقوقی" {% if customer.person_type is defined and customer.person_type == 'حقوقی' %}selected{% endif %}>حقوقی</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>نام مشتری / شرکت</label>
+                        <input type="text" name="name" value="{{ customer.name }}" required>
+                    </div>
+                    <div>
+                        <label>شماره تماس</label>
+                        <input type="text" name="phone" value="{{ customer.phone if customer.phone else '' }}">
+                    </div>
+                    <div>
+                        <label id="national_label_edit">کد ملی</label>
+                        <input type="text" name="national_id" value="{{ customer.national_id if customer.national_id else '' }}">
+                    </div>
+                    <div>
+                        <label>کد اقتصادی</label>
+                        <input type="text" name="economic_code" value="{{ customer.economic_code if customer.economic_code else '' }}">
+                    </div>
+                    <div>
+                        <label>استان</label>
+                        <select name="province" id="province" class="field-select geo-province" required
+                            onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                            <option value="">— انتخاب استان —</option>
+                            {% for p in provinces %}
+                            <option value="{{ p }}" {% if p == customer.province %}selected{% endif %}>{{ p }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label>شهرستان</label>
+                        <select name="county" id="county" class="field-select geo-county"
+                            onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)"
+                            data-selected="{{ customer.county if customer.county else '' }}">
+                            <option value="">— انتخاب شهرستان —</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>شهر <span style="color:#b91c1c">*</span></label>
+                        <select name="city" id="city" class="field-select geo-city" required
+                            data-selected="{{ customer.city if customer.city else '' }}">
+                            <option value="">— انتخاب شهر —</option>
+                        </select>
+                        <input type="text" name="city_manual" id="city_manual" class="geo-city-manual" style="display:none;margin-top:6px"
+                            value="{{ customer.city if customer.city else '' }}" placeholder="یا نام شهر را بنویسید">
+                    </div>
+                    <div class="field-full">
+                        <label>آدرس</label>
+                        <input type="text" name="address" value="{{ customer.address if customer.address else '' }}">
+                    </div>
+                    <div>
+                        <label>کد پستی</label>
+                        <input type="text" name="postal_code" value="{{ customer.postal_code if customer.postal_code else '' }}" dir="ltr" style="text-align:left" maxlength="10" inputmode="numeric" placeholder="کد پستی ۱۰ رقمی">
+                    </div>
+                    <div>
+                        <label>نام مسئول تجهیزات</label>
+                        <input type="text" name="equipment_manager_name" value="{{ customer.equipment_manager_name if customer.equipment_manager_name else '' }}">
+                    </div>
+                    <div>
+                        <label>شماره موبایل مسئول تجهیزات</label>
+                        <input type="text" name="equipment_manager_mobile" value="{{ customer.equipment_manager_mobile if customer.equipment_manager_mobile else '' }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn">ذخیره تغییرات</button>
+                <a href="/settings/customers" class="btn-cancel">انصراف</a>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

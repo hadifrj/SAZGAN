@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}داشبورد مالی نمایندگان{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">سیستم مدیریت مالی نمایندگان</div>
+  <div class="card-body">
+    <form method="GET" class="form-grid" style="grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:16px;">
+      <div>
+        <label>سال</label>
+        <input type="number" name="year" value="{{ year }}" min="1400" max="1499">
+      </div>
+      <div>
+        <label>ماه</label>
+        <select name="month">
+          {% for m, name in [(1,'فروردین'),(2,'اردیبهشت'),(3,'خرداد'),(4,'تیر'),(5,'مرداد'),(6,'شهریور'),(7,'مهر'),(8,'آبان'),(9,'آذر'),(10,'دی'),(11,'بهمن'),(12,'اسفند')] %}
+          <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div><button class="btn" type="submit">نمایش</button></div>
+    </form>
+
+    <div class="wage-summary-grid" style="margin-bottom:16px;">
+      <div class="wage-summary-card month">
+        <div class="wage-summary-label">جمع دستمزد {{ month_label }}</div>
+        <div class="wage-summary-value">{{ '{:,}'.format(grand_month) }}</div>
+        <div class="wage-summary-unit">ریال</div>
+      </div>
+      <div class="wage-summary-card year" style="background:linear-gradient(145deg,#b45309,#92400e);">
+        <div class="wage-summary-label">جمع پرداخت‌نشده {{ month_label }}</div>
+        <div class="wage-summary-value">{{ '{:,}'.format(grand_unpaid) }}</div>
+        <div class="wage-summary-unit">ریال</div>
+      </div>
+    </div>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">جمع درآمد سال {{ year }} (همه نمایندگان): <strong>{{ '{:,}'.format(grand_year) }}</strong> ریال</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>نماینده</th>
+          <th>استان</th><th>شهرستان</th><th>شهر</th>
+          <th>دستمزد ماه</th>
+          <th>پرداخت‌نشده</th>
+          <th>درآمد سال</th>
+          <th>وضعیت</th>
+          <th>شبا</th>
+          <th></th>
+        </tr>
+        {% for r in rows %}
+        <tr>
+          <td><strong>{{ r.name }}</strong></td>
+          <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+          <td style="white-space:nowrap;">{{ '{:,}'.format(r.month_total) }}</td>
+          <td style="white-space:nowrap;color:{% if r.unpaid_month %}#d97706{% else %}#059669{% endif %};font-weight:600;">{{ '{:,}'.format(r.unpaid_month) }}</td>
+          <td style="white-space:nowrap;">{{ '{:,}'.format(r.year_total) }}</td>
+          <td>
+            {% if r.settle_status == 'paid' %}<span style="color:#059669;font-weight:600;">پرداخت‌شده</span>
+            {% elif r.settle_status == 'empty' %}<span style="color:#94a3b8;">—</span>
+            {% else %}<span style="color:#d97706;font-weight:600;">در انتظار</span>{% endif %}
+          </td>
+          <td dir="ltr" style="font-size:12px;">{{ r.bank_sheba or '—' }}</td>
+          <td><a class="btn-edit" href="/finance/settlement/{{ r.id }}?year={{ year }}&month={{ month }}">تسویه</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">نماینده‌ای ثبت نشده</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+<style>
+.wage-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.wage-summary-card { border-radius: 14px; padding: 16px 14px; color: #fff; }
+.wage-summary-card.month { background: linear-gradient(145deg, #0284c7 0%, #0369a1 100%); }
+.wage-summary-label { font-size: 12px; opacity: .9; margin-bottom: 6px; }
+.wage-summary-value { font-size: 20px; font-weight: 800; direction: ltr; text-align: right; }
+.wage-summary-unit { font-size: 11px; opacity: .85; }
+</style>
+{% endblock %}

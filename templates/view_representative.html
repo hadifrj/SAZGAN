@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}سازگان | مشاهده نماینده{% endblock %}
+{% block content %}
+{% set parties_active = 'representatives' %}
+{% include '_settings_parties_tabs.html' %}
+
+<div class="card" style="max-width:720px;">
+    <div class="card-header list-header-row">
+        <span>مشاهده نماینده #{{ rep.id }}</span>
+        <div class="list-header-actions">
+            <a href="/settings/representatives/edit/{{ rep.id }}" class="btn-edit">ویرایش</a>
+            
+        </div>
+    </div>
+    <div class="card-body">
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+            <div>
+                {% if rep.photo_filename %}
+                <img src="/static/uploads/representatives/{{ rep.photo_filename }}" alt=""
+                     style="width:120px;height:120px;border-radius:16px;object-fit:cover;border:1px solid var(--border);">
+                {% else %}
+                <div style="width:120px;height:120px;border-radius:16px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:13px;">بدون عکس</div>
+                {% endif %}
+            </div>
+            <div style="flex:1;min-width:240px;">
+                <div class="info-row"><span class="info-label">نوع نمایندگی:</span> {{ rep.rep_type or '—' }}</div>
+                {% if rep.rep_type == 'حقوقی' and rep.company_name %}
+                <div class="info-row"><span class="info-label">نام شرکت:</span> {{ rep.company_name }}</div>
+                {% endif %}
+                <div class="info-row"><span class="info-label">نام:</span> {{ rep.first_name or '—' }}</div>
+                <div class="info-row"><span class="info-label">نام خانوادگی:</span> {{ rep.last_name or '—' }}</div>
+                {% if rep.rep_type != 'حقوقی' %}
+                <div class="info-row"><span class="info-label">نام پدر:</span> {{ rep.father_name or '—' }}</div>
+                {% endif %}
+                <div class="info-row"><span class="info-label">کد ملی:</span> {{ rep.national_id or '—' }}</div>
+                <div class="info-row"><span class="info-label">شماره تماس:</span> {{ rep.phone or '—' }}</div>
+                <div class="info-row"><span class="info-label">استان:</span> {{ rep.province or '—' }}</div>
+                <div class="info-row"><span class="info-label">آدرس:</span> {{ rep.address or '—' }}</div>
+                <div class="info-row"><span class="info-label">وضعیت ضمانت:</span> {{ rep.guarantee_status or '—' }}</div>
+                <div class="info-row"><span class="info-label">وضعیت:</span> {{ rep.status or '—' }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

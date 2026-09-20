@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}سازگان | کنترل قطعات تعمیرات داخلی{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header list-header-row ">
+    <span>کنترل قطعات تعمیرات داخلی (رهگیری — نه انبار)</span>
+</div>
+  <div class="card-body">
+    <form method="GET" class="filter-bar" style="margin-bottom:12px;">
+      <div class="filter-field" style="min-width:220px;">
+        <label>جستجوی سریال / پذیرش / قطعه</label>
+        <input type="text" name="q" value="{{ q or '' }}" placeholder="سریال ورودی، داغی، شماره پذیرش…">
+      </div>
+      <button type="submit" class="btn">جستجو</button>
+    </form>
+    {% if rows|length == 0 %}
+    <div class="empty-state">سابقه‌ای ثبت نشده است.</div>
+    {% else %}
+    <div class="table-wrap">
+      <table>
+        <tr>
+          <th>ردیف</th>
+          <th>شماره پذیرش</th>
+          <th>تاریخ</th>
+          <th>کد قطعه</th>
+          <th>نام قطعه</th>
+          <th>نوع دستگاه</th>
+          <th>مدل دستگاه</th>
+          <th>سریال قطعه ورودی</th>
+          <th>سریال قطعه داغی</th>
+          <th>تکنسین</th>
+          <th>وضعیت</th>
+          <th>عملیات</th>
+        </tr>
+        {% for r in rows %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ r.reception_no or r.request_id }}</td>
+          <td>{{ r.created_at or r.updated_at or '—' }}</td>
+          <td>{{ r.warehouse_code or '—' }}</td>
+          <td>{{ r.part_name or '—' }}</td>
+          <td>{{ r.device_type or '—' }}</td>
+          <td>{{ r.device_model or '—' }}</td>
+          <td>{{ r.serial_good or r.serial_healthy or '—' }}</td>
+          <td>{{ r.serial_defective or r.serial_faulty or '—' }}</td>
+          <td>{{ r.assigned_technician or '—' }}</td>
+          <td><span class="badge">{{ r.status or '—' }}</span></td>
+          <td>
+            <a href="/service/internal-repair/view/{{ r.request_id }}" class="btn-edit">مشاهده پرونده</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

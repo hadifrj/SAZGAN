@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}سازگان | هاب تأخیرها{% endblock %}
+{% block content %}
+{% if section_tabs %}{% include "_ca_section_tabs.html" %}{% endif %}
+<div class="card">
+  <div class="card-header">
+    <div class="list-header-row">
+      <span>هاب تأخیرها — {{ delayed_count or requests|length }} پرونده تأخیری از {{ all_count or '—' }}</span>
+      <div class="list-header-actions">
+        <a href="/reports/delay-matrix" class="btn-export">ماتریس تأخیر</a>
+        <a href="/reports/stage-delays" class="btn-cancel">گزارش مراحل</a>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p class="muted-note" style="margin-bottom:12px;">سقف تأخیر: {{ delay_threshold or 3 }} روز در وضعیت فعلی</p>
+    {% if requests|length == 0 %}
+    <div class="empty-state">پرونده تأخیری یافت نشد.</div>
+    {% else %}
+    <div class="table-wrap">
+    <table>
+      <tr>
+        <th>ردیف</th>
+        <th>شماره پذیرش</th>
+        <th>تاریخ پذیرش</th>
+        <th>نام مشتری</th>
+        <th>نوع خدمت</th>
+        <th>نوع دستگاه</th>
+        <th>مدل دستگاه</th>
+        <th>استان</th>
+        <th>شهر</th>
+        <th>مسئول پرونده</th>
+        <th>مرحله فعلی</th>
+        <th>تعداد روز تأخیر</th>
+        <th>علت تأخیر</th>
+        <th>اولویت</th>
+        <th>وضعیت پیگیری</th>
+        <th>عملیات</th>
+      </tr>
+      {% for r in requests %}
+      <tr class="row-delayed">
+        <td>{{ loop.index }}</td>
+        <td>{{ r.reception_no or r.id }}</td>
+        <td>{{ r.reception_date or '—' }}</td>
+        <td>{{ r.customer_name }}</td>
+        <td>{{ r.request_category or r.service_type or '—' }}</td>
+        <td>{{ r.device_type or '—' }}</td>
+        <td>{{ r.device_model or r.model or '—' }}</td>
+        <td>{{ r.province or '—' }}</td>
+        <td>{{ r.city or '—' }}</td>
+        <td>{{ r.assigned_technician or '—' }}</td>
+        <td><span class="badge">{{ r.status }}</span></td>
+        <td><strong style="color:var(--danger-text)">{{ r.days_in_status if r.days_in_status is defined else '—' }}</strong></td>
+        <td>{{ r.delay_reason or r.stage_notes or '—' }}</td>
+        <td>{{ r.priority or 'عادی' }}</td>
+        <td>{{ r.followup_status or 'در حال پیگیری' }}</td>
+        <td>
+          {% if r.detail_url %}<a href="{{ r.detail_url }}" class="btn-edit">مشاهده</a>
+          {% else %}<a href="/service/internal-repair/view/{{ r.id }}" class="btn-edit">مشاهده</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

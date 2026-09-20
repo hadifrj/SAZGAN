@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}تسویه {{ rep_name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">تسویه ماهانه — {{ rep_name }}</div>
+  <div class="card-body">
+    <div style="margin:0 0 12px;"></div>
+
+    {% if msg %}<div class="alert alert-success" style="margin-bottom:12px;">{{ msg }}</div>{% endif %}
+    {% if error %}<div class="alert alert-danger" style="margin-bottom:12px;">{{ error }}</div>{% endif %}
+
+    <form method="GET" class="form-grid" style="grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:16px;">
+      <div><label>سال</label><input type="number" name="year" value="{{ year }}"></div>
+      <div>
+        <label>ماه</label>
+        <select name="month">
+          {% for m, name in [(1,'فروردین'),(2,'اردیبهشت'),(3,'خرداد'),(4,'تیر'),(5,'مرداد'),(6,'شهریور'),(7,'مهر'),(8,'آبان'),(9,'آذر'),(10,'دی'),(11,'بهمن'),(12,'اسفند')] %}
+          <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div><button class="btn" type="submit">نمایش</button></div>
+    </form>
+
+    <div class="wage-summary-grid" style="margin-bottom:14px;">
+      <div class="wage-mini"><span>جمع {{ month_label }}</span><strong>{{ '{:,}'.format(summary.month_total) }} ریال</strong></div>
+      <div class="wage-mini unpaid"><span>پرداخت‌نشده</span><strong>{{ '{:,}'.format(summary.unpaid_month) }} ریال</strong></div>
+      <div class="wage-mini paid"><span>پرداخت‌شده</span><strong>{{ '{:,}'.format(summary.paid_month) }} ریال</strong></div>
+      <div class="wage-mini"><span>درآمد سال {{ year }}</span><strong>{{ '{:,}'.format(summary.year_total) }} ریال</strong></div>
+    </div>
+
+    <div class="bank-box">
+      <div class="bank-title">اطلاعات بانکی نماینده</div>
+      <div class="bank-row"><span>شبا</span><b dir="ltr">{{ bank.bank_sheba or '—' }}</b></div>
+      <div class="bank-row"><span>کارت</span><b dir="ltr">{{ bank.bank_card or '—' }}</b></div>
+      <div class="bank-row"><span>صاحب حساب</span><b>{{ bank.bank_owner or '—' }}</b></div>
+    </div>
+
+    <h3 style="font-size:14px;margin:18px 0 10px;">ردیف‌های {{ month_label }}</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>شرح</th><th>مبلغ</th><th>تاریخ</th><th>وضعیت</th><th>منبع</th><th>مشتری</th></tr>
+        {% for r in summary.month_rows %}
+        {% set ps = (r.payment_status if r.payment_status is defined and r.payment_status else 'unpaid') %}
+        <tr>
+          <td>{{ r.work_description }}</td>
+          <td style="white-space:nowrap;">{{ '{:,}'.format(r.amount) }}</td>
+          <td>{{ r.calc_date or '—' }}</td>
+          <td>{% if ps == 'paid' %}<span style="color:#059669;">پرداخت‌شده</span>{% else %}<span style="color:#d97706;">در انتظار</span>{% endif %}</td>
+          <td>{% if r.source is defined and r.source == 'auto' %}خودکار{% elif r.source is defined and r.source == 'manual' %}دستی{% else %}—{% endif %}</td>
+          <td>{{ r.customer_name if r.customer_name is defined and r.customer_name else '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">ردیفی نیست</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <form method="POST" style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+      <div style="flex:1;min-width:200px;">
+        <label>یادداشت پرداخت</label>
+        <input type="text" name="notes" placeholder="مثلاً شماره پیگیری واریز">
+      </div>
+      <button class="btn" type="submit" name="action" value="pay" {% if summary.unpaid_month <= 0 and summary.month_total <= 0 %}disabled{% endif %}>
+        تأیید پرداخت و صدور رسید
+      </button>
+      {% if summary.settle_status == 'paid' or summary.paid_month > 0 %}
+      <button class="btn-cancel" type="submit" name="action" value="unpay">برگشت به در انتظار</button>
+      {% endif %}
+      {% if summary.settlement and summary.settlement.receipt_no %}
+      <a class="btn-edit" href="/finance/settlement/receipt/{{ summary.settlement.id }}">مشاهده رسید</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+<style>
+.wage-summary-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 10px; }
+.wage-mini { border-radius: 12px; padding: 12px; border: 1px solid var(--border); background: var(--card); display: flex; flex-direction: column; gap: 4px; }
+.wage-mini span { font-size: 12px; color: var(--text-muted); }
+.wage-mini.unpaid strong { color: #d97706; }
+.wage-mini.paid strong { color: #059669; }
+.bank-box { margin-top: 10px; padding: 14px; border-radius: 12px; border: 1px dashed var(--border); background: rgba(2,132,199,.04); }
+.bank-title { font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+.bank-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+.bank-row:last-child { border-bottom: 0; }
+.bank-row span { color: var(--text-muted); }
+</style>
+{% endblock %}

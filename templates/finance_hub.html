@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}سازگان | امور مالی{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">امور مالی</div>
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px;">
+      مدیریت مالی نمایندگان، محاسبه و گزارش دستمزد و پرونده‌های مالی از این بخش در دسترس است.
+    </p>
+    <div class="sys-tile-grid" data-module="finance">
+<a href="/settings/wages" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.3c0-1.1 1.3-1.8 3-1.8s3 .7 3 1.8-1.3 1.3-3 1.7-3 .8-3 1.9 1.3 1.8 3 1.8 3-.7 3-1.8"/><line x1="12" y1="5.5" x2="12" y2="7.2"/><line x1="12" y1="16.8" x2="12" y2="18.5"/></svg></span>
+        <span class="sys-tile-title">جدول دستمزد</span>
+        <span class="sys-tile-desc">جدول دستمزد per case برای محاسبات مالی</span>
+      </a>
+<a href="/finance/wage-calculation" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/></svg></span>
+        <span class="sys-tile-title">محاسبه دستمزد</span>
+        <span class="sys-tile-desc">محاسبه دستمزد بر اساس جدول per case</span>
+      </a>
+<a href="/finance/wage-report" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>
+        <span class="sys-tile-title">گزارش دستمزد ماهانه</span>
+        <span class="sys-tile-desc">جمع‌بندی دستمزد به تفکیک ماه</span>
+      </a>
+<a href="/finance/wage-history" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>
+        <span class="sys-tile-title">تاریخچه دستمزد</span>
+        <span class="sys-tile-desc">سوابق پرداخت و محاسبات پیشین</span>
+      </a>
+<a href="/my-wages" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
+        <span class="sys-tile-title">دستمزد من</span>
+        <span class="sys-tile-desc">دستمزد شخصی کاربر جاری</span>
+      </a>
+<a href="/finance/reps-dashboard" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.3c0-1.1 1.3-1.8 3-1.8s3 .7 3 1.8-1.3 1.3-3 1.7-3 .8-3 1.9 1.3 1.8 3 1.8 3-.7 3-1.8"/></svg></span>
+        <span class="sys-tile-title">مدیریت مالی نمایندگان</span>
+        <span class="sys-tile-desc">وضعیت مالی و بدهی/بستانکاری نمایندگان</span>
+      </a>
+<a href="/finance/invoices" class="sys-tile">
+        <span class="sys-tile-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-2-1.3L14 21l-2-1.3L10 21l-2-1.3L6 21z"/></svg></span>
+        <span class="sys-tile-title">پرونده‌های مالی</span>
+        <span class="sys-tile-desc">پرونده‌های مالی باز و بسته‌شده</span>
+      </a>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

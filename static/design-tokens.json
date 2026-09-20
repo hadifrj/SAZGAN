@@ -1,0 +1,42 @@
+{
+  "colors": {
+    "bg": "#f8fafc",
+    "card": "#ffffff",
+    "text": "#0f172a",
+    "muted": "#64748b",
+    "border": "#e2e8f0",
+    "borderStrong": "#cbd5e1",
+    "accent": "#374151",
+    "accentHover": "#1f2937",
+    "accentSoft": "#f3f4f6",
+    "sidebar": "#ffffff",
+    "sidebarActive": "#f3f4f6",
+    "danger": "#b91c1c",
+    "success": "#15803d"
+  },
+  "radius": {
+    "sm": 6,
+    "md": 8,
+    "lg": 10
+  },
+  "spacing": {
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24
+  },
+  "sidebar": {
+    "expanded": 235,
+    "collapsed": 68,
+    "itemHeight": 42,
+    "icon": 21
+  },
+  "header": {
+    "height": 66
+  },
+  "typography": {
+    "family": "Vazirmatn FD",
+    "basePt": 10
+  }
+}

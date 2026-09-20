@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}سازگان | تعمیرات داخلی{% endblock %}
+{% block content %}
+
+{% include "_ca_section_tabs.html" %}
+
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>{{ list_title or "لیست تعمیرات داخلی" }} ({{ requests|length }})</span>
+            <div class="list-header-actions">
+                
+                <a href="/service/internal-repair/export" class="btn-export">خروجی اکسل</a>
+                <a href="/service/internal-repair/new" class="btn btn-quick-new">پذیرش جدید</a>
+            </div>
+        </div>
+    </div>
+
+    <form method="GET" class="filter-bar">
+        <div class="filter-field" style="min-width:200px;">
+            <label>جستجو</label>
+            <input type="text" name="q" value="{{ q or '' }}" placeholder="پذیرش، مشتری، سریال، فاکتور، تکنسین…">
+        </div>
+        <div class="filter-field">
+            <label>از تاریخ</label>
+            <input type="text" name="date_from" value="{{ date_from or '' }}" placeholder="۱۴۰۵/۰۱/۰۱">
+        </div>
+        <div class="filter-field">
+            <label>تا تاریخ</label>
+            <input type="text" name="date_to" value="{{ date_to or '' }}" placeholder="۱۴۰۵/۱۲/۲۹">
+        </div>
+        <div class="filter-field">
+            <label>استان</label>
+            <select name="province" class="field-select geo-province" onchange="if(typeof onGeoProvinceChange==='function')onGeoProvinceChange(this)">
+                <option value="">همه</option>
+                {% for p in provinces or [] %}
+                <option value="{{ p }}" {% if province == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>شهرستان</label>
+            <select name="county" class="field-select geo-county" onchange="if(typeof onGeoCountyChange==='function')onGeoCountyChange(this)">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div>
+            <label>شهر</label>
+            <select name="city" class="field-select geo-city">
+                <option value="">همه</option>
+            </select>
+        </div>
+        <div class="filter-field">
+            <label>وضعیت</label>
+            <select name="status" class="field-select">
+                <option value="">همه</option>
+                {% for s in statuses %}
+                <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-field">
+            <label>تأخیر</label>
+            <select name="only_delayed" class="field-select">
+                <option value="">همه</option>
+                <option value="1" {% if only_delayed %}selected{% endif %}>فقط تأخیری‌ها (≥{{ delay_threshold or 3 }} روز)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn">اعمال فیلتر</button>
+        <a href="/service/internal-repair/archive" class="btn-cancel">پاک کردن</a>
+    </form>
+
+    {% set delayed_n = requests|selectattr('is_delayed')|list|length %}
+    {% if delayed_n > 0 %}
+    <div class="delay-summary"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 L22 20 L2 20 Z"/><line x1="12" y1="9.5" x2="12" y2="14"/><circle cx="12" cy="16.8" r="0.9" fill="currentColor" stroke="none"/></svg> {{ delayed_n }} پرونده بیش از {{ delay_threshold or 3 }} روز در وضعیت فعلی مانده است</div>
+    {% endif %}
+
+    {% if requests|length == 0 %}
+        <div class="empty-state">موردی یافت نشد.</div>
+    {% else %}
+    <div class="table-wrap">
+    <table>
+        <tr>
+            <th>عملیات</th>
+            <th>ردیف</th>
+            <th>شماره پذیرش</th>
+            <th>تاریخ پذیرش</th>
+            <th>نام مشتری</th>
+            <th>سریال</th>
+            <th>نوع دستگاه</th>
+            <th>مدل دستگاه</th>
+            <th>استان</th><th>شهرستان</th><th>شهر</th>
+            <th>شهر</th>
+            <th>تکنسین</th>
+            <th>وضعیت</th>
+            <th>روز</th>
+            <th>شماره فاکتور</th>
+            <th>نام باربری</th>
+            <th>تاریخ تحویل به باربری</th>
+            <th>شماره پیگیری باربری</th>
+        </tr>
+        {% for r in requests %}
+        <tr class="{% if r.is_delayed %}row-delayed{% endif %}">
+            <td>
+                {% if can_access('customer_affairs') %}
+                <a class="repair-view-action" href="/service/internal-repair/view/{{ r.id }}" title="مشاهده" aria-label="مشاهده">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3.5 7.5h6l2 2H20.5v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>
+                        <path d="M3.5 7.5v-1a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span class="sr-only">مشاهده</span>
+                </a>
+                {% endif %}
+                {% if is_sys_admin() %}
+                <form method="POST" action="/service/internal-repair/delete/{{ r.id }}" style="display:inline;" onsubmit="return confirm('این پرونده حذف شود؟ این عملیات قابل بازگشت از این صفحه نیست.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token or session.get('csrf_token', '') }}">
+                    <button type="submit" class="repair-view-action" title="حذف" aria-label="حذف پرونده" style="color:var(--danger-text);">
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 7h16"/>
+                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                            <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/>
+                            <path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/>
+                        </svg>
+                        <span class="sr-only">حذف</span>
+                    </button>
+                </form>
+                {% endif %}
+            </td>
+            <td>{{ loop.index }}</td>
+            <td>{{ r.reception_no or r.id }}</td>
+            <td>{{ r.reception_date or '—' }}</td>
+            <td>{{ r.customer_name }}</td>
+            <td>{{ r.serial_number or '—' }}</td>
+            <td>{{ r.device_type or '—' }}</td>
+            <td>{{ r.device_model or r.model or '—' }}</td>
+            <td>{{ r.province or '—' }}</td><td>{{ r.county or '—' }}</td><td>{{ r.city or '—' }}</td>
+            <td>{{ r.city or '—' }}</td>
+            <td>{{ r.assigned_technician or '—' }}</td>
+            <td>{% if r.is_delayed %}<span class="delay-badge">تأخیر</span>{% endif %}<span class="badge">{{ r.status }}</span></td>
+            <td><strong {% if r.is_delayed %}style="color:var(--danger-text)"{% endif %}>{{ r.days_in_status if r.days_in_status is defined else '—' }}</strong></td>
+            <td>{{ r.invoice_number or '—' }}</td>
+            <td>{{ r.carrier_name or r.shipping_method or '—' }}</td>
+            <td>{{ r.carrier_delivery_date or '—' }}</td>
+            <td>{{ r.tracking_number or '—' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+    {% endif %}
+</div>
+
+{% include '_pagination.html' %}
+{% endblock %}

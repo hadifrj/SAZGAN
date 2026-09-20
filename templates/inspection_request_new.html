@@ -1,0 +1,65 @@
+{% extends "embed_base.html" if (embed or request.args.get("embed") in ["1","true","yes"]) else "base.html" %}
+{% block title %}سازگان | درخواست بازدید{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="list-header-row">
+            <span>ثبت درخواست بررسی و بازدید</span>
+            {% if embed or request.args.get("embed") in ["1","true","yes"] %}
+            {% set back_url = request.args.get('back') or '/service/inspection/list' %}
+            {% include '_page_nav_icons.html' %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {% import '_rq_section_macro.html' as rq %}
+            {% set rq_ns = namespace(n=0) %}
+            {% set date_label = 'تاریخ درخواست (شمسی)' %}
+            {% set show_serial = false %}
+            {% set show_device = false %}
+            {% set show_warranty = false %}
+            {% set tech_label = 'نماینده' %}
+            {% set problem_name = 'hospital_request_desc' %}
+            {% set problem_label = 'شرح درخواست بیمارستان' %}
+            {% include '_common_request_fields.html' %}
+
+            <div class="rq-acc">
+            {% call rq.section(rq_ns, 'جزئیات بازدید', icon='🔍') %}
+                <div class="form-grid">
+                <div>
+                    <label>نوع بازدید</label>
+                    <select name="is_paid_visit" class="field-select">
+                        <option value="0">رایگان (دوره گارانتی)</option>
+                        <option value="1">غیررایگان (نیاز به پیش‌فاکتور)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>نوع دستگاه برای بازدید</label>
+                    <input type="text" name="visit_device_type" list="dt-list">
+                    <datalist id="dt-list">
+                        {% for dt in device_types or [] %}
+                        <option value="{{ dt.device_type if dt.device_type is defined else dt }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div>
+                    <label>تعداد دستگاه</label>
+                    <input type="number" name="visit_device_count" min="1" value="1">
+                </div>
+                </div>
+            {% endcall %}
+            </div>
+
+            {% if embed %}
+            <div class="form-actions-sticky">
+                <button type="submit" class="btn">ثبت درخواست بازدید</button>
+            </div>
+            {% else %}
+            <div class="form-actions-sticky"><button type="submit" class="btn">ثبت درخواست بازدید</button></div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% include '_common_request_scripts.html' %}
+{% endblock %}

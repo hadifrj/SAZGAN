@@ -1,0 +1,151 @@
+{# فیلدهای مشترک فرم‌های ثبت درخواست
+   متغیرهای اختیاری:
+   date_label, show_serial, show_device, show_warranty, show_tech, tech_label,
+   filter_tech_province, problem_name, problem_label, problem_required
+
+   شماره‌گذاری بخش‌ها با rq_ns (namespace) خودکار انجام می‌شود — اگر بخشی از فرم
+   (مثلاً «دستگاه») غیرفعال باشد یا فرم صداکننده بعداً بخش تازه‌ای اضافه کند،
+   شماره‌ها خودشان تنظیم می‌شوند و نیازی به دست‌کاری عدد ثابت نیست.
+#}
+{% import '_rq_section_macro.html' as rq %}
+{% if rq_ns is not defined %}{% set rq_ns = namespace(n=0) %}{% endif %}
+
+{% set date_label = date_label if date_label is defined else 'تاریخ ثبت (شمسی)' %}
+{% set show_serial = true if show_serial is not defined else show_serial %}
+{% set show_device = true if show_device is not defined else show_device %}
+{% set show_warranty = true if show_warranty is not defined else show_warranty %}
+{% set show_tech = true if show_tech is not defined else show_tech %}
+{% set tech_label = tech_label if tech_label is defined else 'تکنسین مسئول' %}
+{% set filter_tech_province = filter_tech_province if filter_tech_province is defined else false %}
+{% set problem_name = problem_name if problem_name is defined else 'hospital_request_desc' %}
+{% set problem_label = problem_label if problem_label is defined else 'شرح درخواست / اعلام خرابی' %}
+{% set problem_required = true if problem_required is not defined else problem_required %}
+{% set show_problem = true if show_problem is not defined else show_problem %}
+
+<div class="rq-acc">
+
+{% call rq.section(rq_ns, 'مشتری و محل نصب', icon='👤') %}
+    <div class="form-grid">
+    <div>
+        <label>{{ date_label }}</label>
+        <input type="text" name="recep_date" class="field-select jalali-date" value="{{ today_year }}/{{ '%02d'|format(today_month) }}/{{ '%02d'|format(today_day) }}" placeholder="1405/01/01" autocomplete="off" dir="ltr" style="max-width:160px;">
+    </div>
+    <div class="customer-field-block ">
+<label>نام مشتری (طرف حساب)</label>
+        <select name="customer_id" id="customer_id" class="cp-source" onchange="fillCustomer()" tabindex="-1" aria-hidden="true">
+            <option value="">—</option>
+            {% for c in customers %}
+            <option value="{{ c.id }}" data-name="{{ c.name }}" data-province="{{ c.province or '' }}" data-county="{{ c.county or '' }}" data-city="{{ c.city or '' }}">{{ c.name }}{% if c.province %} — {{ c.province }}{% endif %}{% if c.city %} / {{ c.city }}{% endif %}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="customer_name" id="customer_name" class="cp-name" required readonly placeholder="از دکمه نام مشتری انتخاب کنید" autocomplete="off" autocomplete="organization">
+    </div>
+
+    <div>
+        <label>استان <span style="font-weight:500;color:var(--text-muted);font-size:11px;">(با انتخاب مشتری خودکار)</span></label>
+        <input type="text" name="province" id="province" class="field-select" required placeholder="استان" autocomplete="address-level1"
+            onchange="{% if filter_tech_province %}if(typeof filterTechs==='function')filterTechs();{% endif %}">
+    </div>
+    <div>
+        <label>شهرستان</label>
+        <input type="text" name="county" id="county" class="field-select" placeholder="شهرستان" autocomplete="address-level2">
+    </div>
+    <div>
+        <label>شهر</label>
+        <input type="text" name="city" id="city" class="field-select" placeholder="شهر" autocomplete="address-level2">
+    </div>
+    <div class="field-full">
+        <label>آدرس</label>
+        <input type="text" name="customer_address" id="customer_address" autocomplete="street-address">
+    </div>
+
+    <div>
+        <label>کارشناس تجهیزات</label>
+        <input type="text" name="equipment_manager_name" id="equipment_manager_name">
+    </div>
+    <div>
+        <label>موبایل کارشناس تجهیزات</label>
+        <input type="text" name="equipment_manager_mobile" id="equipment_manager_mobile" inputmode="tel">
+    </div>
+    <div>
+        <label>نام تماس (اختیاری)</label>
+        <input type="text" name="contact_name" placeholder="اختیاری">
+    </div>
+    <div>
+        <label>شماره تماس (اختیاری)</label>
+        <input type="text" name="contact_phone" id="contact_phone" placeholder="اختیاری" inputmode="tel">
+        <input type="hidden" name="customer_phone" id="customer_phone_hidden">
+    </div>
+    </div>
+{% endcall %}
+
+{% if show_serial or show_device or show_warranty %}
+{% call rq.section(rq_ns, 'دستگاه', icon='🖥️') %}
+    <div class="form-grid">
+    {% if show_serial %}
+    <div>
+        <label>سریال دستگاه</label>
+        <input type="text" name="serial_number" id="serial_number" onblur="lookupWarranty()" placeholder="با ورود سریال، اطلاعات کالا می‌آید" autocomplete="off">
+        <div id="serial-hint" class="field-hint"></div>
+    </div>
+    {% endif %}
+    {% if show_device %}
+    <div>
+        <label>نوع دستگاه</label>
+        <input type="text" name="device_type" id="device_type" list="device-types" placeholder="نوع دستگاه">
+        <datalist id="device-types">
+            {% for dt in device_types or [] %}
+            <option value="{{ dt.device_type if dt.device_type is defined else dt }}">
+            {% endfor %}
+        </datalist>
+    </div>
+    <div>
+        <label>مدل دستگاه</label>
+        <input type="text" name="device_model" id="device_model" placeholder="مدل دستگاه">
+    </div>
+    {% endif %}
+    {% if show_warranty %}
+    <div>
+        <label>تاریخ نصب</label>
+        <input type="text" name="installation_date" id="installation_date" placeholder="۱۴۰۵/۰۱/۱۵">
+    </div>
+    <div>
+        <label>تاریخ اتمام گارانتی</label>
+        <input type="text" name="warranty_end_date" id="warranty_end_date" placeholder="۱۴۰۵/۰۱/۱۵">
+    </div>
+    {% endif %}
+    </div>
+{% endcall %}
+{% endif %}
+
+{% if show_tech or show_problem %}
+{% call rq.section(rq_ns, 'شرح مشکل', icon='📝') %}
+    <div class="form-grid">
+    {% if show_tech %}
+    <div class="{% if not show_serial or not show_device %}field-full{% endif %}">
+        <label>{{ tech_label }}</label>
+        <select name="assigned_technician" id="assigned_technician" class="field-select">
+            <option value="">— انتخاب کنید —</option>
+            {% for t in technicians or [] %}
+            <option value="{{ t.id }}" data-province="{{ t.province if t.province else '' }}">
+                {{ t.full_name }}{% if t.province %} — {{ t.province }}{% endif %}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    {% if show_problem %}
+    <div class="field-full">
+        {% set target_id = problem_name ~ '_ta' %}
+        {% set presets = ready_texts_problem if ready_texts_problem is defined else [] %}
+        {% set label = problem_label %}
+        {% set codes_field = problem_name ~ '_codes' %}
+        {% include '_ready_text_picker.html' %}
+        <textarea name="{{ problem_name }}" id="{{ problem_name }}_ta" {% if problem_required %}required{% endif %} rows="3" placeholder="{{ problem_label }}"></textarea>
+    </div>
+    {% endif %}
+    </div>
+{% endcall %}
+{% endif %}
+
+</div>

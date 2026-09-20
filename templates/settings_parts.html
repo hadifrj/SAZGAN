@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}سازگان | لیست قطعات{% endblock %}
+{% block content %}
+
+{% set products_active = 'parts' %}
+{% include '_settings_products_tabs.html' %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="list-header-row">
+                <span>لیست قطعات ({{ parts|length }})</span>
+                <div class="list-header-actions">
+                    <a href="/settings/parts/export" class="btn-export">خروجی اکسل</a>
+                    <button type="button" class="btn" onclick="openModal('add-part-modal')">+ افزودن قطعه</button>
+                </div>
+            </div>
+        </div>
+        {% if parts|length == 0 %}
+            <div class="empty-state">هنوز قطعه‌ای ثبت نشده است.</div>
+        {% else %}
+        <table>
+            <tr>
+                <th>ردیف</th>
+                <th>کد انبار</th>
+                <th>نام قطعه</th>
+                <th>نوع دستگاه</th>
+                <th>مدل دستگاه</th>
+                <th>عملیات</th>
+            </tr>
+            {% for p in parts %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.warehouse_code if p.warehouse_code else '—' }}</td>
+                <td>{{ p.part_name }}</td>
+                <td>{{ p.device_type if p.device_type else '—' }}</td>
+                <td>{{ p.device_model if p.device_model else '—' }}</td>
+                <td>
+                    <form method="POST" action="/settings/parts/delete/{{ p.id }}" style="display:inline" onsubmit="return confirm('آیا از حذف این قطعه مطمئن هستید؟')">
+                        <button type="submit" class="btn-delete">حذف</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+
+    
+
+    <div class="modal-overlay" id="add-part-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>افزودن قطعه جدید</span>
+                <button type="button" class="modal-close" onclick="closeModal('add-part-modal')"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    <div class="form-grid">
+                        <div>
+                            <label>کد انبار</label>
+                            <input type="text" name="warehouse_code">
+                        </div>
+                        <div>
+                            <label>نام قطعه</label>
+                            <input type="text" name="part_name" required>
+                        </div>
+                        <div>
+                            <label>نوع دستگاه</label>
+                            <input type="text" name="device_type" list="device-types-list">
+                            <datalist id="device-types-list">
+                                {% for dt in devices|map(attribute='device_type')|unique %}
+                                <option value="{{ dt }}">
+                                {% endfor %}
+                            </datalist>
+                        </div>
+                        <div>
+                            <label>مدل دستگاه</label>
+                            <input type="text" name="device_model" list="device-models-list">
+                            <datalist id="device-models-list">
+                                {% for d in devices %}
+                                <option value="{{ d.model }}">
+                                {% endfor %}
+                            </datalist>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">افزودن</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+
+
+<script src="/static/js/display-boot.js?v={{ app_version|default("1") }}"></script>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+    <title>{% block title %}{{ company_name or 'سازگان' }} — خدمات پس از فروش{% endblock %}</title>
+
+    {# —— SEO پایه (بدون self.block — امن برای همه نسخه‌های Jinja) —— #}
+    {% set _seo_name = company_name if company_name is defined and company_name else 'سازگان' %}
+    {% set _seo_desc = 'سامانه خدمات پس از فروش ' ~ _seo_name ~ ' — مدیریت پذیرش، تعمیر، نصب، گارانتی و پشتیبانی.' %}
+    {% set _seo_base = (request.url_root|string).rstrip('/') if request is defined else '' %}
+    <meta name="description" content="{% block meta_description %}{{ _seo_desc }}{% endblock %}">
+    <meta name="robots" content="{% block meta_robots %}noindex, nofollow, noarchive{% endblock %}">
+    <meta name="googlebot" content="{% block meta_googlebot %}noindex, nofollow, noarchive{% endblock %}">
+    <link rel="canonical" href="{% block canonical %}{{ _seo_base }}{{ request.path if request is defined else '/' }}{% endblock %}">
+    <meta name="author" content="{{ _seo_name }}">
+    <meta name="language" content="fa">
+    <meta http-equiv="content-language" content="fa-IR">
+
+    {# Open Graph #}
+    <meta property="og:locale" content="fa_IR">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="{{ _seo_name }}">
+    <meta property="og:title" content="{% block og_title %}{{ _seo_name }} — خدمات پس از فروش{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ _seo_desc }}{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ _seo_base }}{{ request.path if request is defined else '/' }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ _seo_base }}/static/icons/icon-512.png{% endblock %}">
+
+    {# Twitter Card #}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ _seo_name }} — خدمات پس از فروش{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ _seo_desc }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ _seo_base }}/static/icons/icon-512.png{% endblock %}">
+
+    {# Preload بحرانی برای سرعت First Paint #}
+    <link rel="preload" href="/static/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/css/core-bundle.min.css?v={{ app_version|default("1") }}" as="style">
+    <link rel="preload" href="/static/fonts/Vazirmatn-Bold.woff2" as="font" type="font/woff2" crossorigin>
+
+    {# فاز ۲: باندل CSS — ۷ فایل همیشه‌لود قبلی حالا یک فایل با همون ترتیب import هستن
+       (core-bundle.min.css)؛ فایل‌های تکی برای rollback در static/css/ باقی موندن. #}
+    <link rel="stylesheet" href="/static/css/core-bundle.min.css?v={{ app_version|default("1") }}">
+    {# settings-bundle فقط در مسیر تنظیمات — جایگزین ۳ فایل شرطی قبلی #}
+    {% if request.path.startswith('/settings') %}
+    <link rel="stylesheet" href="/static/css/settings-bundle.min.css?v={{ app_version|default("1") }}">
+    {% endif %}
+    
+    {% block extra_head %}{% endblock %}
+    {# نکته برای آینده: extra_head فعلاً هیچ‌جا برای override کردن CSS استفاده نمی‌شه
+       (بررسی شد، صفر استفاده در کل تمپلیت‌ها) — اگر یک روز ازش برای override استفاده
+       بشه، ترتیبش نسبت به core-bundle.min.css بالا فرق می‌کنه با قبل از باندل‌سازی. #}
+    <meta name="csrf-token" content="{{ csrf_token or session.get('csrf_token', '') }}">
+
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <meta name="theme-color" content="#0c4a6e">
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="{{ company_name or 'سازگان' }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png">
+    <meta name="application-name" content="{{ company_name or 'سازگان' }}">
+
+
+{# فاز ۲: باندل CSS — تم/ریسپانسیو/کارت داخل core-bundle.min.css بالا ادغام شدن؛
+   color-picker/section-accents هم داخل settings-bundle.min.css (بالا) هستن. #}
+
+<style id="sazgan-header-collapsed-brand">
+/* ارتفاع مشترک هدر و نوار بالای سایدبار تا نام هم‌تراز بماند */
+:root { --sazgan-header-h: 60px; }
+
+#header-brand-collapsed { display: none !important; }
+body.show-header-brand #header-brand-collapsed {
+  display: flex !important;
+  align-items: center !important;
+  height: 100%;
+}
+@media (max-width: 900px) {
+  #header-brand-collapsed { display: none !important; }
+}
+
+/* نوار بالای سایدبار = همان ارتفاع هدر */
+.sidebar-top-bar.sidebar-brand {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  direction: rtl;
+  box-sizing: border-box !important;
+  height: var(--sazgan-header-h) !important;
+  min-height: var(--sazgan-header-h) !important;
+  max-height: var(--sazgan-header-h) !important;
+  padding: 0 14px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  gap: 10px;
+  flex-shrink: 0;
+}
+.sidebar.sidebar-menu-only {
+  padding-top: 0 !important;
+}
+.sidebar.sidebar-menu-only .sidebar-top-bar {
+  margin-top: 0 !important;
+}
+
+/* تایپوگرافی یکسان نام در سایدبار و هدر */
+.sidebar-top-bar .brand-name,
+.app-header .ah-brand-name {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  color: var(--text, #0f172a) !important;
+}
+.sidebar-top-bar .brand-sub,
+.app-header .ah-brand-sub {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  color: var(--text-muted, #64748b) !important;
+}
+.sidebar-top-bar .sidebar-brand-text,
+.app-header .ah-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  justify-content: center;
+}
+.sidebar-top-bar .sidebar-toggle {
+  color: var(--text, #0f172a) !important;
+  width: 36px;
+  height: 36px;
+}
+
+/* جلوگیری از Flicker قبل از اجرای base-ui.js:
+   کلاس روی <html> در head ثبت می‌شود و عرض collapsed را از همان اولین paint اعمال می‌کند. */
+html.sidebar-is-collapsed #sidebar.sidebar {
+  width: 72px !important;
+  min-width: 72px !important;
+  max-width: 72px !important;
+}
+html.sidebar-is-collapsed #sidebar.sidebar .sidebar-brand-text,
+html.sidebar-is-collapsed #sidebar.sidebar .sidebar-brand-link {
+  display: none !important;
+}
+html.sidebar-is-collapsed #sidebar.sidebar .sidebar-top-bar {
+  justify-content: center !important;
+}
+html.sidebar-is-collapsed #sidebar.sidebar .sidebar-link-text,
+html.sidebar-is-collapsed #sidebar.sidebar .sidebar-submenu {
+  display: none !important;
+}
+html.sidebar-is-collapsed #sidebar.sidebar .sidebar-link {
+  justify-content: center !important;
+  padding: 11px 0 !important;
+}
+html.sidebar-is-collapsed #header-brand-collapsed {
+  display: flex !important;
+  align-items: center !important;
+  height: 100%;
+}
+
+/* هدر هم همان ارتفاع ثابت */
+.app-header.topbar {
+  box-sizing: border-box !important;
+  height: var(--sazgan-header-h) !important;
+  min-height: var(--sazgan-header-h) !important;
+  max-height: var(--sazgan-header-h) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  align-items: center !important;
+}
+
+.sidebar.collapsed .sidebar-brand-text,
+.sidebar.collapsed .sidebar-brand-link { display: none !important; }
+.sidebar.collapsed .sidebar-top-bar { justify-content: center !important; }
+.topbar .ah-menu-toggle,
+.topbar .mobile-menu-btn { display: none !important; }
+
+.ah-hamburger-btn{
+  display:none;
+  align-items:center;justify-content:center;
+  width:40px;height:40px;flex-shrink:0;
+  border:1px solid var(--border,#e2e8f0);border-radius:10px;
+  background:var(--bg,#f8fafc);color:var(--text,#0f172a);
+  cursor:pointer;
+  padding:0;
+}
+.ah-hamburger-btn:hover{background:var(--bg-muted,#f1f5f9);}
+.ah-hamburger-btn svg{width:22px;height:22px;display:block;}
+@media (max-width:900px){
+  /* فقط یک همبرگر: در هدر */
+  .ah-hamburger-btn{display:inline-flex !important;}
+  .app-header.topbar{display:flex !important;align-items:center;gap:8px;}
+  /* همبرگر داخل سایدبار در موبایل مخفی — جلوگیری از دوتا شدن */
+  .sidebar-toggle,
+  .sidebar .sidebar-toggle,
+  .sidebar.mobile-open .sidebar-toggle{
+    display:none !important;
+  }
+  /* کنتراست متن سایدبار موبایل (حتی اگر تم روشن باشد) */
+  .sidebar,
+  #sidebar.sidebar{
+    background:#0f172a !important;
+    color:#f8fafc !important;
+  }
+  .sidebar .sidebar-link,
+  .sidebar .sidebar-link-text,
+  .sidebar .brand-name,
+  .sidebar .brand-sub,
+  .sidebar .sidebar-brand-text{
+    color:#e2e8f0 !important;
+  }
+  .sidebar .sidebar-link.active{
+    background:rgba(255,255,255,.12) !important;
+    color:#fff !important;
+  }
+  .sidebar .sidebar-link .ui-icon{
+    color:#e2e8f0 !important;
+    stroke:#e2e8f0 !important;
+  }
+  .sidebar .sidebar-link.active .ui-icon{
+    color:#fff !important;
+    stroke:#fff !important;
+  }
+}
+</style>
+
+<script id="sazgan-sidebar-state-bootstrap">
+/*
+ * Pre-paint sidebar state:
+ * Restore the persisted desktop collapsed state before the first paint.
+ * This deliberately uses <html> so it works before <body>/<aside> exists.
+ * Active navigation is server-rendered separately and never controls this state.
+ */
+(function () {
+  try {
+    var desktop = window.matchMedia ? window.matchMedia('(min-width: 901px)').matches : window.innerWidth >= 901;
+    if (!desktop) return;
+    if (window.localStorage && localStorage.getItem('sazgan-sidebar-collapsed') === '1') {
+      document.documentElement.classList.add('sidebar-is-collapsed');
+    }
+  } catch (e) {}
+})();
+</script>
+</head>
+
+{% set _body_rp = request.path if request else '' %}
+{% set _section = '' %}
+{% if active_page == 'cartable' or active_page == 'home' %}{% set _section = 'cartable' %}
+{% elif active_page == 'support-inbox' %}{% set _section = 'support' %}
+{% elif active_page and (active_page.startswith('ca-') or active_page.startswith('service-')) %}{% set _section = 'customer' %}
+{% elif active_page and 'warehouse' in active_page %}{% set _section = 'warehouse' %}
+{% elif (active_page and ('finance' in active_page or 'wage' in active_page)) or (_body_rp and _body_rp.startswith('/settings/wages')) %}{% set _section = 'finance' %}
+{% elif active_page and ('report' in active_page or active_page == 'manager-dashboard' or active_page == 'dashboard') %}{% set _section = 'reports' %}
+{% elif active_page and ('settings' in active_page or active_page == 'audit-filter') %}{% set _section = 'settings' %}
+{% endif %}
+<body{% if current_user %} data-user-logged-in="1"{% endif %} data-app-version="{{ app_version|default("") }}" data-section="{{ _section }}">
+<div id="sazgan-install-prompt" class="sazgan-install-prompt" hidden aria-live="polite">
+  <button class="sazgan-install-close" type="button" aria-label="بستن" data-sazgan-install-close>×</button>
+  <div class="sazgan-install-prompt__text"><div class="sazgan-install-prompt__title">نصب سازگان</div><div class="sazgan-install-prompt__desc">برای دسترسی سریع، سازگان را به صفحه اصلی اضافه کنید.</div></div>
+  <button id="sazgan-install-btn" class="sazgan-install-btn" type="button">نصب برنامه</button>
+</div>
+
+    <div id="page-loading-bar"></div>
+    <div class="app-shell">
+        <aside class="sidebar sidebar-menu-only" id="sidebar">
+            <div class="sidebar-top-bar sidebar-brand">
+                <button type="button" class="sidebar-toggle" onclick="toggleSidebar()" title="باز/بسته کردن منو" aria-label="منو" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--border,#e2e8f0);border-radius:8px;cursor:pointer;background:var(--bg,#f8fafc);color:var(--text,#0f172a);flex-shrink:0;order:0;">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+                </button>
+                <a href="/cartable" class="sidebar-brand-link" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;min-width:0;flex:1;order:1;">
+                    <span class="sidebar-brand-text" style="display:flex;flex-direction:column;min-width:0;line-height:1.25;text-align:right;">
+                        <span class="brand-name" style="font-weight:700;font-size:14px;color:var(--text,#0f172a) !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ company_name or 'سازگان' }}</span>
+                        <span class="brand-sub" style="font-size:11px;color:var(--text-muted,#64748b) !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">خدمات پس از فروش</span>
+                    </span>
+                </a>
+            </div>
+
+            {% set _rp = request.path if request else '' %}
+
+            <!-- ============ سایدبار اصلی ============ -->
+            <nav class="sidebar-nav is-main-sidebar">
+                {% set _is_tech_role = current_user.role in ['تکنسین کارخانه', 'تکنسین استانی', 'کنترل کیفیت'] %}
+                <a href="/cartable" class="sidebar-link {% if active_page == 'cartable' or active_page == 'home' %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 12V5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v7"/><rect x="3" y="12" width="18" height="7" rx="1"/></svg></span><span class="sidebar-link-text">{% if _is_tech_role %}وظایف من{% else %}کارتابل{% endif %}{% if cartable_open_count %} ({{ cartable_open_count if cartable_open_count < 100 else '99+' }}){% endif %}</span>
+                </a>
+                <a href="/search" class="sidebar-link {% if active_page == 'search' %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.3" y1="16.3" x2="21" y2="21"/></svg></span><span class="sidebar-link-text">جستجو</span>
+                </a>
+                <a href="/support/inbox" class="sidebar-link {% if active_page == 'support-inbox' %}active{% endif %}" title="گفتگوی مشتری">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0z"/></svg></span><span class="sidebar-link-text">گفتگوی مشتری</span>
+                </a>
+                <a href="/notifications" class="sidebar-link {% if active_page == 'notifications' %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span><span class="sidebar-link-text">اعلان‌ها{% if unread_notifications %} ({{ unread_notifications }}){% endif %}</span>
+                </a>
+
+                {% if can_access('customer_affairs') %}
+                <a href="/customer-affairs" class="sidebar-link {% if active_page and (active_page.startswith('ca-') or active_page.startswith('service-')) %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-2-1.3L14 21l-2-1.3L10 21l-2-1.3L6 21z"/><line x1="8.5" y1="8" x2="15.5" y2="8"/><line x1="8.5" y1="11.5" x2="15.5" y2="11.5"/><line x1="8.5" y1="15" x2="13" y2="15"/></svg></span><span class="sidebar-link-text">امور مشتریان</span>
+                </a>
+                {% endif %}
+
+                {% if can_access('warehouse') %}
+                <a href="/warehouse" class="sidebar-link {% if active_page and 'warehouse' in active_page %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><line x1="12" y1="11" x2="12" y2="21"/></svg></span><span class="sidebar-link-text">رهگیری قطعات</span>
+                </a>
+                {% endif %}
+
+                {% if can_access('finance') %}
+                <a href="/finance" class="sidebar-link {% if (active_page and ('finance' in active_page or 'wage' in active_page)) or (_rp and _rp.startswith('/settings/wages')) %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9.3c0-1.1 1.3-1.8 3-1.8s3 .7 3 1.8-1.3 1.3-3 1.7-3 .8-3 1.9 1.3 1.8 3 1.8 3-.7 3-1.8"/><line x1="12" y1="5.5" x2="12" y2="7.2"/><line x1="12" y1="16.8" x2="12" y2="18.5"/></svg></span><span class="sidebar-link-text">امور مالی</span>
+                </a>
+                {% endif %}
+
+                {% if can_access('reports') or can_access('dashboard') %}
+                <a href="/reports" class="sidebar-link {% if active_page and ('report' in active_page or active_page == 'manager-dashboard' or active_page == 'dashboard') %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span><span class="sidebar-link-text">گزارش‌ها</span>
+                </a>
+                {% endif %}
+
+                {% if can_access('parties') or can_access('system') or can_access('products') %}
+                <a href="/settings/hub" class="sidebar-link {% if active_page and ('settings' in active_page or active_page == 'audit-filter') %}active{% endif %}">
+                    <span class="sidebar-link-icon"><svg class="ui-icon lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 21.4 12.0 L 21.2 13.8 L 19.0 14.9 L 18.3 16.2 L 18.6 18.6 L 17.2 19.8 L 14.9 19.0 L 13.5 19.5 L 12.0 21.4 L 10.2 21.2 L 9.1 19.0 L 7.8 18.3 L 5.4 18.6 L 4.2 17.2 L 5.0 14.9 L 4.5 13.5 L 2.6 12.0 L 2.8 10.2 L 5.0 9.1 L 5.7 7.8 L 5.4 5.4 L 6.8 4.2 L 9.1 5.0 L 10.5 4.5 L 12.0 2.6 L 13.8 2.8 L 14.9 5.0 L 16.2 5.7 L 18.6 5.4 L 19.8 6.8 L 19.0 9.1 L 19.5 10.5 Z"/><circle cx="12" cy="12" r="3.2"/></svg></span><span class="sidebar-link-text">تنظیمات</span>
+                </a>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="javascript:void(0)" onclick="showVersionInfo()" class="sidebar-footer-version" title="{{ app_build_info }}">نسخه {{ app_version_label }}</a>
+            </div>
+
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar topbar-with-search mobile-topbar-v2 app-header">
+                <div class="topbar-brand-group header-brand-when-collapsed" id="header-brand-collapsed">
+                    <a href="/cartable" class="ah-brand-link" style="text-decoration:none;">
+                        <span class="ah-brand-text">
+                            <span class="ah-brand-name">{{ company_name or 'سازگان' }}</span>
+                            <span class="ah-brand-sub">خدمات پس از فروش</span>
+                        </span>
+                    </a>
+                </div>
+
+                <form class="ah-search" action="/search" method="get" role="search">
+                    <span class="ah-search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="20.5" y2="20.5"/></svg></span>
+                    <input type="search" name="q" placeholder="جستجو در مشتریان، درخواست‌ها و سریال" autocomplete="off">
+                </form>
+
+                <div class="ah-tools">
+                    <span class="ah-date" title="{{ header_date }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+                        <span class="ah-date-text">{{ header_date }}</span>
+                    </span>
+
+                    <a href="/support/inbox" class="ah-icon-btn" title="گفتگوی مشتری" aria-label="گفتگوی مشتری">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0z"/></svg>
+                    </a>
+
+                    <a href="/cartable" class="ah-icon-btn" title="کارتابل من" aria-label="کارتابل من">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 12V5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v7"/><rect x="3" y="12" width="18" height="7" rx="1"/></svg>
+                        {% if cartable_open_count %}<span class="ah-badge">{{ cartable_open_count if cartable_open_count < 100 else '99+' }}</span>{% endif %}
+                    </a>
+
+                    <a href="/notifications" class="ah-icon-btn" title="اعلان‌ها" aria-label="اعلان‌ها">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+                        {% if unread_notifications %}<span class="ah-badge">{{ unread_notifications if unread_notifications < 100 else '99+' }}</span>{% endif %}
+                    </a>
+
+                    <div class="ah-user-menu" id="ah-user-menu">
+                        <button type="button" class="ah-user-toggle" id="ah-user-toggle-btn" onclick="toggleAhUserMenu()" aria-haspopup="true" aria-expanded="false">
+                            <span class="ah-avatar">
+                                {% if current_user.photo_filename %}
+                                <img src="/static/uploads/users/{{ current_user.photo_filename }}" alt="">
+                                {% else %}
+                                <span class="ah-avatar-fallback"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
+                                {% endif %}
+                            </span>
+                            <span class="ah-user-info">
+                                <span class="ah-user-name">{{ current_user.full_name or current_user.username }}</span>
+                                {% if current_user.role %}<span class="ah-user-role">{{ current_user.role }}</span>{% endif %}
+                            </span>
+                            <svg class="ah-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="ah-dropdown" id="ah-dropdown" hidden>
+                            <a href="/account"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg> حساب کاربری</a>
+                            <a href="/notifications">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+                                اعلان‌ها{% if unread_notifications %} ({{ unread_notifications if unread_notifications < 100 else '99+' }}){% endif %}
+                            </a>
+                            <a href="/settings/hub"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M 21.4 12.0 L 21.2 13.8 L 19.0 14.9 L 18.3 16.2 L 18.6 18.6 L 17.2 19.8 L 14.9 19.0 L 13.5 19.5 L 12.0 21.4 L 10.2 21.2 L 9.1 19.0 L 7.8 18.3 L 5.4 18.6 L 4.2 17.2 L 5.0 14.9 L 4.5 13.5 L 2.6 12.0 L 2.8 10.2 L 5.0 9.1 L 5.7 7.8 L 5.4 5.4 L 6.8 4.2 L 9.1 5.0 L 10.5 4.5 L 12.0 2.6 L 13.8 2.8 L 14.9 5.0 L 16.2 5.7 L 18.6 5.4 L 19.8 6.8 L 19.0 9.1 L 19.5 10.5 Z"/><circle cx="12" cy="12" r="3.2"/></svg> تنظیمات</a>
+                            <a href="/logout" class="ah-drop-danger"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> خروج</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mobile-topbar-main">
+                    <button type="button" class="ah-hamburger-btn" onclick="openMobileSidebar()" title="منو" aria-label="باز کردن منو">
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+                    </button>
+                    <div class="mobile-topbar-brand">
+                        <span class="mobile-topbar-brand-name">{{ company_name or 'سازگان' }}</span>
+                        <span class="mobile-topbar-brand-sub">خدمات پس از فروش</span>
+                    </div>
+
+                    <div class="mobile-topbar-side-icons">
+                        <a href="/notifications" class="mobile-topbar-bell" aria-label="اعلان‌ها">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+                            {% if unread_notifications %}<span class="mobile-topbar-bell-badge">{{ unread_notifications if unread_notifications < 100 else '99+' }}</span>{% endif %}
+                        </a>
+
+                        <a href="/account" class="mobile-topbar-avatar" title="حساب کاربری">
+                            {% if current_user.photo_filename %}
+                            <img class="mobile-topbar-avatar-img" src="/static/uploads/users/{{ current_user.photo_filename }}" alt="">
+                            {% else %}
+                            <span class="mobile-topbar-avatar-fallback">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4"/>
+                                    <path d="M4 21v-1a8 8 0 0 1 16 0v1"/>
+                                </svg>
+                            </span>
+                            {% endif %}
+                        </a>
+                    </div>
+
+                    <span class="mobile-topbar-user-name">{{ current_user.full_name or current_user.username }}</span>
+                </div>
+
+                <div class="mobile-topbar-kebab">
+                    <button type="button" class="mobile-topbar-kebab-btn" id="mobile-topbar-kebab-btn" onclick="toggleMobileKebab()" aria-label="منوی بیشتر">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                    </button>
+                    <div class="mobile-topbar-kebab-panel" id="mobile-topbar-kebab-panel">
+                        <a href="/account">حساب کاربری</a>
+                        <a href="/notifications">اعلان‌ها{% if unread_notifications %} ({{ unread_notifications if unread_notifications < 100 else '99+' }}){% endif %}</a>
+                        <a href="/settings/hub">تنظیمات</a>
+                        <a href="/logout" class="danger">خروج</a>
+                    </div>
+                </div>
+            </header>
+<div class="container">
+                {# نوار سراسری برگشت + خانه — همه صفحات به‌جز خانه #}
+                {% set _path = request.path if request is defined else '' %}
+                {% set _hide_global_nav = (_path == '/' or _path == '' or (active_page is defined and active_page == 'home')) %}
+                {% if not _hide_global_nav %}
+                <div class="sg-global-nav" id="sg-global-nav" aria-label="ناوبری سراسری">
+                  {# صفحه‌ها می‌توانند با override کردن این بلاک‌ها مقصد برگشت اختصاصی خودشان را تعیین کنند #}
+                  {% set _page_back = self.page_back_url()|trim %}
+                  {% set back_url = _page_back %}
+                  {% set _page_home_flag = self.page_show_home()|trim %}
+                  {% set show_home = (_page_home_flag != 'false') %}
+                  {% set _page_home = self.page_home_url()|trim %}
+                  {% set home_url = (_page_home if _page_home else '/') %}
+                  {% include '_page_nav_icons.html' %}
+                </div>
+                {% endif %}
+{% block content %}{% endblock %}
+{% block page_back_url %}{% endblock %}
+{% block page_show_home %}{% endblock %}
+{% block page_home_url %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <button type="button" class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()" aria-label="بستن منو"></button>
+
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="ناوبری پایین">
+        <div class="bn-sheet" id="bn-sheet">
+            <div class="bn-handle" id="bn-handle" role="button" tabindex="0" aria-label="باز و بسته کردن منوی بیشتر" aria-expanded="false">
+                <span class="bn-handle-bar"></span>
+            </div>
+            <!-- ردیف ۱: همیشه دیده می‌شود -->
+            <div class="bn-main-row" id="bn-main-row">
+                <a href="/cartable" class="bn-item {% if active_page in ['cartable','home'] %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 12V5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v7"/><rect x="3" y="12" width="18" height="7" rx="1"/></svg>
+                    <span>کارتابل{% if cartable_open_count %} ({{ cartable_open_count if cartable_open_count < 100 else '99+' }}){% endif %}</span>
+                </a>
+                <a href="/search" class="bn-item {% if active_page == 'search' %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.3" y1="16.3" x2="21" y2="21"/></svg>
+                    <span>جستجو</span>
+                </a>
+
+                <div class="bn-center-wrap">
+                    <a href="/contacts" class="bn-item {% if active_page == 'contacts' %}active{% endif %}" id="bn-center-drag">
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>مخاطبین</span>
+                    </a>
+                </div>
+
+                <a href="/quick-report-upload" class="bn-item {% if active_page in ['quick_report', 'quick-report-upload'] %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    <span>گزارش سریع</span>
+                </a>
+                <a href="/my-wages" class="bn-item {% if active_page == 'my-wages' %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    <span>دستمزد من</span>
+                </a>
+            </div>
+            <!-- ردیف ۲: مخفی — از زیر ردیف ۱ باز می‌شود -->
+            <div class="bn-extra-row" id="bn-extra-row" aria-hidden="true">
+                <a href="/dashboard" class="bn-item bn-extra-item {% if active_page == 'dashboard' %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="7"/><line x1="19" y1="20" x2="19" y2="15"/><line x1="3" y1="20" x2="21" y2="20"/></svg>
+                    <span>داشبورد</span>
+                </a>
+                <a href="/notifications" class="bn-item bn-extra-item {% if active_page == 'notifications' %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+                    <span>اعلان‌ها</span>
+                </a>
+                <a href="/support/inbox" class="bn-item bn-extra-item {% if active_page == 'support-inbox' %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 1 1 18 0z"/></svg>
+                    <span>پشتیبانی</span>
+                </a>
+                <a href="/account" class="bn-item bn-extra-item {% if active_page == 'account' %}active{% endif %}">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    <span>حساب من</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    
+    
+
+    
+
+    <!-- ✅ Version Info Modal -->
+    <div class="modal-overlay" id="version-info-modal" onclick="if(event.target===this)closeVersionInfo()" style="display:none;">
+        <div class="modal-box" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <span>درباره سازگان</span>
+                <button type="button" class="modal-close" onclick="closeVersionInfo()" aria-label="بستن">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-content" style="padding:20px;text-align:right;">
+                <p style="margin:10px 0;"><strong>نسخه:</strong> <code style="direction:ltr;display:inline-block;background:#f0f0f0;padding:4px 8px;border-radius:4px;">{{ app_version_label_full }}</code></p>
+                <p style="margin:10px 0;"><strong>تاریخ انتشار:</strong> {{ app_release_jalali }}</p>
+                {% if app_build_info %}
+                <p style="margin:10px 0;"><strong>اطلاعات:</strong> {{ app_build_info }}</p>
+                {% endif %}
+                <p style="margin:10px 0;color:#666;font-size:0.9em;">برای دیدن تاریخچه تغییرات، <a href="/settings/changelog">اینجا</a> را کلیک کنید.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeVersionInfo()">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version Info JS Functions -->
+    
+
+    <div class="modal-overlay quick-new-modal" id="quick-new-modal" onclick="if(event.target===this)closeQuickNew()">
+        <div class="modal-box" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <span id="quick-new-title">ثبت درخواست جدید</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <a href="#" id="quick-new-full" class="btn-cancel" style="text-decoration:none;padding:6px 10px;" title="صفحه کامل"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a>
+                    <button type="button" class="modal-close" onclick="closeQuickNew()" aria-label="بستن"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+                </div>
+            </div>
+            <div class="qn-loading" id="quick-new-loading">در حال بارگذاری فرم…</div>
+            <iframe id="quick-new-frame" title="فرم ثبت" src="about:blank"></iframe>
+        </div>
+    </div>
+    
+
+    
+    {% block extra_scripts %}{% endblock %}
+
+
+    
+
+
+<div id="install-pwa-bar" style="display:none;position:fixed;bottom:12px;left:12px;right:12px;z-index:200;background:#6E0D0D;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;">
+    <span>نصب برنامه سازگان روی موبایل</span>
+    <span style="display:flex;gap:8px;">
+      <button type="button" id="btn-pwa-install" style="display:none;background:#fff;color:#6E0D0D;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;">نصب برنامه</button>
+      <button type="button" id="btn-pwa-dismiss" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:8px 12px;cursor:pointer;">بعداً</button>
+    </span>
+  </div>
+  <div style="font-size:11px;opacity:.85;margin-top:6px;">اگر فقط «Create shortcut» دیدید: از HTTPS استفاده کنید یا میانبر قدیمی را پاک کنید.</div>
+</div>
+  <script>window.SAZGAN_HOLIDAYS = {{ sazgan_holidays|default({})|tojson }};</script>
+  <script src="/static/js/jalali-datepicker.js?v={{ app_version|default("1") }}" defer></script>
+  <script src="/static/js/form-validation.js?v={{ app_version|default("1") }}" defer></script>
+  <script src="/static/js/geo-cascade.js?v={{ app_version|default("1") }}" defer></script>
+  <script src="/static/js/ui-icons.js?v={{ app_version|default("1") }}" defer></script>
+  
+
+
+{% if request.path.startswith('/settings') %}
+<script src="{{ url_for('static', filename='js/color-picker.js') }}?v={{ app_version|default("1") }}" defer></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/push-notifications.js') }}?v={{ app_version|default("1") }}" defer></script>
+<script src="{{ url_for('static', filename='js/mobile-perf.js') }}?v={{ app_version|default("1") }}" defer></script>
+
+
+    
+
+
+<style id="sg-form-modal-style">
+.sg-form-modal{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.48);padding:20px;box-sizing:border-box}
+.sg-form-modal.open{display:flex}
+.sg-form-modal.is-loading .sg-form-modal-frame{opacity:0;visibility:hidden}
+.sg-form-modal.is-loading::after{content:'در حال بارگذاری…';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:10px 16px;border-radius:10px;background:var(--card,#fff);color:var(--text,#172033);box-shadow:0 10px 30px rgba(15,23,42,.12);font-size:13px;font-weight:700;z-index:2}
+.sg-form-modal-card{width:min(1100px,96vw);height:min(88vh,900px);max-height:calc(100dvh - 40px);background:var(--card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.25);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.sg-form-modal-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border,#e2e8f0);background:var(--bg,#f8fafc)}
+.sg-form-modal-title{font-weight:800}
+.sg-form-modal-close{border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:var(--text,#0f172a)}
+.sg-form-modal-frame{display:block;flex:1 1 auto;min-height:0;height:0;width:100%;border:0;background:#fff;overflow:hidden !important;overscroll-behavior:contain}
+/* Collapsed sidebar drill-down: child navigation floats beside the 72px rail.
+   It never changes rail width and therefore cannot trigger a collapse/expand flicker. */
+#sidebar.sidebar-subnav-overlay{position:sticky !important;z-index:120 !important}
+#sidebar.sidebar-subnav-overlay .sidebar-subnav-panel{position:fixed !important;top:var(--sazgan-header-h,60px);inset-inline-end:0;width:min(320px,86vw);height:calc(100dvh - var(--sazgan-header-h,60px));max-height:calc(100dvh - var(--sazgan-header-h,60px));border:1px solid var(--border);box-shadow:0 18px 48px rgba(15,23,42,.16);border-radius:0 0 0 14px}
+html.sidebar-is-collapsed #sidebar.sidebar-subnav-overlay{width:72px !important;min-width:72px !important;max-width:72px !important}
+body.sg-modal-open{overflow:hidden}
+</style>
+<div id="sg-form-modal" class="sg-form-modal" aria-hidden="true">
+  <div class="sg-form-modal-card" role="dialog" aria-modal="true" aria-labelledby="sg-form-modal-title">
+    <div class="sg-form-modal-head">
+      <span id="sg-form-modal-title" class="sg-form-modal-title">فرم</span>
+      <button type="button" class="sg-form-modal-close" aria-label="بستن">×</button>
+    </div>
+    <iframe id="sg-form-modal-frame" class="sg-form-modal-frame" title="فرم" scrolling="yes"></iframe>
+  </div>
+</div>
+
+
+<script src="/static/js/modules/table-utils.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/sidebar.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/mobile-nav.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/loading-bar.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/prefetch.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/modal.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/notifications.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/install-prompt.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/display-settings.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/modules/version-handling.js?v={{ app_version|default("1") }}" defer></script>
+<script src="/static/js/base-ui.js?v={{ app_version|default("1") }}" defer></script>
+
+<script>
+(function(){
+  var deferredPrompt=null, box=document.getElementById('sazgan-install-prompt'), btn=document.getElementById('sazgan-install-btn');
+  if(!box||!btn) return;
+  var standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  if(standalone) return;
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;box.hidden=false;box.classList.add('is-visible');});
+  btn.addEventListener('click',async function(){if(!deferredPrompt)return;deferredPrompt.prompt();var r=await deferredPrompt.userChoice;deferredPrompt=null;if(r.outcome==='accepted'){box.hidden=true;box.classList.remove('is-visible');}});
+  var close=box.querySelector('[data-sazgan-install-close]'); if(close) close.onclick=function(){box.hidden=true;box.classList.remove('is-visible');};
+  window.addEventListener('appinstalled',function(){box.hidden=true;box.classList.remove('is-visible');deferredPrompt=null;});
+})();
+</script>
+</body>
+</html>
+
+

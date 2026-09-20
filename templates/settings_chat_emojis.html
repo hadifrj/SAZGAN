@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}ایموجی‌های چت | سازگان{% endblock %}
+{% block content %}
+<div class="card" style="max-width:760px;margin:0 auto;">
+  <div class="card-header">ایموجی‌های چت</div>
+  <div class="card-body">
+    {% if msg %}<div class="login-success" style="margin-bottom:12px;">{{ msg }}</div>{% endif %}
+    <p style="color:var(--text-muted);font-size:13px;line-height:1.8;">ایموجی‌های موردنظر را با ویرگول جدا کنید. این فهرست در انتخاب ایموجی و واکنش روی پیام‌ها استفاده می‌شود. حداکثر ۸۰ مورد.</p>
+    <form method="POST">
+      <textarea name="emojis" rows="5" style="width:100%;font-size:25px;line-height:2;padding:12px;border:1px solid var(--border);border-radius:12px;direction:rtl;">{{ emojis|join(', ') }}</textarea>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        {% for e in emojis %}<span style="font-size:24px;padding:6px 9px;border:1px solid var(--border);border-radius:10px;background:var(--bg);">{{ e }}</span>{% endfor %}
+      </div>
+      <button class="btn" type="submit" style="margin-top:16px;">ذخیره ایموجی‌ها</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
