@@ -1,5 +1,8 @@
 plugins { id "com.android.application" }
 
+def envVersionCode = System.getenv("APK_VERSION_CODE")
+def envVersionName = System.getenv("APK_VERSION_NAME")
+
 android {
     namespace "com.sazgan.app"
     compileSdk 34
@@ -8,8 +11,8 @@ android {
         applicationId "com.sazgan.app"
         minSdk 24
         targetSdk 34
-        versionCode (System.getenv("APK_VERSION_CODE") ?: "1").toInteger()
-        versionName System.getenv("APK_VERSION_NAME") ?: "1.1"
+        versionCode envVersionCode ? envVersionCode.toInteger() : 1
+        versionName envVersionName ?: "1.1"
     }
 
     signingConfigs {
