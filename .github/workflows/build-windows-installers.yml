@@ -1,0 +1,69 @@
+name: Build Windows Installers
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(head -n 1 VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build client-lite exe
+        shell: cmd
+        run: |
+          python -m pip install pyinstaller
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name SazganClientLite --icon static\favicon.ico desktop\client_lite.py
+
+      - name: Build native client
+        shell: cmd
+        run: |
+          python -m pip install -r native_client\requirements-native.txt
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name SazganNative --icon static\icons\sazgan-app.ico --add-data "native_client\assets\fonts;native_client\assets\fonts" --add-data "static\icons;static\icons" native_client\main.py
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Compile Server installer
+        shell: cmd
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ steps.version.outputs.version }} installer\Sazgan.iss'
+
+      - name: Compile Client installer
+        shell: cmd
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ steps.version.outputs.version }} installer\SazganClient.iss'
+
+      - name: Compile Native installer
+        shell: cmd
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ steps.version.outputs.version }} installer\SazganNative.iss'
+
+      - name: Upload installers artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sazgan-windows-installers
+          path: installer/output/*.exe
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}-win${{ github.run_number }}
+          name: Sazgan Windows Installers v${{ steps.version.outputs.version }} (build ${{ github.run_number }})
+          files: installer/output/*.exe
