@@ -1,0 +1,6 @@
+sazgan-backup
+time=20260921_091730
+reason=daily
+db=yes
+uploads_files=2
+sha256_db=02fb93654e452208b6cd9729831a7648a90957b99b9064655f3b7a08068eccee

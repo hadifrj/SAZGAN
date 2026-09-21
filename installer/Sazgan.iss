@@ -1,5 +1,7 @@
 #define MyAppName "Sazgan"
+#ifndef MyAppVersion
 #define MyAppVersion "0.0.0"
+#endif
 #define MyAppPublisher "Sazgan"
 
 [Setup]
