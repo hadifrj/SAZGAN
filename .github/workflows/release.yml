@@ -1,0 +1,134 @@
+name: Build and Release Sazgan
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'VERSION'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Read version
+        id: get
+        run: |
+          VERSION=$(head -n 1 VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  build-apk:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android-webview/sazgan-release.jks
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+
+      - name: Build Release APK
+        working-directory: android-webview
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          APK_VERSION_CODE: ${{ github.run_number }}
+          APK_VERSION_NAME: ${{ needs.version.outputs.version }}
+        run: gradle assembleRelease
+
+      - name: Rename APK
+        run: cp android-webview/app/build/outputs/apk/release/app-release.apk sazgan-v${{ needs.version.outputs.version }}.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: sazgan-v${{ needs.version.outputs.version }}.apk
+
+  build-windows:
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build client-lite exe
+        shell: cmd
+        run: |
+          python -m pip install pyinstaller
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name SazganClientLite --icon static\favicon.ico desktop\client_lite.py
+
+      - name: Build native client
+        shell: cmd
+        run: |
+          python -m pip install -r native_client\requirements-native.txt
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name SazganNative --icon static\icons\sazgan-app.ico --add-data "native_client\assets\fonts;native_client\assets\fonts" --add-data "static\icons;static\icons" native_client\main.py
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Compile Server installer
+        shell: cmd
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ needs.version.outputs.version }} installer\Sazgan.iss'
+
+      - name: Compile Client installer
+        shell: cmd
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ needs.version.outputs.version }} installer\SazganClient.iss'
+
+      - name: Compile Native installer
+        shell: cmd
+        run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ needs.version.outputs.version }} installer\SazganNative.iss'
+
+      - name: Upload installers artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers
+          path: installer/output/*.exe
+
+  release:
+    needs: [version, build-apk, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: apk
+          path: dist
+
+      - name: Download Windows installers
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installers
+          path: dist
+
+      - name: Create unified GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.version.outputs.version }}-${{ github.run_number }}
+          name: Sazgan v${{ needs.version.outputs.version }} (build ${{ github.run_number }})
+          files: dist/*
