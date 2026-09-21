@@ -30,8 +30,8 @@ Source: "..\templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recur
 Source: "..\static\*"; DestDir: "{app}\static"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\scripts\update.py"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "..\scripts\migrate_db.py"; DestDir: "{app}\scripts"; Flags: ignoreversion
-Source: "..\scripts\install_service.bat"; DestDir: "{app}\scripts"; Flags: ignoreversion
-Source: "..\scripts\install_service_silent.bat"; DestDir: "{app}\scripts"; Flags: ignoreversion
+Source: "..\tools\windows\install-service.bat"; DestDir: "{app}\tools\windows"; Flags: ignoreversion
+Source: "..\tools\windows\install-service-silent.bat"; DestDir: "{app}\tools\windows"; Flags: ignoreversion
 Source: "..\scripts\run_as_service.py"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "server_wizard.py"; DestDir: "{app}\installer"; Flags: ignoreversion
 Source: "..\offline\*"; DestDir: "{app}\offline"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -53,5 +53,5 @@ Name: "{group}\Sazgan (پنل مدیریت/سرویس)"; Filename: "{app}\Sazgan
 
 [Run]
 Filename: "{app}\scripts\migrate_db.py"; Parameters: "--status"; Flags: runhidden waituntilterminated skipifsilent
-Filename: "{app}\scripts\install_service_silent.bat"; WorkingDir: "{app}\scripts"; Flags: runhidden waituntilterminated
+Filename: "{app}\tools\windows\install-service-silent.bat"; WorkingDir: "{app}\tools\windows"; Flags: runhidden waituntilterminated
 Filename: "http://127.0.0.1:5000"; Description: "باز کردن Sazgan در مرورگر"; Flags: postinstall shellexec skipifsilent
