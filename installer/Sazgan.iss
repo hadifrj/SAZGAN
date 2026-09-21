@@ -52,6 +52,5 @@ Name: "{group}\Sazgan (مرورگر)"; Filename: "http://127.0.0.1:5000"
 Name: "{group}\Sazgan (پنل مدیریت/سرویس)"; Filename: "{app}\Sazgan.bat"
 
 [Run]
-Filename: "{app}\scripts\migrate_db.py"; Parameters: "--status"; Flags: runhidden waituntilterminated skipifsilent
 Filename: "{app}\tools\windows\install-service-silent.bat"; WorkingDir: "{app}\tools\windows"; Flags: runhidden waituntilterminated
 Filename: "http://127.0.0.1:5000"; Description: "باز کردن Sazgan در مرورگر"; Flags: postinstall shellexec skipifsilent
