@@ -12,7 +12,7 @@ import okhttp3.Request
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-class ApiError(message: String, val statusCode: Int? = null) : Exception(message)
+open class ApiError(message: String, val statusCode: Int? = null) : Exception(message)
 class SessionExpiredError(message: String) : ApiError(message, 401)
 
 /** نگهداری کوکی سشن در حافظه (مثل requests.Session تو پایتون) */
