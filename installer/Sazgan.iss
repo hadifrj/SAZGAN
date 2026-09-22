@@ -9,13 +9,13 @@ AppId={{SAZGAN-SERVER-1}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\Sazgan
+DefaultDirName=C:\Sazgan
 DefaultGroupName=Sazgan
 OutputDir=output
 OutputBaseFilename=Sazgan-Setup-{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
 UninstallDisplayIcon={app}\Sazgan.exe
 WizardStyle=modern
 
