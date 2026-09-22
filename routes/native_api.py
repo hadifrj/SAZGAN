@@ -138,6 +138,8 @@ def register(app):
             conn.close()
         except Exception:
             info = {'company_name': 'سازگان', 'company_mobile': '', 'company_phone': '', 'company_address': ''}
+        from core.security import ensure_csrf_token
+        info['csrf_token'] = ensure_csrf_token()
         return jsonify(info)
 
     # ---- support (internal staff chat - not the customer chat) ----

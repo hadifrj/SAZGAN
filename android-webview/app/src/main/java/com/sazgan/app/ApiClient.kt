@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit
 open class ApiError(message: String, val statusCode: Int? = null) : Exception(message)
 class SessionExpiredError(message: String) : ApiError(message, 401)
 
-/** نگهداری کوکی سشن در حافظه (مثل requests.Session تو پایتون) */
 private class InMemoryCookieJar : CookieJar {
     private val store = mutableMapOf<String, List<Cookie>>()
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
@@ -26,11 +25,6 @@ private class InMemoryCookieJar : CookieJar {
     }
 }
 
-/**
- * Singleton - همه‌ی اکتیویتی‌ها از همین یک نمونه استفاده می‌کنن تا کوکی سشن
- * بین صفحات از بین نره (هر Activity قبلاً یک ApiClient جدا می‌ساخت که باعث
- * می‌شد کوکی لاگین بعد از رفتن به صفحه بعدی گم بشه).
- */
 object ApiClient {
     private lateinit var appContext: Context
     private lateinit var prefs: android.content.SharedPreferences
@@ -66,15 +60,35 @@ object ApiClient {
         }
     }
 
+    /**
+     * قبل از لاگین، از /api/native/login-info یک csrf_token معتبر برای این
+     * session می‌گیریم (سرور آن را روی همین کوکی سشن ذخیره می‌کند) و همان
+     * توکن را در فرم لاگین می‌فرستیم - چون routes/auth.py:login() این
+     * بررسی را جدا و همیشه (حتی خارج از معافیت عمومی CSRF مسیر /login)
+     * انجام می‌دهد.
+     */
+    private suspend fun fetchLoginCsrfToken(): String? = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url("$baseUrl/api/native/login-info").get().build()
+            val resp = client.newCall(req).execute()
+            val body = resp.body?.string() ?: "{}"
+            resp.close()
+            if (resp.isSuccessful) JSONObject(body).optString("csrf_token", null) else null
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     suspend fun login(username: String, password: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            client.newCall(Request.Builder().url("$baseUrl/login").get().build()).execute().close()
+            val loginCsrf = fetchLoginCsrfToken()
+                ?: return@withContext Result.failure(ApiError("اتصال به سرور برای شروع ورود ناموفق بود."))
 
-            val form = FormBody.Builder()
+            val formBuilder = FormBody.Builder()
                 .add("username", username)
                 .add("password", password)
-                .build()
-            val req = Request.Builder().url("$baseUrl/login").post(form).build()
+                .add("csrf_token", loginCsrf)
+            val req = Request.Builder().url("$baseUrl/login").post(formBuilder.build()).build()
             val resp = client.newCall(req).execute()
             resp.body?.string()
             val code = resp.code
