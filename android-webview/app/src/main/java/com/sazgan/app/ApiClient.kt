@@ -26,8 +26,21 @@ private class InMemoryCookieJar : CookieJar {
     }
 }
 
-class ApiClient(private val context: Context) {
-    private val prefs = context.getSharedPreferences("sazgan", Context.MODE_PRIVATE)
+/**
+ * Singleton - همه‌ی اکتیویتی‌ها از همین یک نمونه استفاده می‌کنن تا کوکی سشن
+ * بین صفحات از بین نره (هر Activity قبلاً یک ApiClient جدا می‌ساخت که باعث
+ * می‌شد کوکی لاگین بعد از رفتن به صفحه بعدی گم بشه).
+ */
+object ApiClient {
+    private lateinit var appContext: Context
+    private lateinit var prefs: android.content.SharedPreferences
+
+    fun init(context: Context) {
+        if (!::appContext.isInitialized) {
+            appContext = context.applicationContext
+            prefs = appContext.getSharedPreferences("sazgan", Context.MODE_PRIVATE)
+        }
+    }
 
     var baseUrl: String
         get() = prefs.getString("server_url", "") ?: ""
@@ -41,7 +54,6 @@ class ApiClient(private val context: Context) {
 
     private var csrfToken: String? = null
 
-    /** اتصال ساده - چک می‌کنه سرور جوابگوست یا نه */
     suspend fun ping(): Boolean = withContext(Dispatchers.IO) {
         try {
             val req = Request.Builder().url("$baseUrl/login").get().build()
@@ -54,10 +66,8 @@ class ApiClient(private val context: Context) {
         }
     }
 
-    /** لاگین با فرم session-cookie - دقیقاً مثل مرورگر و native_client پایتون */
     suspend fun login(username: String, password: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // warm-up GET برای گرفتن کوکی اولیه
             client.newCall(Request.Builder().url("$baseUrl/login").get().build()).execute().close()
 
             val form = FormBody.Builder()
@@ -66,15 +76,15 @@ class ApiClient(private val context: Context) {
                 .build()
             val req = Request.Builder().url("$baseUrl/login").post(form).build()
             val resp = client.newCall(req).execute()
-            val bodyStr = resp.body?.string() ?: ""
+            resp.body?.string()
+            val code = resp.code
             resp.close()
 
-            // بعد از لاگین موفق، سرور یا ریدایرکت می‌کنه یا صفحه‌ی داشبورد رو برمی‌گردونه
-            if (resp.isSuccessful || resp.code in 300..399) {
+            if (code in 200..399) {
                 fetchCsrfToken()
                 Result.success(Unit)
             } else {
-                Result.failure(ApiError("نام کاربری یا رمز عبور اشتباه است.", resp.code))
+                Result.failure(ApiError("نام کاربری یا رمز عبور اشتباه است.", code))
             }
         } catch (e: Exception) {
             Result.failure(ApiError("خطا در اتصال: ${e.message}"))
@@ -93,7 +103,6 @@ class ApiClient(private val context: Context) {
         } catch (_: Exception) { }
     }
 
-    /** GET به یکی از endpoint های /api/native/... و برگردوندن JSONObject */
     suspend fun getJson(path: String): JSONObject = withContext(Dispatchers.IO) {
         val req = Request.Builder().url("$baseUrl$path").get().build()
         val resp = client.newCall(req).execute()
@@ -104,7 +113,6 @@ class ApiClient(private val context: Context) {
         JSONObject(body)
     }
 
-    /** POST فرم به یکی از endpoint ها (با CSRF token خودکار) */
     suspend fun postForm(path: String, fields: Map<String, String>): JSONObject = withContext(Dispatchers.IO) {
         val builder = FormBody.Builder()
         fields.forEach { (k, v) -> builder.add(k, v) }

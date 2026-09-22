@@ -19,7 +19,7 @@ import org.json.JSONObject
 
 class HomeActivity : AppCompatActivity() {
 
-    private lateinit var api: ApiClient
+     
     private lateinit var listContainer: LinearLayout
     private lateinit var progress: ProgressBar
     private lateinit var swipeRefresh: SwipeRefreshLayout
@@ -33,7 +33,7 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        api = ApiClient(this)
+        ApiClient.init(this)
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -95,7 +95,7 @@ class HomeActivity : AppCompatActivity() {
         statusText.visibility = View.GONE
         lifecycleScope.launch {
             try {
-                val data = api.getJson("/api/native/home")
+                val data = ApiClient.getJson("/api/native/home")
                 renderHome(data)
             } catch (e: SessionExpiredError) {
                 statusText.text = e.message

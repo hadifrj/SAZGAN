@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var api: ApiClient
+     
     private lateinit var serverInput: EditText
     private lateinit var userInput: EditText
     private lateinit var passInput: EditText
@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        api = ApiClient(this)
+        ApiClient.init(this)
 
         val root = ScrollView(this).apply { setBackgroundColor(COLOR_BG) }
         val panel = LinearLayout(this).apply {
@@ -61,7 +61,7 @@ class LoginActivity : AppCompatActivity() {
         panel.addView(subtitle)
 
         serverInput = makeInput("آدرس سرور (مثال: http://192.168.1.10:5000)", InputType.TYPE_TEXT_VARIATION_URI)
-        serverInput.setText(api.baseUrl)
+        serverInput.setText(ApiClient.baseUrl)
         panel.addView(labeled("آدرس سرور", serverInput))
 
         userInput = makeInput("نام کاربری", InputType.TYPE_CLASS_TEXT)
@@ -141,13 +141,13 @@ class LoginActivity : AppCompatActivity() {
         if (server.isEmpty()) { statusText.text = "آدرس سرور را وارد کنید."; return }
         if (user.isEmpty() || pass.isEmpty()) { statusText.text = "نام کاربری و رمز عبور را وارد کنید."; return }
 
-        api.baseUrl = server
+        ApiClient.baseUrl = server
         statusText.text = ""
         progress.visibility = View.VISIBLE
         loginBtn.isEnabled = false
 
         lifecycleScope.launch {
-            val result = api.login(user, pass)
+            val result = ApiClient.login(user, pass)
             progress.visibility = View.GONE
             loginBtn.isEnabled = true
             result.onSuccess {
