@@ -329,22 +329,22 @@ def apply_theme(app):
     QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0; }}
 
     /* ---------- Modern customer chat ---------- */
-    QListWidget#chatThreadList { background: #ffffff; border: 1px solid {BORDER}; border-radius: 16px; padding: 6px; outline: 0; }
+    QListWidget#chatThreadList {{ background: #ffffff; border: 1px solid {BORDER}; border-radius: 16px; padding: 6px; outline: 0; }}
     QListWidget#chatThreadList::item { border: 0; border-radius: 12px; margin: 2px 0; }
     QListWidget#chatThreadList::item:hover { background: #f8fafc; }
-    QListWidget#chatThreadList::item:selected { background: #eef2ff; color: {TEXT}; }
+    QListWidget#chatThreadList::item:selected {{ background: #eef2ff; color: {TEXT}; }}
     QWidget#chatThreadRow { border-radius: 12px; background: transparent; }
     QLabel#chatThreadAvatar { background: #e8eefc; color: #243b72; border-radius: 21px; font-weight: 700; font-size: 13px; }
-    QLabel#chatThreadName { color: {TEXT}; font-weight: 700; font-size: 12px; }
+    QLabel#chatThreadName {{ color: {TEXT}; font-weight: 700; font-size: 12px; }}
     QLabel#chatThreadPreview { color: #64748b; font-size: 10px; }
     QLabel#chatThreadTime { color: #94a3b8; font-size: 9px; }
     QLabel#chatUnreadBadge { background: #2563eb; color: white; border-radius: 11px; font-size: 9px; font-weight: 700; padding: 1px 5px; }
-    QTextBrowser#chatMessages { background: #f8fafc; border: 1px solid {BORDER}; border-radius: 14px; padding: 10px; }
-    QLineEdit#chatComposer { background: #ffffff; border: 1px solid {BORDER_STRONG}; border-radius: 18px; padding: 8px 14px; min-height: 34px; }
-    QPushButton#chatSendButton { background: {ACCENT}; color: #ffffff; border: 0; border-radius: 18px; padding: 7px 18px; font-weight: 700; min-height: 34px; }
-    QPushButton#chatSendButton:hover { background: {ACCENT_HOVER}; }
-    QPushButton#chatAttachButton { background: #ffffff; border: 1px solid {BORDER}; border-radius: 18px; min-width: 36px; min-height: 36px; padding: 0; }
-    QPushButton#chatAttachButton:hover { background: {ACCENT_SOFT}; }
+    QTextBrowser#chatMessages {{ background: #f8fafc; border: 1px solid {BORDER}; border-radius: 14px; padding: 10px; }}
+    QLineEdit#chatComposer {{ background: #ffffff; border: 1px solid {BORDER_STRONG}; border-radius: 18px; padding: 8px 14px; min-height: 34px; }}
+    QPushButton#chatSendButton {{ background: {ACCENT}; color: #ffffff; border: 0; border-radius: 18px; padding: 7px 18px; font-weight: 700; min-height: 34px; }}
+    QPushButton#chatSendButton:hover {{ background: {ACCENT_HOVER}; }}
+    QPushButton#chatAttachButton {{ background: #ffffff; border: 1px solid {BORDER}; border-radius: 18px; min-width: 36px; min-height: 36px; padding: 0; }}
+    QPushButton#chatAttachButton:hover {{ background: {ACCENT_SOFT}; }}
     /* ---------- Messages ---------- */
     QMessageBox {{ background: {CARD}; }}
     """)
