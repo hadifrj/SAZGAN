@@ -36,7 +36,9 @@ def main():
     log = _setup_log()
     log.info("Sazgan service starting, cwd=%s", BASE)
     try:
-        from app import app, init_db, create_backup, _backup_scheduler
+        from app import app
+        from core.db import init_db
+        from core.backup import create_backup, _backup_scheduler
         init_db()
         try:
             create_backup("service-start")
