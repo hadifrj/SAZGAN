@@ -15,14 +15,46 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get.outputs.version }}
+      server_changed: ${{ steps.diff.outputs.server_changed }}
+      android_changed: ${{ steps.diff.outputs.android_changed }}
+      windows_changed: ${{ steps.diff.outputs.windows_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Read version
         id: get
         run: |
           VERSION=$(head -n 1 VERSION | tr -d '[:space:]')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Detect changed components since last release
+        id: diff
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found - treating everything as changed."
+            CHANGED=$(git ls-files)
+          else
+            echo "Comparing against previous tag: $PREV_TAG"
+            CHANGED=$(git diff --name-only "$PREV_TAG" HEAD)
+          fi
+          SERVER=false
+          ANDROID=false
+          WINDOWS=false
+          while IFS= read -r f; do
+            case "$f" in
+              android-webview/*) ANDROID=true ;;
+              native_client/*|desktop/client_lite.py|installer/SazganClient.iss|installer/SazganNative.iss) WINDOWS=true ;;
+              .github/*|README.md|CHANGELOG.md|docs/*) : ;;
+              *) SERVER=true ;;
+            esac
+          done <<< "$CHANGED"
+          echo "server_changed=$SERVER" >> "$GITHUB_OUTPUT"
+          echo "android_changed=$ANDROID" >> "$GITHUB_OUTPUT"
+          echo "windows_changed=$WINDOWS" >> "$GITHUB_OUTPUT"
 
   build-apk:
     needs: version
@@ -126,9 +158,33 @@ jobs:
           name: windows-installers
           path: dist
 
+      - name: Build release notes
+        run: |
+          {
+            echo "## راهنمای نصب مجدد"
+            echo ""
+            if [ "${{ needs.version.outputs.server_changed }}" = "true" ]; then
+              echo "- 🔴 **سرور تغییر کرده** → Sazgan-Setup را روی سرور دوباره نصب کنید."
+            else
+              echo "- ✅ سرور تغییری نکرده — نیازی به نصب مجدد نیست."
+            fi
+            if [ "${{ needs.version.outputs.android_changed }}" = "true" ]; then
+              echo "- 🔴 **اپ اندروید تغییر کرده** → APK جدید را روی گوشی‌ها نصب کنید."
+            else
+              echo "- ✅ اپ اندروید تغییری نکرده."
+            fi
+            if [ "${{ needs.version.outputs.windows_changed }}" = "true" ]; then
+              echo "- 🔴 **کلاینت ویندوز تغییر کرده** → SazganClient/SazganNative را دوباره نصب کنید."
+            else
+              echo "- ✅ کلاینت ویندوز تغییری نکرده."
+            fi
+          } > release_notes.md
+          cat release_notes.md
+
       - name: Create unified GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.version.outputs.version }}-${{ github.run_number }}
           name: Sazgan v${{ needs.version.outputs.version }} (build ${{ github.run_number }})
+          body_path: release_notes.md
           files: dist/*
