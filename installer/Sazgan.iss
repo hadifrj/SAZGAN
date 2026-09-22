@@ -15,7 +15,7 @@ OutputDir=output
 OutputBaseFilename=Sazgan-Setup-{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
 UninstallDisplayIcon={app}\Sazgan.exe
 WizardStyle=modern
 
