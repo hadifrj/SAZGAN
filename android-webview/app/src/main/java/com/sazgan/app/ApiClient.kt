@@ -24,13 +24,6 @@ private class InMemoryCookieJar : CookieJar {
         return store[url.host] ?: emptyList()
     }
 
-    suspend fun logout() = withContext(Dispatchers.IO) {
-        try {
-            val req = Request.Builder().url("$baseUrl/logout").get().build()
-            client.newCall(req).execute().close()
-        } catch (_: Exception) { }
-        csrfToken = null
-    }
 }
 
 object ApiClient {
