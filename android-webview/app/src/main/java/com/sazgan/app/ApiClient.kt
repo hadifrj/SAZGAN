@@ -23,6 +23,14 @@ private class InMemoryCookieJar : CookieJar {
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         return store[url.host] ?: emptyList()
     }
+
+    suspend fun logout() = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url("$baseUrl/logout").get().build()
+            client.newCall(req).execute().close()
+        } catch (_: Exception) { }
+        csrfToken = null
+    }
 }
 
 object ApiClient {
@@ -137,5 +145,13 @@ object ApiClient {
         resp.close()
         if (resp.code == 401) throw SessionExpiredError("نشست شما منقضی شده. دوباره وارد شوید.")
         JSONObject(body)
+    }
+
+    suspend fun logout() = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url("$baseUrl/logout").get().build()
+            client.newCall(req).execute().close()
+        } catch (_: Exception) { }
+        csrfToken = null
     }
 }
